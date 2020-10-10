@@ -12,27 +12,29 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-const testsRouter = require('./routes/tests');
-
 // Do a developement environment check
 if (process.env.NODE_ENV === 'development') {
   require('dotenv').config();
 }
 
+// Routes
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const testsRouter = require('./routes/tests');
+
+
 // Instantiate the app
 const app = express();
 
 // view engine setup
-app.set('views', join(__dirname, 'views'));
+app.set('views', path.join(__dirname, '/views'));
 app.set('view engine', 'pug');
 
 app.use(logger('dev'));
-app.use(json());
-app.use(urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(static(join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.use('/', indexRouter);
