@@ -4,6 +4,7 @@
  *
  * Connecting to a sample db made in postgreSQL v.13
  *
+ * heroku link: https://git.heroku.com/murmuring-hollows-59069.git
  * https://github.com/sfsu-csc-667-fall-2020-roberts/term-project-bea-erdin-freedland-cruz
  ****************************************************************/
 const createError = require('http-errors');
