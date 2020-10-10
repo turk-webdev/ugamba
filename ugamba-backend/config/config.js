@@ -1,19 +1,29 @@
 require('dotenv').config();
 
+
 module.exports = {
-  development: {
-    use_env_variable: 'DATABASE_URL',
-    dialect: 'postgres',
-    password: 'ugamba',
+  "development": {
+    // "username": "root",
+    // "password": null,
+    // "database": "database_development",
+    // "host": "127.0.0.1",
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres"
   },
-  test: {
-    use_env_variable: 'DATABASE_URL',
-    dialect: 'postgres',
-    password: 'ugamba',
+  "test": {
+    // "username": "root",
+    // "password": null,
+    // "database": "database_development",
+    // "host": "127.0.0.1",
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres"
   },
-  production: {
-    use_env_variable: 'DATABASE_URL',
-    dialect: 'postgres',
-    password: 'ugamba',
-  },
-};
+  "production": {
+    // "username": "root",
+    // "password": null,
+    // "database": "database_development",
+    // "host": "127.0.0.1",
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres"
+  }
+}
