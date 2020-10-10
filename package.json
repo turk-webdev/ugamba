@@ -1,7 +1,9 @@
 {
   "name": "term-project-bea-erdin-freedland-cruz",
   "version": "0.0.0",
-  "private": true,
+  "engines": {
+    "node": "14.13.1"
+  },
   "scripts": {
     "start": "node ./bin/www",
     "start:dev": "SET \"NODE_ENV=development\" SET DEBUG=term-project-bea-erdin-freedland-cruz:* & nodemon ./bin/www",
