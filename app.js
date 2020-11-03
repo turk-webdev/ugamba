@@ -1,4 +1,4 @@
-/****************************************************************
+/** **************************************************************
  * SFSU CSC 667 - Team UGAMBA - M2 - Backend Heroku Deployment
  * George Freedland, Ufkun Erdin, Francis Cruz, Adam Bea
  *
@@ -6,7 +6,7 @@
  *
  * heroku link: https://calm-castle-35028.herokuapp.com/
  * https://github.com/sfsu-csc-667-fall-2020-roberts/term-project-bea-erdin-freedland-cruz
- ****************************************************************/
+ *************************************************************** */
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
@@ -14,15 +14,14 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
 // Do a developement environment check
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'dev') {
   require('dotenv').config();
 }
 
 // Routes
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+// const indexRouter = require('./routes/index');
+// const usersRouter = require('./routes/users');
 const testsRouter = require('./routes/tests');
-
 
 // Instantiate the app
 const app = express();
@@ -35,11 +34,11 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 // Routes
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// app.use('/', indexRouter);
+// app.use('/users', usersRouter);
 app.use('/tests', testsRouter);
 
 // catch 404 and forward to error handler
