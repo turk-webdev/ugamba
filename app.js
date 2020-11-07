@@ -14,7 +14,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
 // Do a developement environment check
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'dev') {
   require('dotenv').config();
 }
 
@@ -51,7 +51,7 @@ app.use(function (req, res, next) {
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = req.app.get('env') === 'dev' ? err : {};
 
   // render the error page
   res.status(err.status || 500);
