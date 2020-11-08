@@ -55,9 +55,11 @@ app.use(function (err, req, res, next) {
 });
 
 const createDatabaseOnSync = false;
-db.sequelize.sync({ force: createDatabaseOnSync }).then(() => {
-  if (createDatabaseOnSync) {
-    console.log('Drop and re-sync db');
-  }
-});
+db.sequelize
+  .sync({ force: createDatabaseOnSync, logging: console.log })
+  .then(() => {
+    if (createDatabaseOnSync) {
+      console.log('Drop and re-sync db');
+    }
+  });
 module.exports = app;

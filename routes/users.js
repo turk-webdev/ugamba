@@ -13,4 +13,6 @@ router.get('/:id', requireAuth, User.findOneById);
 
 router.patch('/:id', requireAuth, User.update);
 
+router.delete('/:id', requireAuth, User.delete);
+
 module.exports = router;

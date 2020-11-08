@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken');
-const db = require('../models');
-
-const { User } = db;
+const db = require('../db');
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
@@ -21,8 +19,16 @@ module.exports = (req, res, next) => {
 
     const { id } = payload;
 
-    const user = await User.findOne({ where: { id } });
-    req.user = user;
-    next();
+    db.one(
+      `SELECT "id", "username", "password" FROM "Users" AS "User" WHERE "User"."id" = ${id}`,
+    )
+      .then((results) => {
+        console.log('results => ', results);
+        req.user = results;
+        next();
+      })
+      .catch(() => {
+        next();
+      });
   });
 };
