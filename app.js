@@ -4,7 +4,7 @@
  *
  * Connecting to a sample db made in postgreSQL v.13
  *
- * heroku link: https://git.heroku.com/murmuring-hollows-59069.git
+ * heroku link: https://calm-castle-35028.herokuapp.com/
  * https://github.com/sfsu-csc-667-fall-2020-roberts/term-project-bea-erdin-freedland-cruz
  *************************************************************** */
 const createError = require('http-errors');
@@ -15,7 +15,7 @@ const logger = require('morgan');
 const db = require('./models');
 
 // Do a developement environment check
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'dev') {
   require('dotenv').config();
 }
 
@@ -31,7 +31,6 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 // Routes
