@@ -1,4 +1,4 @@
-/****************************************************************
+/** **************************************************************
  * SFSU CSC 667 - Team UGAMBA - M2 - Backend Heroku Deployment
  * George Freedland, Ufkun Erdin, Francis Cruz, Adam Bea
  *
@@ -6,12 +6,13 @@
  *
  * heroku link: https://git.heroku.com/murmuring-hollows-59069.git
  * https://github.com/sfsu-csc-667-fall-2020-roberts/term-project-bea-erdin-freedland-cruz
- ****************************************************************/
+ *************************************************************** */
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const db = require('./models');
 
 // Do a developement environment check
 if (process.env.NODE_ENV === 'development') {
@@ -19,26 +20,22 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Routes
-const indexRouter = require('./routes/index');
+// const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const testsRouter = require('./routes/tests');
 
-
 // Instantiate the app
 const app = express();
-
-// view engine setup
-app.set('views', path.join(__dirname, '/views'));
-app.set('view engine', 'pug');
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 // Routes
-app.use('/', indexRouter);
+// app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/tests', testsRouter);
 
@@ -58,4 +55,10 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
+const createDatabaseOnSync = false;
+db.sequelize.sync({ force: createDatabaseOnSync }).then(() => {
+  if (createDatabaseOnSync) {
+    console.log('Drop and re-sync db');
+  }
+});
 module.exports = app;
