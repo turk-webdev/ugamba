@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
-const db = require('../db');
-// const db = require('../models');
+const User = require('../classes/user');
 const { hashPassword, comparePassword } = require('../utils');
 
 exports.register = async (req, res) => {
@@ -9,9 +8,10 @@ exports.register = async (req, res) => {
     return res.status(422).send({ error: 'Must provide email and password' });
   }
   const hashedPassword = hashPassword(password);
-  db.any(
-    `INSERT INTO users (id, username, password) VALUES (DEFAULT, '${username}', '${hashedPassword}') ON CONFLICT DO NOTHING RETURNING id,username;`,
-  )
+  const newUser = new User(undefined, username, hashedPassword);
+
+  newUser
+    .save()
     .then((results) => {
       if (results.length === 0) {
         return res
@@ -22,7 +22,9 @@ exports.register = async (req, res) => {
     })
     .catch((error) => {
       console.log(error);
-      res.status(422).send({ error });
+      return res
+        .status(422)
+        .send({ error: 'User with username already exists' });
     });
 };
 
@@ -33,9 +35,7 @@ exports.login = async (req, res) => {
     return res.status(422).send({ error: 'Must provide email and password' });
   }
 
-  db.one(
-    `SELECT id, username, password FROM users AS U WHERE U.username = '${username}'`,
-  )
+  User.findOneByUsername(username)
     .then((user) => {
       if (!user) {
         return res.status(422).send({ error: 'Invalid password or email' });
@@ -54,14 +54,16 @@ exports.login = async (req, res) => {
 
 exports.findOneById = async (req, res) => {
   const { id } = req.params;
-  db.one(`SELECT id, username FROM users AS U WHERE U.id = ${id}`).then(
-    (results) => {
+  User.findOneById(id)
+    .then((results) => {
       if (!results) {
         return res.status(400).send({ error: 'No user found' });
       }
       return res.send(results);
-    },
-  );
+    })
+    .catch(() => {
+      return res.status(400).send({ error: 'No user found' });
+    });
 };
 
 exports.update = async (req, res) => {
@@ -74,7 +76,7 @@ exports.update = async (req, res) => {
       .send({ error: 'You do not have permissions to complete this action' });
   }
 
-  db.none(`UPDATE users SET username= '${username}' WHERE id= ${id};`)
+  User.updateUsernameById(id, username)
     .then(() => {
       return res.send({ message: 'User has been updated successfully' });
     })
@@ -92,7 +94,7 @@ exports.delete = async (req, res) => {
       .status(400)
       .send({ error: 'You do not have permissions to complete this action' });
   }
-  db.none(`DELETE FROM users WHERE id=${id}`)
+  User.deleteById(id)
     .then(() => {
       return res.send({ message: 'User has been deleted successfully' });
     })
