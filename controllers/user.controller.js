@@ -10,7 +10,7 @@ exports.register = async (req, res) => {
   }
   const hashedPassword = hashPassword(password);
   db.any(
-    `INSERT INTO "Users" ("id", "username", "password") VALUES (DEFAULT, '${username}', '${hashedPassword}') ON CONFLICT DO NOTHING RETURNING "id","username";`,
+    `INSERT INTO users (id, username, password) VALUES (DEFAULT, '${username}', '${hashedPassword}') ON CONFLICT DO NOTHING RETURNING id,username;`,
   )
     .then((results) => {
       if (results.length === 0) {
@@ -34,7 +34,7 @@ exports.login = async (req, res) => {
   }
 
   db.one(
-    `SELECT "id", "username", "password" FROM "Users" AS "User" WHERE "User"."username" = '${username}'`,
+    `SELECT id, username, password FROM users AS U WHERE U.username = '${username}'`,
   )
     .then((user) => {
       if (!user) {
@@ -54,14 +54,14 @@ exports.login = async (req, res) => {
 
 exports.findOneById = async (req, res) => {
   const { id } = req.params;
-  db.one(
-    `SELECT "id", "username" FROM "Users" AS "User" WHERE "User"."id" = ${id}`,
-  ).then((results) => {
-    if (!results) {
-      return res.status(400).send({ error: 'No user found' });
-    }
-    return res.send(results);
-  });
+  db.one(`SELECT id, username FROM users AS U WHERE U.id = ${id}`).then(
+    (results) => {
+      if (!results) {
+        return res.status(400).send({ error: 'No user found' });
+      }
+      return res.send(results);
+    },
+  );
 };
 
 exports.update = async (req, res) => {
@@ -74,7 +74,7 @@ exports.update = async (req, res) => {
       .send({ error: 'You do not have permissions to complete this action' });
   }
 
-  db.none(`UPDATE "Users" SET "username"= '${username}' WHERE "id"= ${id};`)
+  db.none(`UPDATE users SET username= '${username}' WHERE id= ${id};`)
     .then(() => {
       return res.send({ message: 'User has been updated successfully' });
     })
@@ -92,7 +92,7 @@ exports.delete = async (req, res) => {
       .status(400)
       .send({ error: 'You do not have permissions to complete this action' });
   }
-  db.none(`DELETE FROM "Users" WHERE "id"=${id}`)
+  db.none(`DELETE FROM users WHERE id=${id}`)
     .then(() => {
       return res.send({ message: 'User has been deleted successfully' });
     })

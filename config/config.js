@@ -11,6 +11,7 @@ module.exports = {
     define: {
       timestamps: false,
     },
+    quoteIdentifiers: false,
   },
   test: {
     // "username": "root",
@@ -22,6 +23,7 @@ module.exports = {
     define: {
       timestamps: false,
     },
+    quoteIdentifiers: false,
   },
   production: {
     // "username": "root",
@@ -33,5 +35,6 @@ module.exports = {
     define: {
       timestamps: false,
     },
+    quoteIdentifiers: false,
   },
 };
