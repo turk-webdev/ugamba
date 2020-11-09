@@ -17,7 +17,7 @@ class CardValue {
 
     static findOneById(id) {
         return db
-        .one('SELECT * FROM card_value WHERE id=${id}', {id})
+        .one(`SELECT * FROM card_value WHERE id=$1`, [id])
         .map(({id, value}) => 
             new CardValue(id, value)
         );
@@ -25,7 +25,7 @@ class CardValue {
 
     static findByValue(value) {
         return db
-        .any('SELECT * FROM card_value WHERE value=${value}', {value})
+        .any(`SELECT * FROM card_value WHERE value=$1`, [value])
         .map(({id, value}) => 
             new CardValue(id, value)
         );

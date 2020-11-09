@@ -9,6 +9,13 @@ class DeckCard {
         this.id_game_player_hand = id_game_player_hand; 
     }
 
+    save() {
+        return db.one(
+          `INSERT INTO deck_card(id, id_card, id_deck, id_game_player_hand) VALUES (DEFAULT, $1, $2, $3) ON CONFLICT DO NOTHING RETURNING id,id_card,id_deck,id_game_player_hand;`,
+          [this.id_card, this.id_deck, this.id_game_player_hand]
+        );
+      }
+
     static all() {
         return db
         .any('SELECT * FROM deck_card')
@@ -19,7 +26,7 @@ class DeckCard {
 
     static findOneById(id) {
         return db
-        .one('SELECT * FROM deck_card WHERE id=${id}', {id})
+        .one(`SELECT * FROM deck_card WHERE id=1`, [id])
         .map(({id, id_card, id_deck, id_game_player_hand}) => 
             new DeckCard(id, id_card, id_deck, id_game_player_hand)
         );
@@ -27,7 +34,7 @@ class DeckCard {
 
     static findByIdCard(id_card) {
         return db
-        .one('SELECT * FROM deck_card WHERE id_card=${id_card}', {id_card})
+        .one(`SELECT * FROM deck_card WHERE id_card=$1`, [id_card])
         .map(({id, id_card, id_deck, id_game_player_hand}) => 
             new DeckCard(id, id_card, id_deck, id_game_player_hand)
         );
@@ -35,7 +42,7 @@ class DeckCard {
 
     static findByIdDeck(id_deck) {
         return db
-        .one('SELECT * FROM deck_card WHERE id_deck=${id_deck}', {id_deck})
+        .one(`SELECT * FROM deck_card WHERE id_deck=$1`, [id_deck])
         .map(({id, id_card, id_deck, id_game_player_hand}) => 
             new DeckCard(id, id_card, id_deck, id_game_player_hand)
         );
@@ -43,18 +50,14 @@ class DeckCard {
 
     static findByIdGamePlayerHand(id_game_player_hand) {
         return db
-        .one('SELECT * FROM deck_card WHERE id_game_player_hand=${id_game_player_hand}', {id_game_player_hand})
+        .one(`SELECT * FROM deck_card WHERE id_game_player_hand=$1`, [id_game_player_hand])
         .map(({id, id_card, id_deck, id_game_player_hand}) => 
             new DeckCard(id, id_card, id_deck, id_game_player_hand)
         );
     }
 
-    static insertCardById(id) {
-        return db
-        .one('SELECT * FROM deck_card WHERE id_game_player_hand=${id_game_player_hand}', {id_game_player_hand})
-        .map(({id, id_card, id_deck, id_game_player_hand}) => 
-            new DeckCard(id, id_card, id_deck, id_game_player_hand)
-        );
+    static deleteById(id) {
+        return db.none(`DELETE FROM deck_card WHERE id=$1`, [id])
     }
 
 
