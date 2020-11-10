@@ -20,7 +20,7 @@ router.get('/', (request, response) => {
 //get a game
 router.get('/:id', (request, response) => {
     const { id } = req.params
-    db.any(
+    db.one(
         `SELECT * FROM "game" WHERE id = $1`, [id]
     )
       .then((results) => response.json(results))
