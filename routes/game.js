@@ -5,6 +5,16 @@ const db = require('../db');
 
 
 //create a new game
+router.post('/', (request, response) => {
+    db.any(
+        `SELECT * FROM "game"`,
+    )
+      .then((results) => response.json(results))
+      .catch((error) => {
+        console.log(error);
+        response.json({ error });
+      });
+  });
 
 //get all games
 router.get('/', (request, response) => {
@@ -46,11 +56,11 @@ router.put('/:id', (request, response) => {
       });
   });
 //delete a game
-router.put('/:id', (request, response) => {
+router.delete('/:id', (request, response) => {
     const { id } = request.params;
     console.log(id);
     db.none(
-        'DELETE FROM game WHERE id = $1,', [id],
+        'DELETE FROM game WHERE id = $1', [id],
     )
       .then((results) => response.json(results))
       .catch((error) => {
