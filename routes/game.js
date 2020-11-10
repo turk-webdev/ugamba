@@ -6,8 +6,12 @@ const db = require('../db');
 
 //create a new game
 router.post('/', (request, response) => {
-    db.any(
-        `SELECT * FROM "game"`,
+    const { num_players } = request.body;
+    const { id_deck } = request.body;
+    const { game_pot } = request.body;
+    db.one(
+        `INSERT INTO game (id, num_players, id_deck, game_pot) VALUES (DEFAULT, $1, $2, $3) ON CONFLICT DO NOTHING RETURNING id, num_players, id_deck, game_pot;`,
+        [num_players, id_deck, game_pot],
     )
       .then((results) => response.json(results))
       .catch((error) => {
