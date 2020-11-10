@@ -36,7 +36,7 @@ router.put('/:id', (request, response) => {
     const { info } = request.body
     console.log(body)
     db.none(
-        `UPDATE game SET num_players = $1 WHERE id = $2 `, [info], [id]
+        `UPDATE game SET num_players = $1 WHERE id = $2 `, ([info], [id])
     )
       .then((results) => response.json(results))
       .catch((error) => {
