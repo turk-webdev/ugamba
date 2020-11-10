@@ -32,11 +32,12 @@ router.get('/:id', (request, response) => {
   });
 //update a game
 router.put('/:id', (request, response) => {
-    const { id } = request.params
-    const { info } = request.body
-    console.log(body)
+    const { id } = request.params;
+    const { num_players } = request.body;
+    console.log(body);
     db.none(
-        `UPDATE game SET num_players = $1 WHERE id = $2 `, [info, id]
+        `UPDATE game SET (num_players) = $1 WHERE id = $2 `, 
+        [num_players, id],
     )
       .then((results) => response.json(results))
       .catch((error) => {
@@ -45,6 +46,18 @@ router.put('/:id', (request, response) => {
       });
   });
 //delete a game
+router.put('/:id', (request, response) => {
+    const { id } = request.params;
+    console.log(id);
+    db.none(
+        'DELETE FROM game WHERE id = $1,', [id],
+    )
+      .then((results) => response.json(results))
+      .catch((error) => {
+        console.log(error);
+        response.json({ error });
+      });  
+})
 
 
 module.exports = router;
