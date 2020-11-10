@@ -22,8 +22,8 @@ if (process.env.NODE_ENV === 'dev') {
 
 // Routes
 // const indexRouter = require('./routes/index');
-const usersRouter = require('./src/routes/users');
-const testsRouter = require('./src/routes/tests');
+const usersRouter = require('./routes/users');
+const testsRouter = require('./routes/tests');
 
 // Instantiate the app
 const app = express();
