@@ -31,7 +31,19 @@ router.get('/:id', (request, response) => {
       });
   });
 //update a game
-
+router.put('/:id', (request, response) => {
+    const { id } = request.params
+    const { info } = request.body
+    console.log(body)
+    db.none(
+        `UPDATE game SET num_players = $1 WHERE id = $2 `, [info], [id]
+    )
+      .then((results) => response.json(results))
+      .catch((error) => {
+        console.log(error);
+        response.json({ error });
+      });
+  });
 //delete a game
 
 
