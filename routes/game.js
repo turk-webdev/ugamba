@@ -21,7 +21,7 @@ router.get('/', (request, response) => {
 router.get('/:id', (request, response) => {
     const { id } = req.params
     db.one(
-        `SELECT * FROM "game" WHERE id = $1`, [id]
+        `SELECT * FROM users AS U WHERE U.id = $1`, [id]
     )
       .then((results) => response.json(results))
       .catch((error) => {
