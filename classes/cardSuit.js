@@ -1,4 +1,3 @@
-const { all } = require('sequelize/types/lib/operators');
 const db = require('../db');
 
 class CardSuit {
