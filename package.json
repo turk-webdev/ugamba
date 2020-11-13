@@ -7,10 +7,10 @@
   "scripts": {
     "start": "node ./bin/www",
     "start:dev": "SET \"NODE_ENV=development\" SET DEBUG=term-project-bea-erdin-freedland-cruz:* & nodemon ./bin/www",
-    "db:create:migration": "cd src npx sequelize migration:generate --name ",
-    "db:migrate": "cd src npx sequelize db:migrate",
-    "db:rollback": "cd src npx sequelize db:migrate:undo",
-    "postinstall": "cd src npx sequelize db:migrate"
+    "db:create:migration": "npx sequelize migration:generate --name ",
+    "db:migrate": "npx sequelize db:migrate",
+    "db:rollback": "npx sequelize db:migrate:undo",
+    "postinstall": "npx sequelize db:migrate"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
