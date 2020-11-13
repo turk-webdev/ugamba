@@ -25,9 +25,10 @@ class Game {
     return db.oneOrNone(`SELECT * FROM game AS U WHERE U.id = $1`, [id]);
   }
 
-  static updateGame(id, num_players, game_pot) {
-    return db.none(`UPDATE game SET num_players= '$1', game_pot = '$2' WHERE id= $3;`, [
+  static updateGame(id, num_players, id_deck, game_pot) {
+    return db.none(`UPDATE game SET num_players= '$1', id_deck = '$2', game_pot = '$3' WHERE id= $4;`, [
       num_players,
+      id_deck,
       game_pot,
       id,
     ]);
