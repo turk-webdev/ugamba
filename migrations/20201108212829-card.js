@@ -3,26 +3,25 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable(
-      'test_table',
-      {
+      'card',
+      {  
         id: {
           type: Sequelize.INTEGER,
           primaryKey: true,
           autoIncrement: true
         },
-        createdAt: {
-          type: Sequelize.DATE,
-          defaultValue: Sequelize.literal('NOW()'),
+        id_suit: {
+          type: Sequelize.INTEGER,
           allowNull: false
         },
-        testString: {
-          type:Sequelize.STRING,
+        id_value: {
+          type: Sequelize.INTEGER,
           allowNull: false
         }
       }
-   );
- },
- down: (queryInterface, Sequelize) => {
-  return queryInterface.dropTable('test_table');
- }
-}; 
+    );
+  },
+  down: (queryInterface, Sequelize) => {
+    return queryInterface.dropTable('card');
+  }
+};

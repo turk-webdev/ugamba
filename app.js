@@ -24,6 +24,7 @@ if (process.env.NODE_ENV === 'dev') {
 // const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const testsRouter = require('./routes/tests');
+const apiRouter = require('./routes/api');
 
 // Instantiate the app
 const app = express();
@@ -66,6 +67,7 @@ app.get('/logout', (req, res) => {
 
 app.use('/', usersRouter);
 app.use('/tests', testsRouter);
+app.use('/api', apiRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
@@ -76,7 +78,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = req.app.get('env') === 'dev' ? err : {};
 
   // render the error page
   res.status(err.status || 500);
