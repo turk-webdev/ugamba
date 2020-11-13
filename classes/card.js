@@ -8,35 +8,21 @@ class Card {
     }
 
     static all() {
-        return db
-        .any('SELECT * FROM card')
-        .map(({id, id_suit, id_value}) => 
-            new Card(id, id_suit, id_value)
-        );
+        console.log('all');
+        return db.any('SELECT * FROM card');
     }
 
     static findOneById(id) {
-        return db
-        .one(`SELECT * FROM card WHERE id=$1`, [id])
-        .map(({id, id_suit, id_value}) => 
-            new Card(id, id_suit, id_value)
-        );
+        console.log('one, id='+id);
+        return db.one(`SELECT * FROM card WHERE id=$1`, [id]);
     }
 
     static findByIdSuit(id_suit) {
-        return db
-        .any(`SELECT * FROM card WHERE id_suit=$1`, [id_suit])
-        .map(({id, id_suit, id_value}) => 
-            new Card(id, id_suit, id_value)
-        );
+        return db.any(`SELECT * FROM card WHERE id_suit=$1`, [id_suit]);
     }
 
     static findByIdValue(id_value) {
-        return db
-        .any(`SELECT * FROM card WHERE id_value=$1`, [id_value])
-        .map(({id, id_suit, id_value}) => 
-            new Card(id, id_suit, id_value)
-        );
+        return db.any(`SELECT * FROM card WHERE id_value=$1`, [id_value]);
     }
 
 
