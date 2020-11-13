@@ -12,6 +12,7 @@ module.exports = {
       timestamps: false,
     },
     quoteIdentifiers: false,
+    logging: console.log,
   },
   test: {
     // "username": "root",
@@ -24,6 +25,7 @@ module.exports = {
       timestamps: false,
     },
     quoteIdentifiers: false,
+    logging: console.log,
   },
   production: {
     // "username": "root",
@@ -36,5 +38,6 @@ module.exports = {
       timestamps: false,
     },
     quoteIdentifiers: false,
+    logging: console.log,
   },
 };

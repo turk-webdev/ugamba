@@ -8,21 +8,23 @@ class User {
   }
 
   save() {
-    return db.one(
+    return db.oneOrNone(
       `INSERT INTO users (id, username, password) VALUES (DEFAULT, $1, $2) ON CONFLICT DO NOTHING RETURNING id,username;`,
       [this.username, this.password],
     );
   }
 
   static findOneByUsername(username) {
-    return db.one(
+    return db.oneOrNone(
       `SELECT id, username, password FROM users AS U WHERE U.username = $1`,
       [username],
     );
   }
 
   static findOneById(id) {
-    return db.one(`SELECT id, username FROM users AS U WHERE U.id = $1`, [id]);
+    return db.oneOrNone(`SELECT id, username FROM users AS U WHERE U.id = $1`, [
+      id,
+    ]);
   }
 
   static updateUsernameById(id, newUsername) {
