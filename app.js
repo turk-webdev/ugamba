@@ -23,8 +23,8 @@ if (process.env.NODE_ENV === 'dev') {
 // const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const testsRouter = require('./routes/tests');
+
 const gameRouter = require('./routes/game')
-const apiRouter = require('./routes/api');
 
 // Instantiate the app
 const app = express();
@@ -39,8 +39,8 @@ app.use(express.static(path.join(__dirname, 'client', 'build')));
 // app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/tests', testsRouter);
+
 app.use('/game', gameRouter);
-app.use('/api', apiRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
