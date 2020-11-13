@@ -2,76 +2,16 @@ const express = require('express');
 
 const router = express.Router();
 const db = require('../db');
+const Game = require('../controllers/game.controller.js');
 
+//new routes with controllers
 
-//create a new game
-router.post('/', (request, response) => {
-    const { num_players } = request.body;
-    const { id_deck } = request.body;
-    const { game_pot } = request.body;
-    db.one(
-        `INSERT INTO game (id, num_players, id_deck, game_pot) VALUES (DEFAULT, $1, $2, $3) ON CONFLICT DO NOTHING RETURNING id, num_players, id_deck, game_pot;`,
-        [num_players, id_deck, game_pot],
-    )
-      .then((results) => response.json(results))
-      .catch((error) => {
-        console.log(error);
-        response.json({ error });
-      });
-  });
+router.post('/', Game.create);
+router.get('/', Game.findAll);
+router.get('/:id', Game.findById);
+router.put('/:id', Game.update);
+router.delete('/:id', Game.delete);
 
-//get all games
-router.get('/', (request, response) => {
-    db.any(
-        `SELECT * FROM "game"`,
-    )
-      .then((results) => response.json(results))
-      .catch((error) => {
-        console.log(error);
-        response.json({ error });
-      });
-  });
-//get a game
-router.get('/:id', (request, response) => {
-    const { id } = request.params
-    console.log(id)
-    db.one(
-        `SELECT * FROM game AS U WHERE U.id = $1`, [id]
-    )
-      .then((results) => response.json(results))
-      .catch((error) => {
-        console.log(error);
-        response.json({ error });
-      });
-  });
-//update a game
-router.put('/:id', (request, response) => {
-    const { id } = request.params;
-    const { num_players } = request.body;
-    console.log(body);
-    db.none(
-        `UPDATE game SET (num_players) = $1 WHERE id = $2 `, 
-        [num_players, id],
-    )
-      .then((results) => response.json(results))
-      .catch((error) => {
-        console.log(error);
-        response.json({ error });
-      });
-  });
-//delete a game
-router.delete('/:id', (request, response) => {
-    const { id } = request.params;
-    console.log(id);
-    db.none(
-        'DELETE FROM game WHERE id = $1', [id],
-    )
-      .then((results) => response.json(results))
-      .catch((error) => {
-        console.log(error);
-        response.json({ error });
-      });  
-})
 
 
 module.exports = router;
