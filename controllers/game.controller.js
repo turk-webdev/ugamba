@@ -48,8 +48,8 @@ exports.findById = async (req, res) => {
 exports.update = async (req, res) => {
   const { id } = req.params;
   const { num_players } = req.body;
-  const { id_deck } = req.id_deck;
-  const { game_pot } = req.game_pot;
+  const { id_deck } = req.body;
+  const { game_pot } = req.body;
 
   Game.updateGame(id, num_players, id_deck, game_pot)
     .then(() => {

@@ -25,7 +25,7 @@ class Game {
     return db.one(`SELECT * FROM game AS U WHERE U.id = $1`, [id]);
   }
 
-  static updateGame(id, newNumPlayer) {
+  static updateGame(id, num_players, id_deck, game_pot) {
     return db.none(`INSERT INTO game (id, num_players, id_deck, game_pot) VALUES (DEFAULT, $1, $2, $3) ON CONFLICT DO NOTHING RETURNING id, num_players, id_deck, game_pot;`,
     [num_players, id_deck, game_pot]
     );
