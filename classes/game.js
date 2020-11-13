@@ -9,8 +9,8 @@ class Game {
   }
 
   save() {
-    return db.one(
-      `INSERT INTO game (id, num_players, id_deck, game_pot) VALUES (DEFAULT, $1, $2, $3) ON CONFLICT DO NOTHING RETURNING id, num_players, id_deck, game_pot;`,
+    return db.none(
+      `INSERT INTO game (id, num_players, id_deck, game_pot) VALUES (DEFAULT, $1, $2, $3);`,
       [this.num_players, this.id_deck, this.game_pot],
     );
   }
