@@ -26,9 +26,12 @@ class Game {
   }
 
   static updateGame(id, num_players, id_deck, game_pot) {
-    return db.none(`INSERT INTO game (id, num_players, id_deck, game_pot) VALUES (DEFAULT, $1, $2, $3) ON CONFLICT DO NOTHING RETURNING id, num_players, id_deck, game_pot;`,
-    [num_players, id_deck, game_pot]
-    );
+    return db.none(`UPDATE game SET num_players= '$1', id_deck = '$2', game_pot = '$3' WHERE id= $4;`, [
+      num_players,
+      id_deck,
+      game_pot,
+      id,
+    ]);
   }
 
   static delete(id) {

@@ -56,7 +56,7 @@ exports.update = async (req, res) => {
       return res.send({ message: 'Game has been updated successfully' });
     })
     .catch(() => {
-      return res.status(400).send({ error: 'No user found' });
+      return res.status(400).send({ error: 'No game found' });
     });
 };
 
