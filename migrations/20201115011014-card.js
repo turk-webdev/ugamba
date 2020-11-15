@@ -3,14 +3,26 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable(
-      'card_value',
+      'card',
       {  
         id: {
           type: Sequelize.INTEGER,
           primaryKey: true,
           autoIncrement: true
         },
+        suit: {
+          type: Sequelize.INTEGER,
+          allowNull: false
+        },
+        suit_display: {
+          type: Sequelize.STRING,
+          allowNull: false
+        },
         value: {
+          type: Sequelize.INTEGER,
+          allowNull: false
+        },
+        value_display: {
           type: Sequelize.STRING,
           allowNull: false
         }
@@ -18,6 +30,6 @@ module.exports = {
     );
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('card_value');
+    return queryInterface.dropTable('card');
   }
 };
