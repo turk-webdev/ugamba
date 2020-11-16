@@ -15,4 +15,9 @@ router.get('/', (request, response) => {
   response.send('Hello API');
 });
 
+router.get('/test/:arr', (request, response) => {
+  console.log(request.params.arr);
+  response.send('hi');
+});
+
 module.exports = router;
