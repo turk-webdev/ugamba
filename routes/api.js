@@ -10,12 +10,17 @@ router.get('/deck/card/:id', deckController.showCard);
 
 // Test API calls
 router.get('/all/:table', testController.showAll);
+router.get('/one/single/exact/:table/:col/:query',testController.getOneExact);
+router.get('/any/single/exact/:table/:col/:query',testController.getAnyExact);
+router.get('/one/single/like/:table/:col/:query',testController.getOneLike);
+router.get('/any/single/like/:table/:col/:query',testController.getAnyLike);
 
 router.get('/', (request, response) => {
   response.send('Hello API');
 });
 
 router.get('/test/:arr', (request, response) => {
+  console.log('target');
   console.log(request.params.arr);
   response.send('hi');
 });
