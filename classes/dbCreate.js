@@ -5,14 +5,14 @@ const insert = (table, cols, values) => {
         throw 'Incorrect usage of function - cols & queries must have equal number of entries';
     }
 
-    return db.none(`INSERT INTO $1 ($2) VALUES ($3)`,[table,cols.toString(),values.toString()]);
+    return db.none(`INSERT INTO ${table} (${cols.toString()}) VALUES (${values.toString()})`);
 };
 
 const insertIdOnly = (table, returning) => {
     if (returning !== undefined) {
-        return db.one(`INSERT INTO $1 DEFAULT VALUES RETURNING $2`,[table,returning]);
+        return db.one(`INSERT INTO ${table} DEFAULT VALUES RETURNING ${returning}`);
     } else {
-        return db.none(`INSERT INTO $1 DEFAULT VALUES`,[table]);
+        return db.none(`INSERT INTO ${table} DEFAULT VALUES`);
     }
     
 };

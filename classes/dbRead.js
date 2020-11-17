@@ -2,15 +2,15 @@ const db = require('../db');
 
 
 const findAll = (table) => {
-    return db.any(`SELECT * FROM $1`,[table]);
+    return db.any(`SELECT * FROM ${table}`);
 };
 
 const findAllBySingleQueryExact = (table, col, query) => {
-    return db.any(`SELECT * FROM $1 WHERE $2 = $3`,[table,col,query]);
+    return db.any(`SELECT * FROM ${table} WHERE ${col} = ${query}`);
 };
 
 const findAllBySingleQueryLike = (table, col, query) => {
-    return db.any(`SELECT * FROM $1 WHERE $2 LIKE $3`,[table,col,query]);
+    return db.any(`SELECT * FROM ${table} WHERE ${col} LIKE ${query}`);
 };
 
 const findAllByMultipleQueryExact = (table, cols, queries) => {
@@ -42,11 +42,11 @@ const findAllByMultipleQueryLike = (table, cols, queries) => {
 };
 
 const findOneBySingleQueryExact = (table, col, query) => {
-    return db.one(`SELECT * FROM $1 WHERE $2 = $3`,[table,col,query]);
+    return db.one(`SELECT * FROM ${table} WHERE ${col} = ${query}`);
 };
 
 const findOneBySingleQueryLike = (table, col, query) => {
-    return db.one(`SELECT * FROM $1 WHERE $2 LIKE $3`,[table,col,query]);
+    return db.one(`SELECT * FROM ${table} WHERE ${col} LIKE ${query}`);
 };
 
 const findOneByMultipleQueryExact = (table, cols, queries) => {
