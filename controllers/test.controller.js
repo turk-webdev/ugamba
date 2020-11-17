@@ -1,5 +1,6 @@
 const Read = require('../classes/dbRead');
 
+console.log();
 exports.showAll = (req, res) => {
     console.log(req.params);
     Read.findAll(req.params.table)
