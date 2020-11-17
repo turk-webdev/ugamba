@@ -1,7 +1,7 @@
 const db = require('../db');
 
 const removeSingleQueryExact = (table, col, query) => {
-    return db.none(`DELETE FROM ${table} WHERE ${col} = ${query}`);
+    return db.none(`DELETE FROM $1 WHERE $2 = $3`,[table,col,query]);
 };
 
 const removeMultiQueryExact = (table, [cols], [queries]) => {
@@ -20,7 +20,7 @@ const removeMultiQueryExact = (table, [cols], [queries]) => {
 };
 
 const removeSingleQueryLike = (table, col, query) => {
-    return db.none(`DELETE FROM ${table} WHERE ${col} LIKE ${query}`);
+    return db.none(`DELETE FROM $1 WHERE $2 LIKE $3`,[table,col,query]);
 };
 
 const removeMultiQueryLike = (table, [cols], [queries]) => {

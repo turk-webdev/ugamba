@@ -2,18 +2,18 @@ const db = require('../db');
 
 
 const findAll = (table) => {
-    return db.any(`SELECT * FROM ${table}`);
+    return db.any(`SELECT * FROM $1`,[table]);
 };
 
 const findAllBySingleQueryExact = (table, col, query) => {
-    return db.any(`SELECT * FROM ${table} WHERE ${col} = ${query}`);
+    return db.any(`SELECT * FROM $1 WHERE $2 = $3`,[table,col,query]);
 };
 
 const findAllBySingleQueryLike = (table, col, query) => {
-    return db.any(`SELECT * FROM ${table} WHERE ${col} LIKE ${query}`);
+    return db.any(`SELECT * FROM $1 WHERE $2 LIKE $3`,[table,col,query]);
 };
 
-const findAllByMultipleQueryExact = (table, [cols], [queries]) => {
+const findAllByMultipleQueryExact = (table, cols, queries) => {
     if (cols.length != queries.length)  {
         throw 'Incorrect usage of function - cols & queries must have equal number of entries';
     }
@@ -27,7 +27,7 @@ const findAllByMultipleQueryExact = (table, [cols], [queries]) => {
     return db.any(sql);
 };
 
-const findAllByMultipleQueryLike = (table, [cols], [queries]) => {
+const findAllByMultipleQueryLike = (table, cols, queries) => {
     if (cols.length != queries.length)  {
         throw 'Incorrect usage of function - cols & queries must have equal number of entries';
     }
@@ -42,14 +42,14 @@ const findAllByMultipleQueryLike = (table, [cols], [queries]) => {
 };
 
 const findOneBySingleQueryExact = (table, col, query) => {
-    return db.one(`SELECT * FROM ${table} WHERE ${col} = ${query}`);
+    return db.one(`SELECT * FROM $1 WHERE $2 = $3`,[table,col,query]);
 };
 
 const findOneBySingleQueryLike = (table, col, query) => {
-    return db.one(`SELECT * FROM ${table} WHERE ${col} LIKE ${query}`);
+    return db.one(`SELECT * FROM $1 WHERE $2 LIKE $3`,[table,col,query]);
 };
 
-const findOneByMultipleQueryExact = (table, [cols], [queries]) => {
+const findOneByMultipleQueryExact = (table, cols, queries) => {
     if (cols.length != queries.length)  {
         throw 'Incorrect usage of function - cols & queries must have equal number of entries';
     }
@@ -63,7 +63,7 @@ const findOneByMultipleQueryExact = (table, [cols], [queries]) => {
     return db.one(sql);
 };
 
-const findOneByMultipleQueryLike = (table, [cols], [queries]) => {
+const findOneByMultipleQueryLike = (table, cols, queries) => {
     if (cols.length != queries.length)  {
         throw 'Incorrect usage of function - cols & queries must have equal number of entries';
     }
