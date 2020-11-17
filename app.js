@@ -35,7 +35,6 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const testsRouter = require('./routes/tests');
 const apiRouter = require('./routes/api');
-
 const gameRouter = require('./routes/game');
 
 // Instantiate the app
