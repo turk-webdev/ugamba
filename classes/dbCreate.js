@@ -5,11 +5,11 @@ const insert = (table, [cols], [values]) => {
         throw 'Incorrect usage of function - cols & queries must have equal number of entries';
     }
 
-    return await db.none(`INSERT INTO ${table} (${cols.toString()}) VALUES (${values.toString})`);
+    return db.none(`INSERT INTO ${table} (${cols.toString()}) VALUES (${values.toString})`);
 };
 
 const insertIdOnly = (table) => {
-    return await db.none(`INSERT INTO ${table} DEFAULT VALUES`);
+    return db.none(`INSERT INTO ${table} DEFAULT VALUES`);
 };
 
 module.exports = {
