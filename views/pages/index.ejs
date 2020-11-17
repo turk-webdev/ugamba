@@ -1,17 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>This is the basic home page</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css"
-    />
-  </head>
-
-  <body>
+<%- include('../partials/htmlStructure/head.ejs') -%>
     <%- include('../partials/navbar.ejs') -%>
 
     <div id="wrapper">
@@ -19,5 +6,4 @@
         <h1>Home Page of Somthing Nice</h1>
       </section>
     </div>
-  </body>
-</html>
+  <%- include('../partials/htmlStructure/foot.ejs') -%>
