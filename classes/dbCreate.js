@@ -8,6 +8,11 @@ const insert = (table, [cols], [values]) => {
     return await db.none(`INSERT INTO ${table} (${cols.toString()}) VALUES (${values.toString})`);
 };
 
+const insertIdOnly = (table) => {
+    return await db.none(`INSERT INTO ${table} DEFAULT VALUES`);
+};
+
 module.exports = {
-    insert
+    insert,
+    insertIdOnly
 };
