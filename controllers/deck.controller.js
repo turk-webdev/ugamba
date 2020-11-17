@@ -36,6 +36,7 @@ exports.initDeck = (req, res) => {
             var cols = ['id_card', 'id_deck'];
             var values = [i, data.id];
             Create.insert('deck_card',cols,values);
+            // TODO: This currently still needs to be linked to a game
         }
     })
     .catch((error) => {
