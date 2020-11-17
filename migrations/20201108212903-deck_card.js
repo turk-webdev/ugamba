@@ -20,7 +20,7 @@ module.exports = {
         },
         id_game_player_hand: {
           type: Sequelize.INTEGER,
-          allowNull: false
+          allowNull: true
         }
       }
     );

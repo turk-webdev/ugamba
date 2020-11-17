@@ -1,35 +1,46 @@
-const Card = require('../classes/card');
-const CardSuit = require('../classes/cardSuit');
-const CardValue = require('../classes/cardValue');
-const Deck = require('../classes/deck');
-const DeckCard = require('../classes/deckCard');
+const Read = require('../classes/dbRead');
+const Create = require('../classes/dbCreate');
+
+const MAX_CARD_ID = 52;
 
 exports.showAll = (req, res)  => {
-    Card.all()
+    Read.findAll('card')
     .then((data) => {
+        // TODO: Actually handle return
         if(!data) {
-            return res.status(400).send({ error: 'No cards found' });
+            return res.status(400).send({ error: 'No card found' });
         }
         return res.send(data);
-    })
-    .catch((err) => {
-        return res.status(400).send({ error: err });
     });
-}
+};
 
-exports.showCard = (req, res) => {
-    Card.findOneById(req.params.id)
+exports.getCard = (req, res) => {
+    Read.findOneBySingleQueryExact('card','id',req.params.id)
     .then((data) => {
+        // TODO: Actually handle return
         if(!data) {
             return res.status(400).send({ error: 'No card found' });
         }
         return res.send(data);
     })
-    .catch((err) => {
-        return res.status(400).send({ error: err });
+    .catch((error) => {
+        // TODO: Actual error handling
+        return res.send(error);
     });
 };
 
-exports.dealCard = () => {
-
+exports.initDeck = (req, res) => {
+    Create.insertIdOnly('deck','id')
+    .then((data) => {
+        for (let i=1; i<=MAX_CARD_ID; i++) {
+            var cols = ['id_card', 'id_deck'];
+            var values = [i, data.id];
+            Create.insert('deck_card',cols,values);
+            // TODO: This currently still needs to be linked to a game
+        }
+    })
+    .catch((error) => {
+        // TODO: Actual error handling
+        return res.send(error);
+    })
 };
