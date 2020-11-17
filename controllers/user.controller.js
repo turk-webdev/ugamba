@@ -19,7 +19,7 @@ exports.register = async (req, res) => {
         if (err) {
           return res.render('register', { error: 'Username is already taken' });
         }
-        return res.render('index', { user: results });
+        return res.render('authenticated/home', { user: results });
       });
     })
     .catch(() => {
@@ -44,7 +44,7 @@ exports.login = async (req, res) => {
         if (err) {
           return res.render('login', { error: 'Invalid username or password' });
         }
-        res.render('index', { user });
+        res.render('authenticated/home', { user });
       });
     })
     .catch(() => {

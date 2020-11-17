@@ -1,12 +1,10 @@
-const jwt = require('jsonwebtoken');
 const Game = require('../classes/game');
-
 
 exports.create = async (req, res) => {
   const { num_players } = req.body;
   const { id_deck } = req.body;
   const { game_pot } = req.body;
-  
+
   const newGame = new Game(undefined, num_players, id_deck, game_pot);
 
   newGame
@@ -15,13 +13,12 @@ exports.create = async (req, res) => {
       return res.send(results);
     })
     .catch((error) => {
-        console.log(error);
-        response.json({ error });
+      console.log(error);
+      response.json({ error });
     });
 };
 
 exports.findAll = async (req, res) => {
-
   Game.findAll()
     .then((game) => {
       return res.send({ game });
