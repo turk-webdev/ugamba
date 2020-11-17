@@ -2,7 +2,6 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const crypto = require('crypto');
 const User = require('../classes/user');
-const { hashPassword } = require('../utils');
 
 const comparePassword = (candidatePassword, user) => {
   const sha256 = crypto.createHash('sha256');
@@ -30,13 +29,13 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  done(null, user);
 });
 
-passport.deserializeUser((id, done) => {
-  User.findOneById(id)
-    .then((user) => {
-      done(null, user);
+passport.deserializeUser((user, done) => {
+  User.findOneById(user.id)
+    .then((u) => {
+      done(null, u);
     })
     .catch((err) => {
       done(err, null);

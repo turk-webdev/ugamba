@@ -1,0 +1,27 @@
+#chat {
+  position:fixed;
+  right:0;
+  bottom:0;
+  height:60vh;
+}
+
+#chat-container{
+  position:relative;
+  height:100%;
+}
+
+.chat-input-group{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  margin:.75rem 0 .75rem 0;
+}
+
+#messages{
+  height: 100%;
+  margin: 0;
+  overflow-y: scroll;
+  padding-top:80px;
+  bottom: 70px;
+  position: relative;
+}

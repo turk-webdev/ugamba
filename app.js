@@ -25,10 +25,13 @@ if (process.env.NODE_ENV === 'dev') {
 const db = require('./db');
 
 // Initialize session table
-const fullPath = path.join(__dirname, './sql/initSession.sql'); // generating full path;
-db.any(new QueryFile(fullPath, { minify: true })).then(() => {
-  console.log('Initialized session table');
-});
+const dropSessionOnStart = true;
+if (dropSessionOnStart) {
+  const fullPath = path.join(__dirname, './sql/initSession.sql'); // generating full path;
+  db.any(new QueryFile(fullPath, { minify: true })).then(() => {
+    console.log('Initialized session table');
+  });
+}
 
 // Routes
 const indexRouter = require('./routes/index');
@@ -40,20 +43,20 @@ const gameRouter = require('./routes/game');
 // Instantiate the app
 const app = express();
 
-app.use(
-  expressSession({
-    store: new PostgresSqlStore({ conString: process.env.DATABASE_URL }),
-    saveUninitialized: false,
-    resave: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 }, // 1 day
-    secret: process.env.SECRET_KEY,
-  }),
-);
+const sessionMiddleware = expressSession({
+  store: new PostgresSqlStore({ conString: process.env.DATABASE_URL }),
+  saveUninitialized: false,
+  resave: false,
+  cookie: { maxAge: 24 * 60 * 60 * 1000 }, // 1 day
+  secret: process.env.SECRET_KEY,
+});
+app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.set('views', path.join(__dirname, '/views/pages'));
 app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -82,4 +85,4 @@ app.get('*', (req, res) => {
   res.render('error');
 });
 
-module.exports = app;
+module.exports = { app, sessionMiddleware };
