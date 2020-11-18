@@ -56,7 +56,7 @@
 </key>
 <comment>Holds number of players, a foreign key for corresponding deck id, and the games cash pot value.</comment>
 </table>
-<table x="1571" y="716" name="deck">
+<table x="1652" y="671" name="deck">
 <row name="id" null="1" autoincrement="1">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
@@ -65,7 +65,7 @@
 </key>
 <comment>Holds all the decks/collections of cards being used by different games.</comment>
 </table>
-<table x="1989" y="455" name="deck_card">
+<table x="1524" y="399" name="deck_card">
 <row name="id" null="1" autoincrement="1">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
@@ -79,7 +79,7 @@
 </row>
 <row name="id_game_player_hand" null="1" autoincrement="0">
 <datatype>INTEGER</datatype>
-<default>NULL</default><relation table="game_player_hand" row="id" />
+<default>NULL</default><relation table="game_player" row="id" />
 </row>
 <key type="PRIMARY" name="">
 <part>id</part>
@@ -150,29 +150,19 @@ associated deck or game player hand.</comment>
 <datatype>INTEGER</datatype>
 <default>NULL</default><relation table="game_player" row="id" />
 </row>
-<row name="id_type_game_action" null="1" autoincrement="0">
+<row name="game_action" null="1" autoincrement="0">
 <datatype>INTEGER</datatype>
-<default>NULL</default><relation table="type_game_action" row="id" />
-</row>
+<default>NULL</default></row>
+<row name="game_action_display" null="1" autoincrement="0">
+<datatype>VARCHAR</datatype>
+<default>NULL</default></row>
 <key type="PRIMARY" name="">
 <part>id</part>
 </key>
 <comment>Holds every action that occurs in a game, has a foreign key
 for corresponding deal, a foreign key for the corresponding game player, and a foreign key for the corresponding game action type.</comment>
 </table>
-<table x="1153" y="289" name="type_game_action">
-<row name="id" null="1" autoincrement="1">
-<datatype>INTEGER</datatype>
-<default>NULL</default></row>
-<row name="name" null="1" autoincrement="0">
-<datatype>VARCHAR(20)</datatype>
-<default>NULL</default></row>
-<key type="PRIMARY" name="">
-<part>id</part>
-</key>
-<comment> Holds the types of game actions</comment>
-</table>
-<table x="1564" y="91" name="game_player">
+<table x="1438" y="78" name="game_player">
 <row name="id" null="1" autoincrement="1">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
@@ -207,19 +197,5 @@ foreign key of the game the player is in.</comment>
 <part>id</part>
 </key>
 <comment>Holds all the players, associated usernames, password, and cash value.</comment>
-</table>
-<table x="1967" y="68" name="game_player_hand">
-<row name="id" null="1" autoincrement="1">
-<datatype>INTEGER</datatype>
-<default>NULL</default></row>
-<row name="id_game_player" null="1" autoincrement="0">
-<datatype>INTEGER</datatype>
-<default>NULL</default><relation table="game_player" row="id" />
-</row>
-<key type="PRIMARY" name="">
-<part>id</part>
-</key>
-<comment>Joint table associating foreign key of game player with
-foreign key of card in the player’s hand.</comment>
 </table>
 </sql>
