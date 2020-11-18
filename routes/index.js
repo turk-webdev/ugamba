@@ -2,6 +2,15 @@ const express = require('express');
 
 const router = express.Router();
 
+const usersRouter = require('./users');
+const testsRouter = require('./tests');
+const apiRouter = require('./api');
+
+// Redirect routes
+router.use('/users', usersRouter);
+router.use('/tests', testsRouter);
+router.use('/api', apiRouter);
+
 // Routes
 router.get('/', (req, res) => {
   if (req.isUnauthenticated()) {
