@@ -33,12 +33,6 @@ if (dropSessionOnStart) {
   });
 }
 
-// Routes
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-const testsRouter = require('./routes/tests');
-const apiRouter = require('./routes/api');
-const gameRouter = require('./routes/game');
 
 // Instantiate the app
 const app = express();
@@ -68,11 +62,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Routes redirect
+const indexRouter = require('./routes/index');
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/tests', testsRouter);
-app.use('/api', apiRouter);
-app.use('/game', gameRouter);
 
 // catch 404 and forward to error handler
 // app.use((req, res, next) => {
