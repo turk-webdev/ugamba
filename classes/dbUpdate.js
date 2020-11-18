@@ -35,6 +35,6 @@ const updateLike = (table, colsToUpdate, values, col, query) => {
 };
 
 module.exports = {
-    updateSingleQuery,
-    updateMultiQuery
+    updateExact,
+    updateLike
 };
