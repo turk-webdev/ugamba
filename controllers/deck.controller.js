@@ -1,55 +1,31 @@
 const Read = require('../classes/dbRead');
 const Create = require('../classes/dbCreate');
 const Update = require('../classes/dbUpdate');
+const Deck = require('../classes/deck');
 
 const MAX_CARD_ID = 52;
 
-exports.showAll = (req, res)  => {
-    Read.findAll('card')
-    .then((data) => {
-        // TODO: Actually handle return
-        if(!data) {
-            return res.status(400).send({ error: 'No card found' });
-        }
-        return res.send(data);
-    });
-};
-
-exports.getCard = (req, res) => {
-    Read.findOneBySingleQueryExact('card','id',req.params.id)
-    .then((data) => {
-        // TODO: Actually handle return
-        if(!data) {
-            return res.status(400).send({ error: 'No card found' });
-        }
-        return res.send(data);
-    })
-    .catch((error) => {
-        // TODO: Actual error handling
-        return res.send(error);
-    });
-};
-
-exports.initDeck = (req, res) => {
-    Create.insertIdOnly('deck','id')
-    .then((data) => {
-        let deckId = data.id;
+const initDeckForGame = (req, res) => {
+    // First, create a new deck entry
+    Deck.createNewDeck()
+    .then((deckId) => {
+        // Using deckId, create 52 new cards for that deck
         for (let i=1; i<=MAX_CARD_ID; i++) {
-            let cols = ['id_card', 'id_deck'];
-            let values = [i, deckId];
-            Create.insert('deck_card',cols,values);
+            Deck.createDeckCard(i,deckId);
         }
+
         return deckId;
     })
     .then((deckId) => {
-        Update.updateExact('game',['id_deck'],[deckId])
-        .catch((error) => {
-            // TODO: Actual error handling
-            return res.send(error);
-        });
+        // Then, modify the given gameId in body with the new deck
+        Deck.assignDeckToGame(deckId, parseInt(req.params.gameId));
     })
     .catch((error) => {
-        // TODO: Actual error handling
+        console.log(error);
         return res.send(error);
     });
+};
+
+module.exports = {
+    initDeckForGame
 };
