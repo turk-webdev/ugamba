@@ -1,5 +1,6 @@
 const Read = require('../classes/dbRead');
 const Create = require('../classes/dbCreate');
+const Update = require('../classes/dbUpdate');
 
 const MAX_CARD_ID = 52;
 
@@ -32,15 +33,23 @@ exports.getCard = (req, res) => {
 exports.initDeck = (req, res) => {
     Create.insertIdOnly('deck','id')
     .then((data) => {
+        let deckId = data.id;
         for (let i=1; i<=MAX_CARD_ID; i++) {
-            var cols = ['id_card', 'id_deck'];
-            var values = [i, data.id];
+            let cols = ['id_card', 'id_deck'];
+            let values = [i, deckId];
             Create.insert('deck_card',cols,values);
-            // TODO: This currently still needs to be linked to a game
         }
+        return deckId;
+    })
+    .then((deckId) => {
+        Update.updateExact('game',['id_deck'],[deckId])
+        .catch((error) => {
+            // TODO: Actual error handling
+            return res.send(error);
+        });
     })
     .catch((error) => {
         // TODO: Actual error handling
         return res.send(error);
-    })
+    });
 };
