@@ -8,34 +8,6 @@ const chatInput = document.getElementById('chat-input');
 const pageloader = document.getElementById('loader-wrapper');
 const quickPlay = document.getElementById('quick-play');
 const exitLoading = document.getElementById('exit-loading');
-quickPlay.addEventListener('click', (e) => {
-  e.preventDefault(); // prevents page reloading
-  pageloader.classList.add('is-loading');
-  exitLoading.classList.remove('is-hidden');
-});
-exitLoading.addEventListener('click', (e) => {
-  e.preventDefault(); // prevents page reloading
-  pageloader.classList.remove('is-loading');
-  exitLoading.classList.add('is-hidden');
-});
-
-chatSubmit.addEventListener('click', (e) => {
-  e.preventDefault(); // prevents page reloading
-  if (chatText.value) {
-    socket.emit('chat message', chatText.value);
-    chatText.value = '';
-  }
-  return false;
-});
-chatInput.addEventListener('keyup', (event) => {
-  if (event.key === 'Enter') {
-    // Cancel the default action, if needed
-    event.preventDefault();
-    // Trigger the button element with a click
-    chatSubmit.click();
-  }
-});
-
 const messageTypes = [
   'has-text-primary',
   'has-text-link',
@@ -45,9 +17,56 @@ const messageTypes = [
   'has-text-danger',
 ];
 
+/*
+ * **************************************************************
+ *                        Event listeners
+ * **************************************************************
+ */
+if (quickPlay) {
+  quickPlay.addEventListener('click', (e) => {
+    e.preventDefault(); // prevents page reloading
+    pageloader.classList.add('is-loading');
+    exitLoading.classList.remove('is-hidden');
+    fetch('/game/join', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  });
+  exitLoading.addEventListener('click', (e) => {
+    e.preventDefault(); // prevents page reloading
+    pageloader.classList.remove('is-loading');
+    exitLoading.classList.add('is-hidden');
+  });
+}
+
+if (chatInput) {
+  chatSubmit.addEventListener('click', (e) => {
+    e.preventDefault(); // prevents page reloading
+    if (chatText.value) {
+      socket.emit('chat message', chatText.value);
+      chatText.value = '';
+    }
+    return false;
+  });
+  chatInput.addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+      // Cancel the default action, if needed
+      event.preventDefault();
+      // Trigger the button element with a click
+      chatSubmit.click();
+    }
+  });
+}
+
+/*
+ * **************************************************************
+ *                      Helper functions
+ * **************************************************************
+ */
 const addMessageToChat = (res) => {
   const textClassArr = ['is-size-6', 'mt-4'];
-  // console.log('res=>', messageTypes[res.color]);
   const coloredNameClassArr = [messageTypes[res.color]];
   const li = document.createElement('li');
   const span = document.createElement('span');
@@ -59,10 +78,16 @@ const addMessageToChat = (res) => {
   messages.appendChild(li);
 };
 
+/*
+ * **************************************************************
+ *                          Sockets
+ * **************************************************************
+ */
 socket.on('chat message', (res) => {
   addMessageToChat(res);
 });
 
-socket.on('test', (test) => {
+socket.on('join game', (res) => {
   console.log('hit test');
+  window.location.href = `/game/join/${res.game_id}`;
 });

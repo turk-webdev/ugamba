@@ -65,7 +65,6 @@ app.use(cookieParser());
 
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
-  console.log('this is req.user => ', req.user);
   next();
 });
 
@@ -75,11 +74,6 @@ app.use('/tests', testsRouter);
 app.use('/api', apiRouter);
 app.use('/game', gameRouter);
 
-app.post('/test', (req, res) => {
-  const io = req.app.get('io');
-  io.emit('test');
-});
-
 // catch 404 and forward to error handler
 // app.use((req, res, next) => {
 // next(createError(404));
@@ -87,7 +81,6 @@ app.post('/test', (req, res) => {
 
 // error handler
 app.get('*', (req, res) => {
-  console.log('req.user => ', req.user);
   res.render('error');
 });
 

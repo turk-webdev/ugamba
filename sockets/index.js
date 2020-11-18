@@ -9,10 +9,13 @@ const init = (server, session) => {
       session(socket.request, {}, next);
     })
     .on('connection', (socket) => {
+      console.log('a user connected');
       const user = socket.request.session.passport;
-      if (user.user) {
+
+      if (user && user.user) {
         user.user.color = _.random(5);
         user.user.socket = socket.id;
+        socket.request.session.save();
       }
 
       socket.on('chat message', (msg) => {
@@ -29,11 +32,6 @@ const init = (server, session) => {
     });
   return io;
 };
-
-// io.on('connection', (socket) => {
-// console.log(socket.request.session.passport);
-// console.log('a user connected');
-// });
 
 module.exports = {
   init,
