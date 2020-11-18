@@ -1,6 +1,6 @@
 const db = require('../db');
 
-const updateSingleQuery = (table, [colsToUpdate], [values], col, query) => {
+const updateExact = (table, colsToUpdate, values, col, query) => {
     if (colsToUpdate.length != values) {
         throw 'Incorrect usage of function - cols & queries/values must have equal number of entries';
     }
@@ -17,8 +17,8 @@ const updateSingleQuery = (table, [colsToUpdate], [values], col, query) => {
     return db.none(sql);
 };
 
-const updateMultiQuery = (table, [colsToUpdate], [values], [cols], [queries]) => {
-    if (colsToUpdate.length != values || cols.length != queries.length) {
+const updateLike = (table, colsToUpdate, values, col, query) => {
+    if (colsToUpdate.length != values) {
         throw 'Incorrect usage of function - cols & queries/values must have equal number of entries';
     }
 
@@ -29,13 +29,7 @@ const updateMultiQuery = (table, [colsToUpdate], [values], [cols], [queries]) =>
         }
         sql.concat(`${colsToUpdate[i]} = ${values[i]}`);
     }
-    sql.concat(`WHERE `);
-    for (let i=0; i<cols.length; i++) {
-        if (i>0) {
-            sql.concat(` AND `);
-        }
-        sql.concat(`${cols[i]} = ${queries[i]}`);
-    }
+    sql.concat(`WHERE ${col} LIKE ${query}`);
 
     return db.none(sql);
 };
