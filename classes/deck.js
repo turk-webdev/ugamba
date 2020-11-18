@@ -1,27 +1,29 @@
 const db = require('../db');
 
-class Deck {
-    constructor(id) {
-        this.id = id;
-    }
+const getCardById = (id) => {
+    return db.one('SELECT FROM card WHERE id = $1',[id]);
+};
 
-    static all() {
-        return db
-        .any('SELECT * FROM deck')
-        .map(({id}) => 
-            new Deck(id)
-        );
-    }
+const getDeckCardById = (id) => {
+    return db.one('SELECT FROM deck_card WHERE id = $1',[id]);
+};
 
-    static findOneById(id) {
-        return db
-        .one(`SELECT * FROM deck WHERE id=$1`, [id])
-        .map(({id}) => 
-            new Deck(id)
-        );
-    }
+const createNewDeck = () => {
+    return db.one('INSERT INTO deck DEFAULT VALUES RETURNING id');
+};
 
+const assignDeckToGame = (deckId, gameId) => {
+    return db.none('UPDATE game SET id_deck = $1 WHERE id = $2',[deckId,gameId])
+};
 
-}
+const createDeckCard = (cardId, deckId) => {
+    return db.none('INSERT INTO deck_card(id_card,id_deck) VALUES($1,$2)',[cardId,deckId]);
+};
 
-module.exports = Deck;
+module.exports = {
+  getCardById,
+  getDeckCardById,
+  createNewDeck,
+  assignDeckToGame,
+  createDeckCard
+};
