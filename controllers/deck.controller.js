@@ -1,6 +1,3 @@
-const Read = require('../classes/dbRead');
-const Create = require('../classes/dbCreate');
-const Update = require('../classes/dbUpdate');
 const Deck = require('../classes/deck');
 
 const MAX_CARD_ID = 52;
