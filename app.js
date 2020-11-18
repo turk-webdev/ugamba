@@ -25,7 +25,7 @@ if (process.env.NODE_ENV === 'dev') {
 const db = require('./db');
 
 // Initialize session table
-const dropSessionOnStart = true;
+const dropSessionOnStart = process.env.NODE_ENV !== 'dev';
 if (dropSessionOnStart) {
   const fullPath = path.join(__dirname, './sql/initSession.sql'); // generating full path;
   db.any(new QueryFile(fullPath, { minify: true })).then(() => {
@@ -65,6 +65,7 @@ app.use(cookieParser());
 
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
+  console.log('this is req.user => ', req.user);
   next();
 });
 
@@ -73,6 +74,11 @@ app.use('/users', usersRouter);
 app.use('/tests', testsRouter);
 app.use('/api', apiRouter);
 app.use('/game', gameRouter);
+
+app.post('/test', (req, res) => {
+  const io = req.app.get('io');
+  io.emit('test');
+});
 
 // catch 404 and forward to error handler
 // app.use((req, res, next) => {

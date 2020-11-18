@@ -1,7 +1,7 @@
 const socketIo = require('socket.io');
+const _ = require('lodash');
 
 let io = {};
-let user = {};
 
 const init = (server, session) => {
   io = socketIo(server)
@@ -9,25 +9,25 @@ const init = (server, session) => {
       session(socket.request, {}, next);
     })
     .on('connection', (socket) => {
-      console.log('a user connected');
-      user = socket.request.session.passport;
-      if (user) {
-        io.emit('set username', {
-          username: user.user.username,
-          color: Math.floor(Math.random() * 7),
-          socketId: socket.id,
-        });
+      const user = socket.request.session.passport;
+      if (user.user) {
+        user.user.color = _.random(5);
+        user.user.socket = socket.id;
       }
 
       socket.on('chat message', (msg) => {
-        console.log('msg => ', msg, ' ', user.user.username);
-        io.emit('chat message', { username: user.user.username, message: msg });
+        io.emit('chat message', {
+          username: user.user.username,
+          message: msg,
+          color: user.user.color,
+        });
       });
 
       socket.on('disconnect', () => {
         console.log('user disconnected');
       });
     });
+  return io;
 };
 
 // io.on('connection', (socket) => {

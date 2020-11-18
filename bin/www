@@ -20,7 +20,8 @@ app.set('port', port);
  */
 
 const server = http.createServer(app);
-Socket.init(server, sessionMiddleware);
+const io = Socket.init(server, sessionMiddleware);
+app.set('io', io);
 
 /**
  * Listen on provided port, on all network interfaces.
