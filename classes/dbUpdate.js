@@ -1,40 +1,99 @@
 const db = require('../db');
 
 const updateExact = (table, colsToUpdate, values, col, query) => {
-    if (colsToUpdate.length != values) {
-        throw 'Incorrect usage of function - cols & queries/values must have equal number of entries';
-    }
+    let sql = 'UPDATE $1 ';
+    let params = [table];
+    let set = 'SET ', where = 'WHERE ';
+    let count = 2;
 
-    let sql = `UPDATE ${table} SET `;
-    for (let i=0; i<colsToUpdate.length; i++) {
-        if (i>0) {
-            sql.concat(`, `);
+    if (Array.isArray(colsToUpdate) && Array.isArray(values)) {
+        if (colsToUpdate.length != values.length) {
+            throw 'ERROR - colsToUpdate & values array length different';
         }
-        sql.concat(`${colsToUpdate[i]} = ${values[i]}`);
-    }
-    sql.concat(`WHERE ${col} = ${query}`);
 
-    return db.none(sql);
+        for (let i=0; i<colsToUpdate.length; i++) {
+            if (i>0) {
+                set.concat(', ');
+            }
+            params.push(colsToUpdate[i]);
+            params.push(values[i]);
+            set.concat(`$${count} = $${count+1}`);
+            count += 2;
+        }
+        
+    }
+
+    if (Array.isArray(col) && Array.isArray(query)) {
+        if (col.length != query.length) {
+            throw 'ERROR - col & query array length different';
+        }
+
+        for (let i=0; i<col.length; i++) {
+            if (i>0) {
+                set.concat(', ');
+            }
+            params.push(col[i]);
+            params.push(query[i]);
+            where.concat(`$${count} = $${count+1}`);
+            count += 2;
+        }
+        
+    }
+
+    sql.concat(set);
+    sql.concat(where);
+
+
+    return db.none(sql, params);
 };
 
 const updateLike = (table, colsToUpdate, values, col, query) => {
-    if (colsToUpdate.length != values) {
-        throw 'Incorrect usage of function - cols & queries/values must have equal number of entries';
-    }
+    let sql = 'UPDATE $1 ';
+    let params = [table];
+    let set = 'SET ', where = 'WHERE ';
+    let count = 2;
 
-    let sql = `UPDATE ${table} SET `;
-    for (let i=0; i<colsToUpdate.length; i++) {
-        if (i>0) {
-            sql.concat(`, `);
+    if (Array.isArray(colsToUpdate) && Array.isArray(values)) {
+        if (colsToUpdate.length != values.length) {
+            throw 'ERROR - colsToUpdate & values array length different';
         }
-        sql.concat(`${colsToUpdate[i]} = ${values[i]}`);
-    }
-    sql.concat(`WHERE ${col} LIKE ${query}`);
 
-    return db.none(sql);
+        for (let i=0; i<colsToUpdate.length; i++) {
+            if (i>0) {
+                where.concat(', ');
+            }
+            params.push(colsToUpdate[i]);
+            params.push(values[i]);
+            set.concat(`$${count} = $${count+1}`);
+            count += 2;
+        }
+        
+    }
+
+    if (Array.isArray(col) && Array.isArray(query)) {
+        if (col.length != query.length) {
+            throw 'ERROR - col & query array length different';
+        }
+
+        for (let i=0; i<col.length; i++) {
+            if (i>0) {
+                where.concat(', ');
+            }
+            params.push(col[i]);
+            params.push(query[i]);
+            where.concat(`$${count} LIKE $${count+1}`);
+            count += 2;
+        }
+        
+    }
+
+    sql.concat(set);
+    sql.concat(where);
+
+
+    return db.none(sql, params);
 };
 
 module.exports = {
-    updateExact,
-    updateLike
+    updateExact
 };
