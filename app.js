@@ -25,7 +25,7 @@ if (process.env.NODE_ENV === 'dev') {
 const db = require('./db');
 
 // Initialize session table
-const dropSessionOnStart = true;
+const dropSessionOnStart = process.env.NODE_ENV !== 'dev';
 if (dropSessionOnStart) {
   const fullPath = path.join(__dirname, './sql/initSession.sql'); // generating full path;
   db.any(new QueryFile(fullPath, { minify: true })).then(() => {
@@ -73,7 +73,6 @@ app.use('/', indexRouter);
 
 // error handler
 app.get('*', (req, res) => {
-  console.log('req.user => ', req.user);
   res.render('error');
 });
 

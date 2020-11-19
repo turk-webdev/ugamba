@@ -1,30 +1,32 @@
 const db = require('../db');
 
 class User {
-  constructor(id, username, password) {
+  constructor(id, username, password, money) {
     this.id = id;
     this.username = username;
     this.password = password;
+    this.money = money;
   }
 
   save() {
     return db.oneOrNone(
-      `INSERT INTO users (id, username, password) VALUES (DEFAULT, $1, $2) ON CONFLICT DO NOTHING RETURNING id,username;`,
-      [this.username, this.password],
+      `INSERT INTO users (id, username, password, money) VALUES (DEFAULT, $1, $2, $3) ON CONFLICT DO NOTHING RETURNING id,username, money;`,
+      [this.username, this.password, this.money],
     );
   }
 
   static findOneByUsername(username) {
     return db.oneOrNone(
-      `SELECT id, username, password FROM users AS U WHERE U.username = $1`,
+      `SELECT id, username, password, money FROM users AS U WHERE U.username = $1`,
       [username],
     );
   }
 
   static findOneById(id) {
-    return db.oneOrNone(`SELECT id, username FROM users AS U WHERE U.id = $1`, [
-      id,
-    ]);
+    return db.oneOrNone(
+      `SELECT id, username, money FROM users AS U WHERE U.id = $1`,
+      [id],
+    );
   }
 
   static updateUsernameById(id, newUsername) {

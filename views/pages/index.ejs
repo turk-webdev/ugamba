@@ -1,9 +1,68 @@
 <%- include('../partials/htmlStructure/head.ejs') -%>
-    <%- include('../partials/navbar.ejs') -%>
+     <section class="container">
+      <div class="columns is-multiline">
+        <div class="column is-8 is-offset-2 register">
+          <div class="columns">
+            <div class="column left registration-left">
+              <h1 class="title is-1">uGamba!</h1>
+              <h2 class="subtitle colored is-4">The best way to play poker at SFSU</h2>
+            </div>
+            <div class="column right has-text-centered registration-right">
+              <% if(type===undefined || type === 'signup'){%>
+              <div id="sign-up">
+              <%} else{ %>
+                  <div id="sign-up" class="is-hidden">
+                     <% } %>
 
-    <div id="wrapper">
-      <section id="full-height">
-        <h1>Home Page of Somthing Nice</h1>
-      </section>
-    </div>
-  <%- include('../partials/htmlStructure/foot.ejs') -%>
+              <h1 class="title is-4">Sign up today</h1>
+              <p class="description">Create an account to play!</p>
+              <form action="/users/register" method="POST">
+                <div class="field">
+                  <div class="control">
+                    <input class="input is-medium" required name="username" type="text" placeholder="Username">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="control">
+                    <input class="input is-medium" required name="password" type="password" placeholder="Password">
+                  </div>
+                </div>
+                <% if(error){ %>
+                  <p class="has-text-danger is-size-6"><%= error %><h3>
+                <%}%>
+                <button type="submit" class="button is-block is-primary is-fullwidth is-medium">Submit</button>
+                <a id="login-link">Already have an account?</a>
+              </form>
+              </div>
+
+              <% if( type === 'login'){%>
+              <div id="login">
+            <%} else{ %>
+                  <div id="login" class="is-hidden">
+                     <% } %>
+              <h1 class="title is-4">Log in</h1>
+              <p class="description">Log in to play!</p>
+              <form action="/users/login" method="POST">
+                <div class="field">
+                  <div class="control">
+                    <input class="input is-medium"required  name="username" type="text" placeholder="Username">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="control">
+                    <input class="input is-medium"required  name="password" type="password" placeholder="Password">
+                  </div>
+                </div>
+                <% if(error){ %>
+                  <p class="has-text-danger is-size-6"><%= error %><h3>
+                <%}%>
+                <button class="button is-block is-primary is-fullwidth is-medium">Submit</button>
+                <a id="signup-link" >Don't have an account?</a>
+              </form>
+              </div>
+            </div>
+          </div>
+        </div>
+  <%- include('../partials/htmlStructure/unauthenticatedFoot.ejs') -%>

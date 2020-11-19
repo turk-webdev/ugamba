@@ -1,60 +1,93 @@
 const socket = io();
 
-const users = {};
-
-const chatDiv = document.getElementById('chat');
-chatDiv.scrollTop = chatDiv.scrollHeight;
-
 const chatText = document.getElementById('chat-input');
 const chatSubmit = document.getElementById('chat-submit');
 const messages = document.getElementById('messages');
+const chatInput = document.getElementById('chat-input');
 
+const pageloader = document.getElementById('loader-wrapper');
+const quickPlay = document.getElementById('quick-play');
+const exitLoading = document.getElementById('exit-loading');
 const messageTypes = [
-  'is-dark',
-  'is-primary',
-  'is-link',
-  'is-info',
-  'is-success',
-  'is-warning',
-  'is-danger',
+  'has-text-primary',
+  'has-text-link',
+  'has-text-info',
+  'has-text-success',
+  'has-text-warning',
+  'has-text-danger',
 ];
 
+/*
+ * **************************************************************
+ *                        Event listeners
+ * **************************************************************
+ */
+if (quickPlay) {
+  quickPlay.addEventListener('click', (e) => {
+    e.preventDefault(); // prevents page reloading
+    pageloader.classList.add('is-loading');
+    exitLoading.classList.remove('is-hidden');
+    fetch('/game/join', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  });
+  exitLoading.addEventListener('click', (e) => {
+    e.preventDefault(); // prevents page reloading
+    pageloader.classList.remove('is-loading');
+    exitLoading.classList.add('is-hidden');
+  });
+}
+
+if (chatInput) {
+  chatSubmit.addEventListener('click', (e) => {
+    e.preventDefault(); // prevents page reloading
+    if (chatText.value) {
+      socket.emit('chat message', chatText.value);
+      chatText.value = '';
+    }
+    return false;
+  });
+  chatInput.addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+      // Cancel the default action, if needed
+      event.preventDefault();
+      // Trigger the button element with a click
+      chatSubmit.click();
+    }
+  });
+}
+
+/*
+ * **************************************************************
+ *                      Helper functions
+ * **************************************************************
+ */
 const addMessageToChat = (res) => {
-  const classArr = ['message', users[res.username].color];
+  const textClassArr = ['is-size-6', 'mt-4'];
+  const coloredNameClassArr = [messageTypes[res.color]];
   const li = document.createElement('li');
-  li.classList.add(...classArr);
-  const messageHeader = document.createElement('div');
-  messageHeader.classList.add('message-header');
-  messageHeader.appendChild(document.createTextNode(`${res.username}`));
-
-  const messageBody = document.createElement('div');
-  messageBody.classList.add('message-body');
-  messageBody.appendChild(document.createTextNode(`${res.message}`));
-
-  li.appendChild(messageHeader);
-  li.appendChild(messageBody);
+  const span = document.createElement('span');
+  li.classList.add(...textClassArr);
+  span.appendChild(document.createTextNode(`${res.username}: `));
+  li.appendChild(span);
+  li.appendChild(document.createTextNode(`${res.message}`));
+  span.classList.add(...coloredNameClassArr);
   messages.appendChild(li);
 };
 
-chatSubmit.addEventListener('click', (e) => {
-  e.preventDefault(); // prevents page reloading
-  // console.log('chatText.value => ', chatText.value);
-  if (chatText.value) {
-    socket.emit('chat message', chatText.value);
-    chatText.value = '';
-  }
-  return false;
-});
-
+/*
+ * **************************************************************
+ *                          Sockets
+ * **************************************************************
+ */
 socket.on('chat message', (res) => {
-  // console.log('this is the message on the frontend => ', msg);
-  console.log('res => ', res);
   addMessageToChat(res);
 });
 
-socket.on('set username', (user) => {
-  users[user.username] = {
-    color: messageTypes[user.color],
-    username: user.socketId,
-  };
+socket.on('join game', (res) => {
+  console.log('hit test');
+  window.location.href = `/game/join/${res.game_id}`;
 });
