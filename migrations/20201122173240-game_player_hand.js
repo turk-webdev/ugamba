@@ -1,23 +1,24 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('game_player', {
+  up: async (queryInterface, Sequelize) => {
+    return queryInterface.createTable('game_player_hand', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
       },
-      id_game: {
+      game_player_id: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        primaryKey: true,
       },
-      id_player: {
+      strength: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
     });
   },
+
   // eslint-disable-next-line no-unused-vars
-  down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('game_player');
+  down: async (queryInterface, Sequelize) => {
+    return queryInterface.dropTable('game_player_hand');
   },
 };
