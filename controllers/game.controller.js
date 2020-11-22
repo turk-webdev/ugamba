@@ -14,7 +14,7 @@ exports.create = async (req, res) => {
     })
     .catch((error) => {
       console.log(error);
-      response.json({ error });
+      res.json({ error });
     });
 };
 

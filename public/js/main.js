@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 const socket = io();
 
 const chatText = document.getElementById('chat-input');

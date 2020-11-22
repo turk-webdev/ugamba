@@ -7,7 +7,6 @@
  * heroku link: https://calm-castle-35028.herokuapp.com/
  * https://github.com/sfsu-csc-667-fall-2020-roberts/term-project-bea-erdin-freedland-cruz
  *************************************************************** */
-const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -16,11 +15,7 @@ const expressSession = require('express-session');
 const { QueryFile } = require('pg-promise');
 const passport = require('passport');
 const PostgresSqlStore = require('connect-pg-simple')(expressSession);
-
-// Do a developement environment check
-if (process.env.NODE_ENV === 'dev') {
-  require('dotenv').config();
-}
+require('dotenv').config();
 
 const db = require('./db');
 
@@ -32,7 +27,6 @@ if (dropSessionOnStart) {
     console.log('Initialized session table');
   });
 }
-
 
 // Instantiate the app
 const app = express();
@@ -64,12 +58,8 @@ app.use((req, res, next) => {
 
 // Routes redirect
 const indexRouter = require('./routes/index');
-app.use('/', indexRouter);
 
-// catch 404 and forward to error handler
-// app.use((req, res, next) => {
-// next(createError(404));
-// });
+app.use('/', indexRouter);
 
 // error handler
 app.get('*', (req, res) => {
