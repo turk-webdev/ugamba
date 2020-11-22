@@ -9,7 +9,7 @@ class Game_player {
 
   save() {
     return db.oneOrNone(
-      `INSERT INTO Game_player (id, id_game, id_user) VALUES (DEFAULT, $1, $2)`,
+      `INSERT INTO Game_player (id, id_game, id_player) VALUES (DEFAULT, $1, $2)`,
       [this.id_game, this.id_user],
     );
   }

@@ -9,9 +9,10 @@ const Game = require('../../controllers/game.controller.js');
 
 router.get('/join/:game_id', (req, res) => {
   // get game
-  res.render('authenticated/game', { game: undefined });
+  res.render('authenticated/game', { game: Game.findById });
 });
 
+// eslint-disable-next-line no-unused-vars
 router.post('/join', (req, res) => {
   const io = req.app.get('io');
   /* 
@@ -19,6 +20,7 @@ router.post('/join', (req, res) => {
     - If there is a game with < max num of players: join the game
     - else: create a game and wait until a new player joins to start the game.
     */
+  // eslint-disable-next-line func-names
   setTimeout(function () {
     io.to(req.session.passport.user.socket).emit('join game', {
       game_id: '1234',

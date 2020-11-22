@@ -1,21 +1,31 @@
 const Game = require('../classes/game');
+const Deck = require('../classes/deck');
+// eslint-disable-next-line no-unused-vars
+const GamePlayer = require('../classes/game_player');
 
 exports.create = async (req, res) => {
-  const { num_players } = req.body;
-  const { id_deck } = req.body;
-  const { game_pot } = req.body;
-
-  const newGame = new Game(undefined, num_players, id_deck, game_pot);
-
-  newGame
-    .save()
-    .then((results) => {
-      return res.send(results);
-    })
-    .catch((error) => {
-      console.log(error);
-      response.json({ error });
-    });
+  // Create a new deck to get deck_id, then create a game with deck_id
+  // Create a game_player with the id_game and id_player
+  let newGame;
+  console.log('THE REQBODY IS:   ', req.body);
+  Deck.createNewDeck().then((results) => {
+    console.log('THE DECKCREATE RESULTS: ', results);
+    newGame = new Game(undefined, 1, results.id, 0);
+    newGame
+      .save()
+      .then((results2) => {
+        console.log('THE RESULTS ARE:  ', results2);
+        const gamePlayer = new GamePlayer(undefined, results2.id, req.body.id);
+        gamePlayer.save();
+        return res.send(results2);
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.log(error);
+        // eslint-disable-next-line no-undef
+        response.json({ error });
+      });
+  });
 };
 
 exports.findAll = async (req, res) => {

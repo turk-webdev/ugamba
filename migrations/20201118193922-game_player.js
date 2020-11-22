@@ -8,7 +8,7 @@ module.exports = {
       },
       id_game: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
       },
       id_player: {
         type: Sequelize.INTEGER,
