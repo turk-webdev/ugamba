@@ -8,14 +8,14 @@ exports.create = async (req, res) => {
   // Create a game_player with the id_game and id_player
   const { id } = req.user;
   let newGame;
-  Deck.createNewDeck().then((results) => {
-    newGame = new Game(undefined, 1, results.id, 0);
+  Deck.createNewDeck().then((deck) => {
+    newGame = new Game(undefined, 1, deck.id, 0);
     newGame
       .save()
-      .then((results2) => {
-        const gamePlayer = new GamePlayer(undefined, results2.id, id);
+      .then((game) => {
+        const gamePlayer = new GamePlayer(undefined, game.id, id);
         gamePlayer.save();
-        return res.send(results2);
+        return res.send(game);
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
