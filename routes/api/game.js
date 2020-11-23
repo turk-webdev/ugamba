@@ -9,7 +9,9 @@ const Game = require('../../controllers/game.controller.js');
 
 router.get('/join/:game_id', (req, res) => {
   // get game
-  res.render('authenticated/game', { game: Game.findById });
+  const { game_id } = req.params;
+  const game = Game.findById(game_id);
+  res.render('authenticated/game', { game });
 });
 
 // eslint-disable-next-line no-unused-vars
