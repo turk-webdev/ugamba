@@ -19,33 +19,56 @@ class DeckCard {
     return db
       .any('SELECT * FROM deck_card')
       .map(
-        ({ id, id_card, id_deck, id_game_player_hand }) =>
-          new DeckCard(id, id_card, id_deck, id_game_player_hand),
+        (deckCard) =>
+          new DeckCard(
+            deckCard.id,
+            deckCard.id_card,
+            deckCard.id_deck,
+            deckCard.id_game_player_hand,
+          ),
       );
   }
 
   static findOneById(id) {
-    return db.one(`SELECT * FROM deck_card WHERE id=1`, [id]).map(
-      // eslint-disable-next-line no-shadow
-      ({ id, id_card, id_deck, id_game_player_hand }) =>
-        new DeckCard(id, id_card, id_deck, id_game_player_hand),
-    );
+    return db
+      .one(`SELECT * FROM deck_card WHERE id=1`, [id])
+      .map(
+        (deckCard) =>
+          new DeckCard(
+            deckCard.id,
+            deckCard.id_card,
+            deckCard.id_deck,
+            deckCard.id_game_player_hand,
+          ),
+      );
   }
 
   static findByIdCard(id_card) {
-    return db.one(`SELECT * FROM deck_card WHERE id_card=$1`, [id_card]).map(
-      // eslint-disable-next-line no-shadow
-      ({ id, id_card, id_deck, id_game_player_hand }) =>
-        new DeckCard(id, id_card, id_deck, id_game_player_hand),
-    );
+    return db
+      .one(`SELECT * FROM deck_card WHERE id_card=$1`, [id_card])
+      .map(
+        (deckCard) =>
+          new DeckCard(
+            deckCard.id,
+            deckCard.id_card,
+            deckCard.id_deck,
+            deckCard.id_game_player_hand,
+          ),
+      );
   }
 
   static findByIdDeck(id_deck) {
-    return db.one(`SELECT * FROM deck_card WHERE id_deck=$1`, [id_deck]).map(
-      // eslint-disable-next-line no-shadow
-      ({ id, id_card, id_deck, id_game_player_hand }) =>
-        new DeckCard(id, id_card, id_deck, id_game_player_hand),
-    );
+    return db
+      .one(`SELECT * FROM deck_card WHERE id_deck=$1`, [id_deck])
+      .map(
+        (deckCard) =>
+          new DeckCard(
+            deckCard.id,
+            deckCard.id_card,
+            deckCard.id_deck,
+            deckCard.id_game_player_hand,
+          ),
+      );
   }
 
   static findByIdGamePlayerHand(id_game_player_hand) {
@@ -54,9 +77,13 @@ class DeckCard {
         id_game_player_hand,
       ])
       .map(
-        // eslint-disable-next-line no-shadow
-        ({ id, id_card, id_deck, id_game_player_hand }) =>
-          new DeckCard(id, id_card, id_deck, id_game_player_hand),
+        (deckCard) =>
+          new DeckCard(
+            deckCard.id,
+            deckCard.id_card,
+            deckCard.id_deck,
+            deckCard.id_game_player_hand,
+          ),
       );
   }
 

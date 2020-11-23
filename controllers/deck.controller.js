@@ -16,14 +16,13 @@ const initDeckForGame = (req, res) => {
     })
     .then((deckId) => {
       // Then, modify the given gameId in body with the new deck
-      return Deck.assignDeckToGame(deckId, parseInt(req.params.gameId, 10));
+      return Deck.assignDeckToGame(deckId, parseInt(req.params.gameId));
     })
     .then(() => {
       return res.sendStatus(200);
     })
     .catch((error) => {
       // TODO: Do some real error handling/checking
-      // eslint-disable-next-line no-console
       console.log(error);
       return res.sendStatus(500);
     });
@@ -35,9 +34,9 @@ const initDeckForGame = (req, res) => {
 const dealCardToPlayer = (req, res) => {
   const { id_game } = req.body;
   const { id_game_player } = req.body;
-  Deck.getDeckByGameId(parseInt(id_game, 10))
+  Deck.getDeckByGameId(parseInt(id_game))
     .then((data) => {
-      return parseInt(data.id_deck, 10);
+      return parseInt(data.id_deck);
     })
     .then((deckId) => {
       return Deck.getAllUnownedCardsInDeck(deckId);
@@ -47,18 +46,14 @@ const dealCardToPlayer = (req, res) => {
       return data[randIndex]; // Picks a random card from the dealable cards
     })
     .then((card) => {
-      const cardId = parseInt(card.id, 10);
-      return Deck.assignDeckCardToPlayerHand(
-        cardId,
-        parseInt(id_game_player, 10),
-      );
+      const cardId = parseInt(card.id);
+      return Deck.assignDeckCardToPlayerHand(cardId, parseInt(id_game_player));
     })
     .then(() => {
       return res.sendStatus(200);
     })
     .catch((error) => {
       // TODO: Do some real error handling/checking
-      // eslint-disable-next-line no-console
       console.log(error);
       return res.sendStatus(500);
     });

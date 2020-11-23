@@ -20,8 +20,7 @@ module.exports = {
       },
     });
   },
-  // eslint-disable-next-line no-unused-vars
-  down: (queryInterface, Sequelize) => {
+  down: (queryInterface) => {
     return queryInterface.dropTable('deck_card');
   },
 };

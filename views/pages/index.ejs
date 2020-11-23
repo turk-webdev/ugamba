@@ -1,5 +1,5 @@
 <%- include('../partials/htmlStructure/head.ejs') -%>
-     <section class="container">
+  <section class="container">
       <div class="columns is-multiline">
         <div class="column is-8 is-offset-2 register">
           <div class="columns">
@@ -13,7 +13,6 @@
               <%} else{ %>
                   <div id="sign-up" class="is-hidden">
                      <% } %>
-
               <h1 class="title is-4">Sign up today</h1>
               <p class="description">Create an account to play!</p>
               <form action="/users/register" method="POST">
@@ -22,7 +21,6 @@
                     <input class="input is-medium" required name="username" type="text" placeholder="Username">
                   </div>
                 </div>
-
                 <div class="field">
                   <div class="control">
                     <input class="input is-medium" required name="password" type="password" placeholder="Password">
@@ -35,11 +33,10 @@
                 <a id="login-link">Already have an account?</a>
               </form>
               </div>
-
               <% if( type === 'login'){%>
               <div id="login">
             <%} else{ %>
-                  <div id="login" class="is-hidden">
+              <div id="login" class="is-hidden">
                      <% } %>
               <h1 class="title is-4">Log in</h1>
               <p class="description">Log in to play!</p>
@@ -65,4 +62,8 @@
             </div>
           </div>
         </div>
+        </div>
+        </div>
+        </div>
+        </section>
   <%- include('../partials/htmlStructure/unauthenticatedFoot.ejs') -%>
