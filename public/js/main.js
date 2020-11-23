@@ -28,7 +28,7 @@ if (quickPlay) {
     e.preventDefault(); // prevents page reloading
     pageloader.classList.add('is-loading');
     exitLoading.classList.remove('is-hidden');
-    fetch('api/game/', {
+    fetch('api/game/join', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

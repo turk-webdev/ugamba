@@ -33,7 +33,7 @@ exports.findAll = async (req, res) => {
       return res.send({ game });
     })
     .catch((err) => {
-      return res.status(422).send({ error: err.message });
+      return res.send({ error: err.message });
     });
 };
 
