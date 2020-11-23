@@ -28,14 +28,11 @@ if (quickPlay) {
     e.preventDefault(); // prevents page reloading
     pageloader.classList.add('is-loading');
     exitLoading.classList.remove('is-hidden');
-    console.log('EVENTTARGETID: ', e.target.id);
-    const data = { id: 22 };
     fetch('api/game/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
     });
   });
   exitLoading.addEventListener('click', (e) => {

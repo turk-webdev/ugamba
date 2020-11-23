@@ -21,7 +21,8 @@ exports.create = async (req, res) => {
         // eslint-disable-next-line no-console
         console.log(error);
         // eslint-disable-next-line no-undef
-        response.json({ error });
+        res.json({ error });
+        return res.status(422).send({ error: 'Game creation failure.' });
       });
   });
 };
