@@ -7,6 +7,7 @@ const initDeckForGame = (req, res) => {
   Deck.createNewDeck()
     .then((deckId) => {
       // Using deckId, create 52 new cards for that deck
+      // eslint-disable-next-line no-plusplus
       for (let i = 1; i <= MAX_CARD_ID; i++) {
         Deck.createDeckCard(i, deckId);
       }

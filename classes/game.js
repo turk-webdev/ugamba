@@ -9,10 +9,21 @@ class Game {
   }
 
   save() {
-    return db.none(
-      `INSERT INTO game (id, num_players, id_deck, game_pot) VALUES (DEFAULT, $1, $2, $3);`,
+    return db.one(
+      `INSERT INTO game (id, num_players, id_deck, game_pot) VALUES (DEFAULT, $1, $2, $3) RETURNING id;`,
       [this.num_players, this.id_deck, this.game_pot],
     );
+  }
+
+  static createGamePlayer(user_id) {
+    return db.any(
+      `INSERT INTO game_player (id, id_game, id_player) VALUES (DEFAULT, $1, $2);`,
+      [this.id, user_id],
+    );
+  }
+
+  static createGameDeck() {
+    return db.any(`INSERT INTO deck (id) VALUES (DEFAULT);`);
   }
 
   static findAll() {

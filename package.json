@@ -6,7 +6,7 @@
   },
   "scripts": {
     "start": "node ./bin/www",
-    "start:dev": "SET \"NODE_ENV=dev\" SET DEBUG=term-project-bea-erdin-freedland-cruz:* & nodemon ./bin/www",
+    "start:dev": "SET \"NODE_ENV=development\" SET DEBUG=term-project-bea-erdin-freedland-cruz:* & nodemon ./bin/www",
     "lint": "eslint '**/*.js' --fix",
     "db:create:migration": "npx sequelize migration:generate --name ",
     "db:migrate": "npx sequelize db:migrate",
