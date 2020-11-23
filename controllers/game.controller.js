@@ -6,16 +6,14 @@ const GamePlayer = require('../classes/game_player');
 exports.create = async (req, res) => {
   // Create a new deck to get deck_id, then create a game with deck_id
   // Create a game_player with the id_game and id_player
+  const { id } = req.user;
   let newGame;
-  console.log('THE REQBODY IS:   ', req.body);
   Deck.createNewDeck().then((results) => {
-    console.log('THE DECKCREATE RESULTS: ', results);
     newGame = new Game(undefined, 1, results.id, 0);
     newGame
       .save()
       .then((results2) => {
-        console.log('THE RESULTS ARE:  ', results2);
-        const gamePlayer = new GamePlayer(undefined, results2.id, req.body.id);
+        const gamePlayer = new GamePlayer(undefined, results2.id, id);
         gamePlayer.save();
         return res.send(results2);
       })
