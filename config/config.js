@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 module.exports = {
-  development: {
+  dev: {
     // username: "fcruz",
     // password: null,
     // database: "develpment",
