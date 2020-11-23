@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 const socket = io();
 
 const chatText = document.getElementById('chat-input');
@@ -27,7 +28,7 @@ if (quickPlay) {
     e.preventDefault(); // prevents page reloading
     pageloader.classList.add('is-loading');
     exitLoading.classList.remove('is-hidden');
-    fetch('/game/join', {
+    fetch('api/game/join', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -88,6 +89,7 @@ socket.on('chat message', (res) => {
 });
 
 socket.on('join game', (res) => {
+  // eslint-disable-next-line no-console
   console.log('hit test');
-  window.location.href = `/game/join/${res.game_id}`;
+  window.location.href = `api/game/join/${res.game_id}`;
 });
