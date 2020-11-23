@@ -35,7 +35,7 @@ exports.createOrJoin = async (req, res) => {
     if (full === true) {
       // eslint-disable-next-line no-unused-vars
       this.create(req, res).then((results) => {
-        console.log('RES: ', results);
+        // console.log('RES: ', results);
         const { game_id } = req.params;
         const game = Game.findById(game_id);
         res.render('authenticated/game', { game });
