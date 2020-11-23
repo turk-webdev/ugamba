@@ -3,59 +3,7 @@ const Deck = require('../classes/deck');
 // eslint-disable-next-line no-unused-vars
 const GamePlayer = require('../classes/game_player');
 
-exports.createOrJoin = async (req, res) => {
-  // eslint-disable-next-line no-unused-vars
-  const io = req.app.get('io');
-  /* 
-    - we fetch all available games with < max num of players.
-    - If there is a game with < max num of players: join the game
-    - else: create a game and wait until a new player joins to start the game.
-    */
-  // Game.create(req, res);
-  // console.log('~~~~~~REQ: ', req.user);
-  let gameIdToJoin;
-
-  Game.findAll().then((games) => {
-    // console.log('GAMES:  ', games);
-    if (games.length === 0) {
-      // console.log('THERE ARE NO GAMES SO MAKE ONE');
-      Game.create(req, res);
-    }
-    // console.log('THERE ARE ONE OR MORE GAMES');
-    let full = true;
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < games.length; i++) {
-      if (games[i].num_players < 4) {
-        // console.log('Found a game with id ', games[i].id);
-        gameIdToJoin = games[i].id;
-        full = false;
-        break;
-      }
-    }
-    if (full === true) {
-      // eslint-disable-next-line no-unused-vars
-      this.create(req, res).then((results) => {
-        // console.log('RES: ', results);
-        const { game_id } = req.params;
-        const game = Game.findById(game_id);
-        res.render('authenticated/game', { game });
-      });
-    } else {
-      // Game.findById(gameIdToJoin).then((gameinfo) => {
-      //   res.render('authenticated/game', { gameinfo });
-      // });
-      // eslint-disable-next-line func-names
-      setTimeout(function () {
-        io.to(req.session.passport.user.socket).emit('join game', {
-          game_id: gameIdToJoin,
-        });
-      }, 3000);
-    }
-  });
-  // return res.render('authenticated/game');
-};
-
-exports.create = async (req, res) => {
+const create = async (req, res) => {
   // Create a new deck to get deck_id, then create a game with deck_id
   // Create a game_player with the id_game and id_player
   const { id } = req.user;
@@ -73,13 +21,12 @@ exports.create = async (req, res) => {
         // eslint-disable-next-line no-console
         console.log(error);
         // eslint-disable-next-line no-undef
-        res.json({ error });
         return res.status(422).send({ error: 'Game creation failure.' });
       });
   });
 };
 
-exports.findAll = async (req, res) => {
+const findAll = async (_, res) => {
   Game.findAll()
     .then((game) => {
       return res.send({ game });
@@ -89,7 +36,59 @@ exports.findAll = async (req, res) => {
     });
 };
 
-exports.findById = async (req, res) => {
+const createOrJoin = async (req, res) => {
+  // eslint-disable-next-line no-unused-vars
+  const io = req.app.get('io');
+  /* 
+    - we fetch all available games with < max num of players.
+    - If there is a game with < max num of players: join the game
+    - else: create a game and wait until a new player joins to start the game.
+    */
+  // console.log('~~~~~~REQ: ', req.user);
+  const { id } = req.user;
+  let gameIdToJoin;
+  let allGamesFull = true;
+  let game;
+
+  Game.findAll().then((games) => {
+    if (games.length === 0) {
+      try {
+        game = Game.create();
+        const gamePlayer = new GamePlayer(undefined, game.id, id);
+        gamePlayer.save();
+      } catch (e) {
+        res.send({ message: 'there was an error creating a game' });
+      }
+    }
+    // eslint-disable-next-line no-plusplus
+    for (const existingGame of games) {
+      if (existingGame.num_players < 4) {
+        gameIdToJoin = existingGame.id;
+        allGamesFull = false;
+        break;
+      }
+    }
+    if (allGamesFull === true) {
+      // eslint-disable-next-line no-unused-vars
+      create(req, res).then((createdGame) => {
+        res.redirect(`/join/${createdGame.id}`);
+      });
+    } else {
+      // Game.findById(gameIdToJoin).then((gameinfo) => {
+      //   res.render('authenticated/game', { gameinfo });
+      // });
+      // eslint-disable-next-line func-names
+      setTimeout(function () {
+        io.to(req.session.passport.user.socket).emit('join game', {
+          game_id: gameIdToJoin,
+        });
+      }, 3000);
+    }
+  });
+  // return res.render('authenticated/game');
+};
+
+const findById = async (req, res) => {
   const { id } = req.params;
   Game.findById(id)
     .then((results) => {
@@ -103,7 +102,7 @@ exports.findById = async (req, res) => {
     });
 };
 
-exports.update = async (req, res) => {
+const update = async (req, res) => {
   const { id } = req.params;
   const { num_players } = req.body;
   const { id_deck } = req.body;
@@ -118,7 +117,7 @@ exports.update = async (req, res) => {
     });
 };
 
-exports.delete = async (req, res) => {
+const deleteGame = async (req, res) => {
   const { id } = req.params;
 
   Game.delete(id)
@@ -128,4 +127,13 @@ exports.delete = async (req, res) => {
     .catch(() => {
       return res.status(400).send({ error: 'No game found' });
     });
+};
+
+module.exports = {
+  createOrJoin,
+  create,
+  findAll,
+  findById,
+  update,
+  deleteGame,
 };

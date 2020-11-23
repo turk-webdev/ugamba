@@ -9,8 +9,15 @@ class Game_player {
 
   save() {
     return db.oneOrNone(
-      `INSERT INTO Game_player (id, id_game, id_player) VALUES (DEFAULT, $1, $2)`,
+      `INSERT INTO game_player (id, id_game,id_user) VALUES (DEFAULT, $1, $2)`,
       [this.id_game, this.id_user],
+    );
+  }
+
+  static findAllGamesByUserId(user_id) {
+    return db.any(
+      `SELECT game.id, game.num_players, game.game_pot FROM game INNER JOIN game_player ON game.id=game_player.id_game WHERE game_player.id_user=1;`,
+      [user_id],
     );
   }
 }

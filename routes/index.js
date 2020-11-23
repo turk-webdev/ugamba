@@ -5,6 +5,7 @@ const router = express.Router();
 const usersRouter = require('./users');
 const testsRouter = require('./tests');
 const apiRouter = require('./api');
+const GamePlayer = require('../classes/game_player');
 
 // Redirect routes
 router.use('/users', usersRouter);
@@ -16,7 +17,13 @@ router.get('/', (req, res) => {
   if (req.isUnauthenticated()) {
     res.render('index', { error: undefined, type: undefined });
   } else {
-    res.render('authenticated/home', { user: req.user });
+    let games = [];
+    GamePlayer.findAllGamesByUserId(req.user.id)
+      .then((result) => {
+        games = games.concat(result);
+        res.render('authenticated/home', { user: req.user, games });
+      })
+      .catch(console.log('error in auth home'));
   }
 });
 

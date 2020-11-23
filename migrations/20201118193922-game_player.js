@@ -10,7 +10,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      id_player: {
+      id_user: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
