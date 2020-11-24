@@ -1,0 +1,26 @@
+/* 
+  --bgImg: url('/img/ugamba-bg-wide.jpg');
+  --bgImgMobile: url('/img/ugamba-bg-tall.jpg'); */
+
+  body {
+      background-image: url('/img/ugamba-bg-wide.jpg');
+      background-repeat: no-repeat;
+      background-size: cover;
+  }
+
+  button[type="submit"] {
+      background-color: hsl(16, 88%, 54%) !important;
+  }
+
+  button[type="submit"]:hover {
+      background-color: hsl(60, 100%, 50%) !important;
+      color: #ddd !important;
+  }
+
+  @media (max-width: 600px) {
+    body {
+        background-image: url('/img/ugamba-bg-tall.jpg');
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+  }
