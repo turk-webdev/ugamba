@@ -8,7 +8,7 @@
     "start": "node ./bin/www",
     "start:dev": "SET \"NODE_ENV=development\" SET DEBUG=term-project-bea-erdin-freedland-cruz:* & nodemon ./bin/www",
     "lint": "eslint '**/*.js' --fix",
-    "css-build": "node-sass --omit-source-map-url sass/mystyles.scss css/mystyles.css",
+    "css-build": "node-sass --omit-source-map-url sass/custom.scss public/css/custom.css",
     "css-watch": "npm run css-build -- --watch",
     "db:create:migration": "npx sequelize migration:generate --name ",
     "db:migrate": "npx sequelize db:migrate",
@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
+    "bulma": "^0.9.1",
     "eslint": "^7.14.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^6.15.0",
