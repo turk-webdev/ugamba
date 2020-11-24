@@ -53,6 +53,7 @@ const createOrJoin = async (req, res) => {
   Game.findAll().then((games) => {
     if (games.length === 0) {
       console.log('No games yet, make a game and gameplayer');
+      allGamesFull = false;
       try {
         game = Game.create();
         const gamePlayer = new GamePlayer(undefined, game.id, id);
