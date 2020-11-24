@@ -57,6 +57,16 @@ const assignDeckCardToPlayerHand = (cardId, playerHandId) => {
   );
 };
 
+const getAllOwnedCardsOfPlayer = (deckId, playerHandId) => {
+  return db.many(
+    'SELECT card.id, card.suit, card.suit_display, card.value, card.value_display FROM card' +
+      ' INNER JOIN deck_card' +
+      ' ON card.id = deck_card.id_card' +
+      ' WHERE deck_card.id_deck = $1 AND deck_card.id_game_player_hand = $2',
+    [deckId, playerHandId],
+  );
+};
+
 module.exports = {
   getCardById,
   getDeckCardById,
@@ -68,4 +78,5 @@ module.exports = {
   getAllUnownedCardsInDeck,
   getAllOwnedCardsInDeck,
   assignDeckCardToPlayerHand,
+  getAllOwnedCardsOfPlayer,
 };
