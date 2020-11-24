@@ -1,10 +1,10 @@
 const Game = require('../classes/game');
 const Deck = require('../classes/deck');
-// eslint-disable-next-line no-unused-vars
 const GamePlayer = require('../classes/game_player');
 
 const create = async (req, res) => {
-  // Create a new deck to get deck_id, then create a game with deck_id
+  // Create a new deck to get deck_id,
+  // then create a game with the returned deck_id
   // Create a game_player with the id_game and id_player
   const { id } = req.user;
   let newGame;
@@ -52,6 +52,7 @@ const createOrJoin = async (req, res) => {
 
   Game.findAll().then((games) => {
     if (games.length === 0) {
+      console.log('No games yet, make a game and gameplayer');
       try {
         game = Game.create();
         const gamePlayer = new GamePlayer(undefined, game.id, id);
