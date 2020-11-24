@@ -1,4 +1,6 @@
 <%- include('../partials/htmlStructure/head.ejs') -%>
+<link rel="stylesheet" type="text/css" href="/css/custom-home.css" />
+
   <section class="container">
       <div class="columns is-multiline">
         <div class="column is-8 is-offset-2 register">
@@ -6,6 +8,7 @@
             <div class="column left registration-left">
               <h1 class="title is-1">uGamba!</h1>
               <h2 class="subtitle colored is-4">The best way to play poker at SFSU</h2>
+              <img src="/img/ugamba-logo.png">
             </div>
             <div class="column right has-text-centered registration-right">
               <% if(type===undefined || type === 'signup'){%>
