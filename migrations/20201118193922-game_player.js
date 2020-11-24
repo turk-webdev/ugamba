@@ -14,6 +14,14 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
+      blind_status: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      player_folded: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
     });
   },
   // eslint-disable-next-line no-unused-vars
