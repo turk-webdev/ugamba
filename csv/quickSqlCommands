@@ -1,0 +1,2 @@
+// drop all tables
+drop table card, deck, deck_card, game, game_action, game_player, game_player_hand, sequelizemeta, session, users
