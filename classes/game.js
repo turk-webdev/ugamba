@@ -1,4 +1,5 @@
 const db = require('../db');
+const Deck = require('./deck');
 
 class Game {
   constructor(id, num_players, id_deck, game_pot) {
@@ -13,6 +14,17 @@ class Game {
       `INSERT INTO game (id, num_players, id_deck, game_pot) VALUES (DEFAULT, $1, $2, $3) RETURNING id;`,
       [this.num_players, this.id_deck, this.game_pot],
     );
+  }
+
+  static create() {
+    Deck.createNewDeck()
+      .then((deck) => {
+        return new Game(undefined, 1, deck.id, 0);
+      })
+      .catch((error) => {
+        console.log('error creating game: ', error);
+        throw new Error('Game creation failure.');
+      });
   }
 
   static createGamePlayer(user_id) {

@@ -16,6 +16,24 @@ include('../../partials/navbar.ejs') -%>
           <h2 class="subtitle colored is-4">
             You currently have $<%= user.money %>
           </h2>
+          <% if(games){%>
+          <h3 class="is-6">You're already in these games. Click to join</h3>
+          <%games.forEach((game)=>{%>
+
+          <div class="columns is-align-content-space-between is-vcentered p-0">
+            <div class="column">
+              <p class="is-6">Game #<%=game.id%>:</p>
+            </div>
+            <div class="column level-right">
+              <button
+                data-it="<%=game.id%>"
+                class="join-existing-game m-0 level-item button is-primary"
+              >
+                Join
+              </button>
+            </div>
+          </div>
+          <%})%> <%}%>
         </div>
         <div class="column right has-text-centered registration-right">
           <div class="field">

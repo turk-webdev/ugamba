@@ -9,6 +9,7 @@ const chatInput = document.getElementById('chat-input');
 const pageloader = document.getElementById('loader-wrapper');
 const quickPlay = document.getElementById('quick-play');
 const exitLoading = document.getElementById('exit-loading');
+const joinExistingGame = document.getElementsByClassName('join-existing-game');
 const messageTypes = [
   'has-text-primary',
   'has-text-link',
@@ -17,6 +18,15 @@ const messageTypes = [
   'has-text-warning',
   'has-text-danger',
 ];
+
+if (joinExistingGame) {
+  Array.from(joinExistingGame).forEach((button) => {
+    const id = button.getAttribute('data-it');
+    button.addEventListener('click', () => {
+      window.location.href = `api/game/join/${id}`;
+    });
+  });
+}
 
 /*
  * **************************************************************
