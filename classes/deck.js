@@ -67,6 +67,13 @@ const getAllOwnedCardsOfPlayer = (deckId, playerHandId) => {
   );
 };
 
+const unassignAllCardsInDeck = (deckId) => {
+  return db.none(
+    'UPDATE deck_card SET id_game_player_hand = NULL WHERE id_deck = $1',
+    [deckId],
+  );
+};
+
 module.exports = {
   getCardById,
   getDeckCardById,
@@ -79,4 +86,5 @@ module.exports = {
   getAllOwnedCardsInDeck,
   assignDeckCardToPlayerHand,
   getAllOwnedCardsOfPlayer,
+  unassignAllCardsInDeck,
 };
