@@ -55,11 +55,38 @@ const dealCardToPlayer = (req, res) => {
     .catch((error) => {
       // TODO: Do some real error handling/checking
       console.log(error);
-      return res.sendStatus(500);
+      res.sendStatus(500);
+    });
+};
+
+const getTableCards = (req, res) => {
+  // id_game_player_hand = 0 is ALWAYS table
+  Deck.getAllOwnedCardsOfPlayer(parseInt(req.params.deckId), 0)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.sendStatus(500);
+      console.log(err);
+    });
+};
+
+const resetGameDeck = (req, res) => {
+  const { id_game } = req.body;
+  Deck.getDeckByGameId(id_game)
+    .then((data) => {
+      Deck.unassignAllCardsInDeck(data.id_deck);
+      res.sendStatus(200);
+    })
+    .catch((error) => {
+      console.log(error);
+      res.sendStatus(500);
     });
 };
 
 module.exports = {
   initDeckForGame,
   dealCardToPlayer,
+  getTableCards,
+  resetGameDeck,
 };
