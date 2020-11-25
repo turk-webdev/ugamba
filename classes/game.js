@@ -11,8 +11,8 @@ class Game {
 
   save() {
     return db.one(
-      `INSERT INTO game (id, num_players, id_deck, game_pot) VALUES (DEFAULT, $1, $2, $3) RETURNING id;`,
-      [this.num_players, this.id_deck, this.game_pot],
+      `INSERT INTO game (id, num_players, id_deck, game_pot, min_bet, game_round, curr_game_player_id) VALUES (DEFAULT, $1, $2, $3, $4, $5, $6) RETURNING id;`,
+      [this.num_players, this.id_deck, this.game_pot, 10, 0, 0],
     );
   }
 
@@ -29,8 +29,8 @@ class Game {
 
   static createGamePlayer(user_id) {
     return db.any(
-      `INSERT INTO game_player (id, id_game, id_player) VALUES (DEFAULT, $1, $2);`,
-      [this.id, user_id],
+      `INSERT INTO game_player (id, id_game, id_player, blind_status, player_folded) VALUES (DEFAULT, $1, $2, $3, $4);`,
+      [this.id, user_id, 0, 0],
     );
   }
 
@@ -46,10 +46,26 @@ class Game {
     return db.oneOrNone(`SELECT * FROM game AS U WHERE U.id = $1`, [id]);
   }
 
-  static updateGame(id, num_players, id_deck, game_pot) {
+  static updateGame(
+    id,
+    num_players,
+    id_deck,
+    game_pot,
+    min_bet,
+    game_round,
+    curr_game_player_id,
+  ) {
     return db.none(
-      `UPDATE game SET num_players= '$1', id_deck = '$2', game_pot = '$3' WHERE id= $4;`,
-      [num_players, id_deck, game_pot, id],
+      `UPDATE game SET num_players= '$1', id_deck = '$2', game_pot = '$3', min_bet = '$4', game_round = '$5', curr_game_player_id = '$6' WHERE id= $7;`,
+      [
+        num_players,
+        id_deck,
+        game_pot,
+        min_bet,
+        game_round,
+        curr_game_player_id,
+        id,
+      ],
     );
   }
 
