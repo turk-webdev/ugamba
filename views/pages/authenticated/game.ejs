@@ -1,6 +1,41 @@
 <%- include('../../partials/htmlStructure/head.ejs') -%>
 <%- include('../../partials/navbar.ejs') -%>
-<h1>You are in game now</h1>
-<p>You are <%= user.username%> <%= user.id%></p>
+<link rel="stylesheet" type="text/css" href="/css/cards.css">
+
+
+<div class="columns">
+    <div class="column" id="users-list-container">
+        <h1>You are in game now</h1>
+        <p>You are <%= user.username%> <%= user.id%></p>
+        <table class="table is-striped" id="users-list">
+            <tr>
+                <td>Each user</td>
+                <td>SML BLIND</td>
+            </tr>
+            <tr>
+                <td>In game</td>
+                <td>BIG BLIND</td>
+            </tr>
+            <tr>
+                <td>Will go here</td>
+            </tr>
+        </table>
+    </div>
+    <div class="column is-two-thirds" height="200">
+        <!-- Body of game goes here -->
+        <div id="dealer-cards" class="hand">
+            <div class="game-card ace spade"></div>
+            <div class="game-card king club"></div>
+            <div class="game-card eight heart"></div>
+            <div class="game-card queen diamond"></div>
+            <div class="game-card jack spade"></div>
+        </div>
+    </div>
+    <div class="column">
+        <p>Hello</p>
+    </div>
+</div>
+
+
 <%- include('../../partials/chat.ejs') -%>
 <%- include('../../partials/htmlStructure/foot.ejs') -%>
