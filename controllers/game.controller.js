@@ -129,8 +129,19 @@ const update = async (req, res) => {
   const { num_players } = req.body;
   const { id_deck } = req.body;
   const { game_pot } = req.body;
+  const { min_bet } = req.body;
+  const { game_round } = req.body;
+  const { curr_game_player_id } = req.body;
 
-  Game.updateGame(id, num_players, id_deck, game_pot)
+  Game.updateGame(
+    id,
+    num_players,
+    id_deck,
+    game_pot,
+    min_bet,
+    game_round,
+    curr_game_player_id,
+  )
     .then(() => {
       return res.send({ message: 'Game has been updated successfully' });
     })
