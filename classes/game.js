@@ -69,6 +69,20 @@ class Game {
     );
   }
 
+  static updateGamePot(id, game_pot) {
+    return db.none(`UPDATE game SET game_pot = game_pot + $1 WHERE id = $2;`, [
+      game_pot,
+      id,
+    ]);
+  }
+
+  static updateGameRound(id, game_round) {
+    return db.none(`UPDATE game SET game_round = $1 WHERE id = $2;`, [
+      id,
+      game_round,
+    ]);
+  }
+
   static delete(id) {
     return db.none(`DELETE FROM game WHERE id=$1`, [id]);
   }
