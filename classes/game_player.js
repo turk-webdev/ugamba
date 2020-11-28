@@ -28,7 +28,7 @@ class Game_player {
     );
   }
 
-  static setPlayertoUnFold(id_user, id_game) {
+  static setPlayertoUnold(id_user, id_game) {
     return db.one(
       `UPDATE game_player SET player_folded = 0 WHERE id_user = $1 AND id_game = $2;`,
       [id_user, id_game],
