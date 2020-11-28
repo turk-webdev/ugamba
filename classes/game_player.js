@@ -9,7 +9,7 @@ class Game_player {
 
   save() {
     return db.oneOrNone(
-      `INSERT INTO game_player (id, id_game, id_user, blind_status, player_folded) VALUES (DEFAULT, $1, $2, $3, $4)`,
+      `INSERT INTO game_player (id, id_game, id_user, blind_status, player_folded) VALUES (DEFAULT, $1, $2, $3, $4);`,
       [this.id_game, this.id_user, 0, 0],
     );
   }
@@ -18,6 +18,27 @@ class Game_player {
     return db.any(
       `SELECT game.id, game.num_players, game.game_pot, game.min_bet, game.game_round, game.curr_game_player_id FROM game INNER JOIN game_player ON game.id=game_player.id_game WHERE game_player.id_user=$1;`,
       [user_id],
+    );
+  }
+
+  static setPlayertoFold(id_user, id_game) {
+    return db.one(
+      `UPDATE game_player SET player_folded = 1 WHERE id_user = $1 AND id_game = $2;`,
+      [id_user, id_game],
+    );
+  }
+
+  static setPlayertoUnold(id_user, id_game) {
+    return db.one(
+      `UPDATE game_player SET player_folded = 0 WHERE id_user = $1 AND id_game = $2;`,
+      [id_user, id_game],
+    );
+  }
+
+  static setPlayerBlind(id_user, id_game, blind_status) {
+    return db.one(
+      `UPDATE game_player SET blind_status = $1 WHERE id_user = $2 AND id_game = $3;`,
+      [blind_status, id_user, id_game],
     );
   }
 }
