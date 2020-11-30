@@ -28,7 +28,7 @@ class Game_player {
     );
   }
 
-  static setPlayertoUnold(id_user, id_game) {
+  static setPlayertoUnfold(id_user, id_game) {
     return db.one(
       `UPDATE game_player SET player_folded = 0 WHERE id_user = $1 AND id_game = $2;`,
       [id_user, id_game],
@@ -40,6 +40,13 @@ class Game_player {
       `UPDATE game_player SET blind_status = $1 WHERE id_user = $2 AND id_game = $3;`,
       [blind_status, id_user, id_game],
     );
+  }
+
+  static removePlayer(id_user, id_game) {
+    return db.none(`DELETE FROM game_player WHERE id_user=$1 AND id_game=$2;`, [
+      id_user,
+      id_game,
+    ]);
   }
 }
 

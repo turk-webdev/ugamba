@@ -39,6 +39,10 @@ class User {
   static deleteById(id) {
     return db.none(`DELETE FROM users WHERE id=$1`, [id]);
   }
+
+  static updateMoneyById(id, money) {
+    return db.none(`UPDATE users SET money=$1 WHERE id=$2;`, [money, id]);
+  }
 }
 
 module.exports = User;
