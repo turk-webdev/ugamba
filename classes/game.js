@@ -86,6 +86,17 @@ class Game {
   static delete(id) {
     return db.none(`DELETE FROM game WHERE id=$1`, [id]);
   }
+
+  static updateNumPlayers(id, num_players) {
+    return db.none(`UPDATE game SET num_players=$1 WHERE id=$2;`, [
+      num_players,
+      id,
+    ]);
+  }
+
+  static getNumPlayers(id) {
+    return db.one(`SELECT num_players FROM game WHERE id=$1;`, [id]);
+  }
 }
 
 module.exports = Game;
