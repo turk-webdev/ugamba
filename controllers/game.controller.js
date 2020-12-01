@@ -2,30 +2,6 @@ const Game = require('../classes/game');
 const Deck = require('../classes/deck');
 const GamePlayer = require('../classes/game_player');
 
-const create = async (req, res) => {
-  // Create a new deck to get deck_id,
-  // then create a game with the returned deck_id
-  // Create a game_player with the id_game and id_player
-  const { id } = req.user;
-  let newGame;
-  Deck.createNewDeck().then((deck) => {
-    newGame = new Game(undefined, 1, deck.id, 0);
-    newGame
-      .save()
-      .then((game) => {
-        const gamePlayer = new GamePlayer(undefined, game.id, id);
-        gamePlayer.save();
-        return res.send(game);
-      })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.log(error);
-        // eslint-disable-next-line no-undef
-        return res.status(422).send({ error: 'Game creation failure.' });
-      });
-  });
-};
-
 const findAll = async (_, res) => {
   Game.findAll()
     .then((game) => {
@@ -37,7 +13,6 @@ const findAll = async (_, res) => {
 };
 
 const createOrJoin = async (req, res) => {
-  // eslint-disable-next-line no-unused-vars
   const io = req.app.get('io');
   /* 
     - we fetch all available games with < max num of players.
@@ -81,23 +56,49 @@ const createOrJoin = async (req, res) => {
     } else {
       console.log('There are games, just make a game_player and join the game');
       for (const existingGame of games) {
-        if (existingGame.num_players < 4) {
+        console.log(existingGame.num_players);
+        if (existingGame.num_players < 2) {
+          console.log('NUM PLAYERS IS LESS THAN 2, ADDING PLAYER TO GAME');
           gameIdToJoin = existingGame.id;
           const gamePlayer = new GamePlayer(undefined, gameIdToJoin, id);
           gamePlayer.save();
+          Game.updateNumPlayers(gameIdToJoin, existingGame.num_players + 1);
           allGamesFull = false;
           break;
         }
       }
       if (allGamesFull === true) {
+        console.log('ALL GAMES ARE FULL MAKE A NEW ONE');
         // eslint-disable-next-line no-unused-vars
-        create(req, res).then((createdGame) => {
-          res.redirect(`/join/${createdGame.id}`);
-        });
+        allGamesFull = false;
+        try {
+          Deck.createNewDeck().then((deck) => {
+            newGame = new Game(undefined, 1, deck.id, 0);
+            newGame
+              .save()
+              .then((game) => {
+                const gamePlayer = new GamePlayer(undefined, game.id, id);
+                gamePlayer.save();
+                // eslint-disable-next-line func-names
+                setTimeout(function () {
+                  io.to(req.session.passport.user.socket).emit('join game', {
+                    game_id: game.id,
+                  });
+                }, 3000);
+                return res.send(game);
+              })
+              .catch((error) => {
+                console.log(error);
+                return res
+                  .status(422)
+                  .send({ error: 'Game creation failure.' });
+              });
+          });
+        } catch (e) {
+          res.send({ message: 'there was an error creating a game' });
+        }
       } else {
-        // Game.findById(gameIdToJoin).then((gameinfo) => {
-        //   res.render('authenticated/game', { gameinfo });
-        // });
+        console.log('REDIRECTING TO GAME');
         // eslint-disable-next-line func-names
         setTimeout(function () {
           io.to(req.session.passport.user.socket).emit('join game', {
@@ -107,7 +108,6 @@ const createOrJoin = async (req, res) => {
       }
     }
   });
-  // return res.render('authenticated/game');
 };
 
 const findById = async (req, res) => {
@@ -164,7 +164,6 @@ const deleteGame = async (req, res) => {
 
 module.exports = {
   createOrJoin,
-  create,
   findAll,
   findById,
   update,

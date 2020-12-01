@@ -19,8 +19,6 @@ router.post('/join', Game.createOrJoin);
 // eslint-disable-next-line no-unused-vars
 
 // router.delete('/leave', Game.removePlayer);
-
-router.post('/', Game.create);
 router.get('/', Game.findAll);
 router.get('/:id', Game.findById);
 router.put('/:id', Game.update);
