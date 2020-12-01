@@ -21,7 +21,10 @@ router.get('/', (req, res) => {
     GamePlayer.findAllGamesByUserId(req.user.id)
       .then((result) => {
         games = games.concat(result);
-        res.render('authenticated/home', { user: req.user, games });
+        res.render('authenticated/home', {
+          user: req.user,
+          games,
+        });
       })
       .catch(console.log('error in auth home'));
   }

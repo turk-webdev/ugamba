@@ -50,7 +50,7 @@ const createOrJoin = async (req, res) => {
   let allGamesFull = true;
   let newGame;
 
-  Game.findAll().then((games) => {
+  GamePlayer.findAllGamesNotParticipating(id).then((games) => {
     if (games.length === 0) {
       console.log('No games yet, make a deck, game and gameplayer');
       allGamesFull = false;

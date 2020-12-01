@@ -21,6 +21,14 @@ class Game_player {
     );
   }
 
+  static findAllGamesNotParticipating(user_id) {
+    // finds all games the user with user_id is currently not in
+    return db.any(
+      `SELECT * FROM game WHERE game.id NOT IN(SELECT game.id FROM game INNER JOIN game_player ON game.id=game_player.id_game WHERE game_player.id_user=$1);`,
+      [user_id],
+    );
+  }
+
   static setPlayertoFold(id_user, id_game) {
     return db.one(
       `UPDATE game_player SET player_folded = 1 WHERE id_user = $1 AND id_game = $2;`,

@@ -1,9 +1,21 @@
+<aside class="chat-menu">
+<p class="menu-label">
+    Chat Rooms
+  </p>
+  <ul class="menu-list" >
+    <li><a class='is-active chat-menu-item' data-it="0">General</a></li>
+    <% games.forEach((game)=>{%>
+      <li><a class="chat-menu-item" data-it="<%=game.id%>">Game <%=game.id%></a></li>
+    <%})%>
+  </ul>
+</aside>
 <div id="chat" class="card column level-right is-one-fifth">
-  <header class="card-header chat-header">
-    <p class="card-header-title">Global chat</p>
-  </header>
-  <div id="chat-container">
-    <ul id="messages"></ul>
+  <div id="chat-container" class="columns">
+    <ul id="messages">
+      <div class="column is-full has-text-centered">
+        <li class='has-text-centered has-text-grey-light'>Start Chatting!</h3>
+        <div>
+    </ul>
   </div>
   <div class="field has-addons chat-input-group">
     <div class="control is-expanded">

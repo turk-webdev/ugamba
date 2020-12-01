@@ -5,7 +5,7 @@
 
 <div class="columns">
     <div class="column" id="users-list-container">
-        <h1>You are in game now</h1>
+      <h1>You are in game <%= game.id%> now</h1>
         <p>You are <%= user.username%> <%= user.id%></p>
         <table class="table is-striped" id="users-list">
             <tr>
@@ -21,7 +21,7 @@
             </tr>
         </table>
     </div>
-    <div class="column is-two-thirds" height="200">
+    <div id="game" data-it="<%=game.id%>" class="column is-two-thirds" height="200">
         <!-- Body of game goes here -->
         <div id="dealer-cards" class="hand">
             <div class="game-card ace spade"></div>
