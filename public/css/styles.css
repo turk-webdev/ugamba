@@ -6,6 +6,16 @@
   padding: 0;
 }
 
+.chat-menu{
+  background-color:white;
+  position: fixed;
+  right:380px;
+  bottom: 0;
+  height: 60vh;
+  padding:1rem;
+  overflow:scroll;
+}
+
 #chat-container {
   /* position:relative; */
   /* height:100%; */
@@ -262,3 +272,4 @@ input:focus {
   transition: all 1s;
   height: 100%;
 }
+
