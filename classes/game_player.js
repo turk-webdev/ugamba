@@ -30,21 +30,21 @@ class Game_player {
   }
 
   static setPlayertoFold(id_user, id_game) {
-    return db.one(
+    return db.none(
       `UPDATE game_player SET player_folded = 1 WHERE id_user = $1 AND id_game = $2;`,
       [id_user, id_game],
     );
   }
 
   static setPlayertoUnfold(id_user, id_game) {
-    return db.one(
+    return db.none(
       `UPDATE game_player SET player_folded = 0 WHERE id_user = $1 AND id_game = $2;`,
       [id_user, id_game],
     );
   }
 
   static setPlayerBlind(id_user, id_game, blind_status) {
-    return db.one(
+    return db.none(
       `UPDATE game_player SET blind_status = $1 WHERE id_user = $2 AND id_game = $3;`,
       [blind_status, id_user, id_game],
     );

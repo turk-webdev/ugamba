@@ -76,6 +76,10 @@ class Game {
     ]);
   }
 
+  static getGameRound(id) {
+    return db.one(`SELECT game_round FROM game WHERE id=$1;`, [id]);
+  }
+
   static updateGameRound(id, game_round) {
     return db.none(`UPDATE game SET game_round = $1 WHERE id = $2;`, [
       id,
