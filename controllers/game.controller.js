@@ -162,10 +162,60 @@ const deleteGame = async (req, res) => {
     });
 };
 
+const playerFold = async (req, res) => {
+  const { id_user } = req.body;
+  const { game_id } = req.params;
+
+  GamePlayer.setPlayertoFold(id_user, game_id)
+    .then(() => {
+      return res.send({ message: 'Game_player has been updated successfully' });
+    })
+    .catch(() => {
+      return res.status(400).send({ error: 'No game_player found' });
+    });
+};
+
+const leaveGame = async (req, res) => {
+  const { game_id } = req.params;
+  const { id_user } = req.body;
+
+  GamePlayer.removePlayer(id_user, game_id)
+    .then(() => {
+      return res.send({ message: 'Game_player has been removed successfully' });
+    })
+    .catch(() => {
+      return res.status(400).send({ error: 'No game_player found' });
+    });
+};
+
+const changeRound = async (req, res) => {
+  const { game_id } = req.params;
+
+  Game.getGameRound(game_id)
+    .then((results) => {
+      if (results === 9) {
+        Game.updateGameRound(game_id, 1);
+      } else {
+        Game.updateGameRound(game_id, results + 1);
+      }
+    })
+    .then(() => {
+      return res.send({
+        message: 'Game game_round has been updated successfully',
+      });
+    })
+    .catch(() => {
+      return res.status(400).send({ error: 'No game found' });
+    });
+};
+
 module.exports = {
   createOrJoin,
   findAll,
   findById,
   update,
   deleteGame,
+  playerFold,
+  leaveGame,
+  changeRound,
 };

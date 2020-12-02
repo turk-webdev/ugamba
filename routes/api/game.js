@@ -17,7 +17,11 @@ router.get('/join/:game_id', async (req, res) => {
   res.render('authenticated/game', { game, games });
 });
 
+router.delete('/leave/:game_id', Game.leaveGame);
+
 router.post('/join', Game.createOrJoin);
+router.put('/fold/:game_id', Game.playerFold);
+router.put('/next/:game_id', Game.changeRound);
 // eslint-disable-next-line no-unused-vars
 
 // router.delete('/leave', Game.removePlayer);
