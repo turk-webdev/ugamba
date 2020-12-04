@@ -16,8 +16,15 @@ class Game_player {
 
   static findAllGamesByUserId(user_id) {
     return db.any(
-      `SELECT game.id, game.num_players, game.game_pot, game.min_bet, game.game_round, game.curr_game_player_id FROM game INNER JOIN game_player ON game.id=game_player.id_game WHERE game_player.id_user=$1;`,
+      `SELECT game.id, game.num_players, game.game_pot, game.min_bet, game.game_round, game.curr_game_player_id FROM game INNER JOIN game_player ON game.id=game_player.id_game WHERE game_player.id_user=$1 ORDER BY game.id;`,
       [user_id],
+    );
+  }
+
+  static findAllPlayersByGameId(game_id) {
+    return db.any(
+      `SELECT u.id, u.username, u.money, gp.id_game,gp.id_user, gp.blind_status, gp.player_folded  FROM users AS u INNER JOIN game_player AS gp ON u.id=gp.id_user WHERE gp.id_game=$1`,
+      [game_id],
     );
   }
 

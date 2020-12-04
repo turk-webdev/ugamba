@@ -24,7 +24,7 @@ if (joinExistingGame) {
   Array.from(joinExistingGame).forEach((button) => {
     const id = button.getAttribute('data-it');
     button.addEventListener('click', () => {
-      window.location.href = `api/game/join/${id}`;
+      window.location.href = `api/game/${id}`;
     });
   });
 }
@@ -162,5 +162,5 @@ socket.on('subscribe chat', (user) => {
 socket.on('join game', (res) => {
   // eslint-disable-next-line no-console
   socket.emit('join game room', res.game_id);
-  window.location.href = `api/game/join/${res.game_id}`;
+  window.location.href = `api/game/${res.game_id}`;
 });

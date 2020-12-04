@@ -1,6 +1,7 @@
 const Game = require('../classes/game');
 const Deck = require('../classes/deck');
 const GamePlayer = require('../classes/game_player');
+const { PlayerActions } = require('../utils/index');
 
 const findAll = async (_, res) => {
   Game.findAll()
@@ -209,6 +210,52 @@ const changeRound = async (req, res) => {
     });
 };
 
+const actionHandler = async (req) => {
+  const { game_id, game_action } = req.params;
+  const { user } = req;
+
+  const io = req.app.get('io');
+
+  /*
+   *this is the main action handler
+   * Each case should emit a socket action to the player making the action,
+   *the entire board, or both
+   */
+
+  console.log('game_action => ', game_action);
+  console.log('PlayerActions.LEAVE => ', PlayerActions.LEAVE);
+  // eslint-disable-next-line
+  switch (game_action) {
+    case PlayerActions.CHECK:
+      break;
+    case PlayerActions.BET:
+      break;
+    case PlayerActions.CALL:
+      break;
+    case PlayerActions.RAISE:
+      break;
+    case PlayerActions.FOLD:
+      break;
+    case PlayerActions.LEAVE:
+      console.log('should be leaving game');
+      await GamePlayer.removePlayer(user.id, game_id);
+      io.emit('leave game');
+      // return res.redirect('/') doesnt work for some reason.
+      // Have to manually change the location on the frontend
+      return;
+  }
+
+  console.log('hello world');
+  /*
+   * after handling the player actions, here is where we send events
+   * back to the entire table,
+   * i.e if last player in river, calculate winner and display
+   * winner of round, gather all cards, distrubute cards etc.
+   * these should all be throguh sockets
+   */
+  // return res.send('hello world');
+};
+
 module.exports = {
   createOrJoin,
   findAll,
@@ -218,4 +265,5 @@ module.exports = {
   playerFold,
   leaveGame,
   changeRound,
+  actionHandler,
 };
