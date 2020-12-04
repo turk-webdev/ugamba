@@ -8,13 +8,14 @@ const GamePlayer = require('../../classes/game_player');
 
 /* These are boilerplates for how we should handle game */
 
-router.get('/join/:game_id', async (req, res) => {
+router.get('/:game_id', async (req, res) => {
   // get game
   // console.log('-----REQPARAMS: ', req.params);
   const { game_id } = req.params;
   const game = await GameClass.findById(game_id);
   const games = await GamePlayer.findAllGamesByUserId(req.user.id);
-  res.render('authenticated/game', { game, games });
+  const players = await GamePlayer.findAllPlayersByGameId(game_id);
+  res.render('authenticated/game', { game, games, players });
 });
 
 router.delete('/leave/:game_id', Game.leaveGame);
@@ -24,10 +25,13 @@ router.put('/fold/:game_id', Game.playerFold);
 router.put('/next/:game_id', Game.changeRound);
 // eslint-disable-next-line no-unused-vars
 
+router.post('/:game_id/:game_action', Game.actionHandler);
 // router.delete('/leave', Game.removePlayer);
-router.get('/', Game.findAll);
-router.get('/:id', Game.findById);
-router.put('/:id', Game.update);
-router.delete('/:id', Game.deleteGame);
+
+// router.post('/', Game.create);
+// router.get('/', Game.findAll);
+// router.get('/:id', Game.findById);
+// router.put('/:id', Game.update);
+// router.delete('/:id', Game.deleteGame);
 
 module.exports = router;

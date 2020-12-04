@@ -6,11 +6,12 @@ const usersRouter = require('./users');
 const testsRouter = require('./tests');
 const apiRouter = require('./api');
 const GamePlayer = require('../classes/game_player');
+const requireAuth = require('../middleware/requireAuth');
 
 // Redirect routes
 router.use('/users', usersRouter);
 router.use('/tests', testsRouter);
-router.use('/api', apiRouter);
+router.use('/api', requireAuth, apiRouter);
 
 // Routes
 router.get('/', (req, res) => {
@@ -18,6 +19,7 @@ router.get('/', (req, res) => {
     res.render('index', { error: undefined, type: undefined });
   } else {
     let games = [];
+    console.log('req.user => ', req.user);
     GamePlayer.findAllGamesByUserId(req.user.id)
       .then((result) => {
         games = games.concat(result);
@@ -26,7 +28,9 @@ router.get('/', (req, res) => {
           games,
         });
       })
-      .catch(console.log('error in auth home'));
+      .catch((e) => {
+        console.log('error in auth home => ', e);
+      });
   }
 });
 

@@ -1,5 +1,4 @@
 const crypto = require('crypto');
-const debug = require('debug')('ugamba-backend:server');
 
 const hashPassword = (password) => {
   const sha256 = crypto.createHash('sha256');
@@ -14,7 +13,17 @@ const comparePassword = (candidatePassword, user) => {
   }
 };
 
+const PlayerActions = {
+  CHECK: 'check',
+  BET: 'bet',
+  CALL: 'call',
+  RAISE: 'raise',
+  FOLD: 'fold',
+  LEAVE: 'leave',
+};
+
 module.exports = {
   comparePassword,
   hashPassword,
+  PlayerActions,
 };
