@@ -12,8 +12,7 @@ const init = (server, session) => {
       console.log('a user connected');
       const user = socket.request.session.passport;
       // join global chat on connection always
-      socket.join('0');
-
+      socket.join('chat-0');
       if (user && user.user) {
         user.user.color = _.random(5);
         user.user.socket = socket.id;
@@ -41,6 +40,10 @@ const init = (server, session) => {
       });
 
       socket.on('join game room', (game_id) => {
+        socket.join(game_id);
+      });
+
+      socket.on('game room', (game_id) => {
         socket.join(game_id);
       });
 

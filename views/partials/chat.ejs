@@ -3,9 +3,9 @@
     Chat Rooms
   </p>
   <ul class="menu-list" >
-    <li><a class='is-active chat-menu-item' data-it="0">General</a></li>
+    <li><a class='is-active chat-menu-item' data-it="chat-0">General</a></li>
     <% games.forEach((game)=>{%>
-      <li><a class="chat-menu-item" data-it="<%=game.id%>">Game <%=game.id%></a></li>
+      <li><a class="chat-menu-item" data-it="chat-<%=game.id%>">Game <%=game.id%></a></li>
     <%})%>
   </ul>
 </aside>

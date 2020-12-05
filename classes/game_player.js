@@ -14,6 +14,14 @@ class Game_player {
     );
   }
 
+  static getNumPlayersInGame(game_id) {
+    return db.one(
+      `SELECT COUNT(*) FROM game_player AS gp WHERE gp.id_game=$1;
+`,
+      [game_id],
+    );
+  }
+
   static findAllGamesByUserId(user_id) {
     return db.any(
       `SELECT game.id, game.num_players, game.game_pot, game.min_bet, game.game_round, game.curr_game_player_id FROM game INNER JOIN game_player ON game.id=game_player.id_game WHERE game_player.id_user=$1 ORDER BY game.id;`,
@@ -31,7 +39,7 @@ class Game_player {
   static findAllGamesNotParticipating(user_id) {
     // finds all games the user with user_id is currently not in
     return db.any(
-      `SELECT * FROM game WHERE game.id NOT IN(SELECT game.id FROM game INNER JOIN game_player ON game.id=game_player.id_game WHERE game_player.id_user=$1);`,
+      `SELECT * FROM game WHERE game.id NOT IN(SELECT game.id FROM game INNER JOIN game_player ON game.id=game_player.id_game WHERE game_player.id_user=$1) ORDER BY game.id;`,
       [user_id],
     );
   }
