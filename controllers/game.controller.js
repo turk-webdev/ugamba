@@ -3,6 +3,8 @@ const Deck = require('../classes/deck');
 const GamePlayer = require('../classes/game_player');
 const { PlayerActions } = require('../utils/index');
 
+const MAX_NUM_PLAYER_IN_GAME = 4;
+
 const findAll = async (_, res) => {
   Game.findAll()
     .then((game) => {
@@ -26,7 +28,7 @@ const createOrJoin = async (req, res) => {
   let allGamesFull = true;
   let newGame;
 
-  GamePlayer.findAllGamesNotParticipating(id).then((games) => {
+  GamePlayer.findAllGamesNotParticipating(id).then(async (games) => {
     if (games.length === 0) {
       console.log('No games yet, make a deck, game and gameplayer');
       allGamesFull = false;
@@ -57,9 +59,12 @@ const createOrJoin = async (req, res) => {
     } else {
       console.log('There are games, just make a game_player and join the game');
       for (const existingGame of games) {
-        console.log(existingGame.num_players);
-        if (existingGame.num_players < 2) {
-          console.log('NUM PLAYERS IS LESS THAN 2, ADDING PLAYER TO GAME');
+        // eslint-disable-next-line
+        const numOfPlayersInGame = await GamePlayer.getNumPlayersInGame(
+          existingGame.id,
+        );
+        if (parseInt(numOfPlayersInGame.count) < MAX_NUM_PLAYER_IN_GAME) {
+          console.log('NUM PLAYERS IS LESS THAN MAX, ADDING PLAYER TO GAME');
           gameIdToJoin = existingGame.id;
           const gamePlayer = new GamePlayer(undefined, gameIdToJoin, id);
           gamePlayer.save();
@@ -214,6 +219,9 @@ const actionHandler = async (req) => {
   const { game_id, game_action } = req.params;
   const { user } = req;
 
+  // eslint-disable-next-line
+  const userSocket = req.session.passport.user.socket;
+
   const io = req.app.get('io');
 
   /*
@@ -223,7 +231,6 @@ const actionHandler = async (req) => {
    */
 
   console.log('game_action => ', game_action);
-  console.log('PlayerActions.LEAVE => ', PlayerActions.LEAVE);
   // eslint-disable-next-line
   switch (game_action) {
     case PlayerActions.CHECK:
@@ -235,13 +242,13 @@ const actionHandler = async (req) => {
     case PlayerActions.RAISE:
       break;
     case PlayerActions.FOLD:
+      console.log('EMITTING TESTING TO GAME_ID => ', game_id);
+      io.to(game_id).emit('testing');
       break;
     case PlayerActions.LEAVE:
       console.log('should be leaving game');
       await GamePlayer.removePlayer(user.id, game_id);
-      io.emit('leave game');
-      // return res.redirect('/') doesnt work for some reason.
-      // Have to manually change the location on the frontend
+      io.to(userSocket).emit('leave game');
       return;
   }
 
