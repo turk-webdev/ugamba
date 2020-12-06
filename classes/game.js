@@ -69,9 +69,9 @@ class Game {
     );
   }
 
-  updateGamePot(id) {
+  static updateGamePot(id, game_pot) {
     return db.none(`UPDATE game SET game_pot = $1 WHERE id = $2;`, [
-      this.game_pot,
+      game_pot,
       id,
     ]);
   }
@@ -100,6 +100,14 @@ class Game {
 
   static getNumPlayers(id) {
     return db.one(`SELECT num_players FROM game WHERE id=$1;`, [id]);
+  }
+
+  static getGamePot(id) {
+    return db.one(`SELECT game_pot FROM game WHERE id=$1;`, [id]);
+  }
+
+  static getMinBet(id) {
+    return db.one(`SELECT min_bet FROM game WHERE id=$1;`, [id]);
   }
 }
 

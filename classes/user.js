@@ -43,6 +43,10 @@ class User {
   static updateMoneyById(id, money) {
     return db.none(`UPDATE users SET money=$1 WHERE id=$2;`, [money, id]);
   }
+
+  static getMoneyById(id) {
+    return db.one(`SELECT money FROM users WHERE id=$1;`, [id]);
+  }
 }
 
 module.exports = User;

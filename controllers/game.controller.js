@@ -2,6 +2,7 @@ const Game = require('../classes/game');
 const Deck = require('../classes/deck');
 const GamePlayer = require('../classes/game_player');
 const { PlayerActions } = require('../utils/index');
+const User = require('../classes/user');
 
 const findAll = async (_, res) => {
   Game.findAll()
@@ -227,14 +228,59 @@ const actionHandler = async (req) => {
   // eslint-disable-next-line
   switch (game_action) {
     case PlayerActions.CHECK:
+      // literally nothing happens, signify in user game window by greying
+      // out actions for that 'turn'?
+      console.log('check called');
       break;
-    case PlayerActions.BET:
+    case PlayerActions.BET: {
+      // we need to get the users money, validate bet
+      // if validated then we can remove the money from the user
+      // finally we can then add that amount to the game pot
+      console.log('bet called');
+      const results = await User.getMoneyById(user.id);
+      if (results >= req.body.amount) {
+        User.updateMoneyById(user.id, results + req.body.amount);
+        const gamePot = await Game.getGamePot(game_id);
+        Game.updateGamePot(game_id, gamePot + req.body.amount);
+      } else {
+        console.log('User does not have enough money');
+      }
       break;
-    case PlayerActions.CALL:
+    }
+    case PlayerActions.CALL: {
+      // would be sick if the game table had like a bet amount or something
+      // basically query that amount, then do the same logic as above ^
+      const min_bet = await Game.getMinBet(game_id);
+      const user_money = await User.getMoneybyId(user.id);
+      if (user_money >= min_bet) {
+        User.updateMoneyById(user.id, user_money - min_bet);
+        const gamePot = await Game.getGamePot(game_id);
+        Game.updateGamePot(game_id, gamePot + min_bet);
+      } else {
+        console.log('User does not have enough money');
+      }
       break;
-    case PlayerActions.RAISE:
+    }
+    case PlayerActions.RAISE: {
+      // again, would be cool if we had a bet column in the table
+      // then we would query that then do the same logic as bet
+      // this time the action amount is the amount of money MORE
+      // than the minimum bet that we are raising
+      const min_bet = await Game.getMinBet(game_id);
+      const user_money = await User.getMoneybyId(user.id);
+      if (user_money >= min_bet + req.body.amount) {
+        User.updateMoneyById(user.id, user_money - min_bet - req.body.amount);
+        const gamePot = await Game.getGamePot(game_id);
+        Game.updateGamePot(game_id, gamePot + min_bet + req.body.amount);
+      } else {
+        console.log('User does not have enough money');
+      }
       break;
+    }
     case PlayerActions.FOLD:
+      console.log('fold called');
+      await GamePlayer.setPlayertoFold(user.id, game_id);
+      io.emit('folded');
       break;
     case PlayerActions.LEAVE:
       console.log('should be leaving game');
@@ -244,7 +290,12 @@ const actionHandler = async (req) => {
       // Have to manually change the location on the frontend
       return;
   }
-
+  // list of game actions
+  /*
+   * reset minimum bet - also reset ui components etc
+   * check for minimum bet at all, set ui accordingly
+   *
+   */
   console.log('hello world');
   /*
    * after handling the player actions, here is where we send events
