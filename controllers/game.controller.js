@@ -278,9 +278,8 @@ const actionHandler = async (req) => {
       break;
     }
     case PlayerActions.FOLD:
-      console.log('fold called');
-      await GamePlayer.setPlayertoFold(user.id, game_id);
-      io.emit('folded');
+      console.log('EMITTING TESTING TO GAME_ID => ', game_id);
+      io.to(game_id).emit('testing');
       break;
     case PlayerActions.LEAVE:
       console.log('should be leaving game');
