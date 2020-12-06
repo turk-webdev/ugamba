@@ -2,17 +2,16 @@ const db = require('../db');
 const Deck = require('./deck');
 
 class Game {
-  constructor(id, num_players, id_deck, game_pot) {
+  constructor(id, id_deck, game_pot) {
     this.id = id;
-    this.num_players = num_players;
     this.id_deck = id_deck;
     this.game_pot = game_pot;
   }
 
   save() {
     return db.one(
-      `INSERT INTO game (id, num_players, id_deck, game_pot, min_bet, game_round, curr_game_player_id) VALUES (DEFAULT, $1, $2, $3, $4, $5, $6) RETURNING id;`,
-      [this.num_players, this.id_deck, this.game_pot, 10, 0, 0],
+      `INSERT INTO game (id, id_deck, game_pot, min_bet, game_round, curr_game_player_id) VALUES (DEFAULT, $1, $2, $3, $4, $5) RETURNING id;`,
+      [this.id_deck, this.game_pot, 10, 0, 0],
     );
   }
 
