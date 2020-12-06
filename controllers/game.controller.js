@@ -249,6 +249,7 @@ const actionHandler = async (req) => {
         Game.updateMinBet(game_id, action_amount);
       } else {
         console.log('User does not have enough money');
+        io.to(userSocket).emit('not enough money');
       }
       break;
     }
@@ -279,6 +280,7 @@ const actionHandler = async (req) => {
         Game.updateGamePot(game_id, gamePot + min_bet + action_amount);
       } else {
         console.log('User does not have enough money');
+        io.to(userSocket).emit('not enough money');
       }
       break;
     }

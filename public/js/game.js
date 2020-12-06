@@ -167,3 +167,7 @@ socket.on('subscribe chat', (user) => {
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 });
+
+socket.on('not enough money', () => {
+  document.getElementById('action-amount').value = 'Not Enough Money';
+});
