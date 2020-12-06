@@ -12,9 +12,14 @@ router.get('/:game_id', async (req, res) => {
   // get game
   // console.log('-----REQPARAMS: ', req.params);
   const { game_id } = req.params;
+  const io = req.app.get('io');
   const game = await GameClass.findById(game_id);
   const games = await GamePlayer.findAllGamesByUserId(req.user.id);
   const players = await GamePlayer.findAllPlayersByGameId(game_id);
+
+  io.to(req.session.passport.user.socket).emit('join game room', {
+    game_id: game.id,
+  });
   res.render('authenticated/game', { game, games, players });
 });
 

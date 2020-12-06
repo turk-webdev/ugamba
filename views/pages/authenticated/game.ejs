@@ -4,21 +4,17 @@ include('../../partials/navbar.ejs') -%>
 
 <div class="columns">
   <div class="column" id="users-list-container">
-    <h1>You are in game <%= game.id%> now</h1>
-    <p>You are <%= user.username%> <%= user.id%></p>
-    <table class="table is-striped" id="users-list">
-      <tr>
-        <td>Each user</td>
-        <td>SML BLIND</td>
-      </tr>
-      <tr>
-        <td>In game</td>
-        <td>BIG BLIND</td>
-      </tr>
-      <tr>
-        <td>Will go here</td>
-      </tr>
-    </table>
+    <p>Username: <%= user.username%></p>
+    <p>UserID: <%= user.id%></p>
+    <br />
+    <p>GameID: <%= game.id%></p>
+    <p>Game Pot: <%= game.game_pot%></p>
+    <p>MinBet: <%= game.min_bet%></p>
+    <p>Action on player: <%= game.curr_game_player_id%></p>
+    <p>Game Round: <%= game.game_round%></p>
+    <br />
+    <p>IDDeck: <%= game.id_deck%></p>
+    <p>Gameplayer info and card info.</p>
   </div>
   <div
     id="game"
@@ -34,8 +30,7 @@ include('../../partials/navbar.ejs') -%>
     <!-- <div class="game-card jack spade"></div> -->
     <!-- </div> -->
     <%players.forEach((player)=>{%>
-      <p><%= player.username%></p>
-      
+    <p><%= player.username%></p>  
     <p>Money: <%= player.money%></p>
     <% if(player.id === user.id){%>
     <div class="columns m-0 p-0">
@@ -72,3 +67,17 @@ include('../../partials/navbar.ejs') -%>
 
 <%- include('../../partials/chat.ejs') -%> <%-
 include('../../partials/htmlStructure/gameFoot.ejs') -%>
+
+<!-- <table class="table is-striped" id="users-list">
+      <tr>
+        <td>Each user</td>
+        <td>SML BLIND</td>
+      </tr>
+      <tr>
+        <td>In game</td>
+        <td>BIG BLIND</td>
+      </tr>
+      <tr>
+        <td>Will go here</td>
+      </tr>
+    </table> -->

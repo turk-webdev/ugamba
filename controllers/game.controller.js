@@ -4,6 +4,8 @@ const GamePlayer = require('../classes/game_player');
 const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
 
+const MAX_NUM_PLAYER_IN_GAME = 4;
+
 const findAll = async (_, res) => {
   Game.findAll()
     .then((game) => {
@@ -27,13 +29,13 @@ const createOrJoin = async (req, res) => {
   let allGamesFull = true;
   let newGame;
 
-  GamePlayer.findAllGamesNotParticipating(id).then((games) => {
+  GamePlayer.findAllGamesNotParticipating(id).then(async (games) => {
     if (games.length === 0) {
       console.log('No games yet, make a deck, game and gameplayer');
       allGamesFull = false;
       try {
         Deck.createNewDeck().then((deck) => {
-          newGame = new Game(undefined, 1, deck.id, 0);
+          newGame = new Game(undefined, deck.id, 0);
           newGame
             .save()
             .then((game) => {
@@ -58,24 +60,25 @@ const createOrJoin = async (req, res) => {
     } else {
       console.log('There are games, just make a game_player and join the game');
       for (const existingGame of games) {
-        console.log(existingGame.num_players);
-        if (existingGame.num_players < 2) {
-          console.log('NUM PLAYERS IS LESS THAN 2, ADDING PLAYER TO GAME');
+        // eslint-disable-next-line
+        const numOfPlayersInGame = await GamePlayer.getNumPlayersInGame(
+          existingGame.id,
+        );
+        if (parseInt(numOfPlayersInGame.count) < MAX_NUM_PLAYER_IN_GAME) {
+          console.log('NUM PLAYERS IS LESS THAN MAX, ADDING PLAYER TO GAME');
           gameIdToJoin = existingGame.id;
           const gamePlayer = new GamePlayer(undefined, gameIdToJoin, id);
           gamePlayer.save();
-          Game.updateNumPlayers(gameIdToJoin, existingGame.num_players + 1);
           allGamesFull = false;
           break;
         }
       }
       if (allGamesFull === true) {
         console.log('ALL GAMES ARE FULL MAKE A NEW ONE');
-        // eslint-disable-next-line no-unused-vars
         allGamesFull = false;
         try {
           Deck.createNewDeck().then((deck) => {
-            newGame = new Game(undefined, 1, deck.id, 0);
+            newGame = new Game(undefined, deck.id, 0);
             newGame
               .save()
               .then((game) => {
@@ -128,7 +131,6 @@ const findById = async (req, res) => {
 
 const update = async (req, res) => {
   const { id } = req.params;
-  const { num_players } = req.body;
   const { id_deck } = req.body;
   const { game_pot } = req.body;
   const { min_bet } = req.body;
@@ -137,7 +139,6 @@ const update = async (req, res) => {
 
   Game.updateGame(
     id,
-    num_players,
     id_deck,
     game_pot,
     min_bet,
@@ -216,6 +217,9 @@ const actionHandler = async (req) => {
   const { user } = req;
   const { action_amount } = req.body.amount;
 
+  // eslint-disable-next-line
+  const userSocket = req.session.passport.user.socket;
+
   const io = req.app.get('io');
 
   /*
@@ -225,7 +229,6 @@ const actionHandler = async (req) => {
    */
 
   console.log('game_action => ', game_action);
-  console.log('PlayerActions.LEAVE => ', PlayerActions.LEAVE);
   // eslint-disable-next-line
   switch (game_action) {
     case PlayerActions.CHECK:
@@ -286,9 +289,7 @@ const actionHandler = async (req) => {
     case PlayerActions.LEAVE:
       console.log('should be leaving game');
       await GamePlayer.removePlayer(user.id, game_id);
-      io.emit('leave game');
-      // return res.redirect('/') doesnt work for some reason.
-      // Have to manually change the location on the frontend
+      io.to(userSocket).emit('leave game');
       return;
   }
   // list of game actions
