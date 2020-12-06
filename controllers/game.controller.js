@@ -214,6 +214,7 @@ const changeRound = async (req, res) => {
 const actionHandler = async (req) => {
   const { game_id, game_action } = req.params;
   const { user } = req;
+  const { action_amount } = req.body.amount;
 
   const io = req.app.get('io');
 
@@ -239,9 +240,9 @@ const actionHandler = async (req) => {
       console.log('bet called');
       const results = await User.getMoneyById(user.id);
       if (results >= req.body.amount) {
-        User.updateMoneyById(user.id, results + req.body.amount);
+        User.updateMoneyById(user.id, results + action_amount);
         const gamePot = await Game.getGamePot(game_id);
-        Game.updateGamePot(game_id, gamePot + req.body.amount);
+        Game.updateGamePot(game_id, gamePot + action_amount);
       } else {
         console.log('User does not have enough money');
       }
@@ -269,9 +270,9 @@ const actionHandler = async (req) => {
       const min_bet = await Game.getMinBet(game_id);
       const user_money = await User.getMoneybyId(user.id);
       if (user_money >= min_bet + req.body.amount) {
-        User.updateMoneyById(user.id, user_money - min_bet - req.body.amount);
+        User.updateMoneyById(user.id, user_money - min_bet - action_amount);
         const gamePot = await Game.getGamePot(game_id);
-        Game.updateGamePot(game_id, gamePot + min_bet + req.body.amount);
+        Game.updateGamePot(game_id, gamePot + min_bet + action_amount);
       } else {
         console.log('User does not have enough money');
       }
