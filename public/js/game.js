@@ -172,4 +172,23 @@ socket.on('subscribe chat', (user) => {
 
 socket.on('not enough money', () => {
   document.getElementById('action-amount').value = 0;
+  document.getElementById('error').innerHTML = 'Not Enough Money';
+});
+
+socket.on('msg', (msg) => {
+  document.getElementById('error').innerHTML = msg;
+});
+
+socket.on('user update', (user_money) => {
+  document.getElementById('player_money').innerHTML = user_money;
+  document.getElementById('error').innerHTML = '';
+});
+
+socket.on('game update', (min_bet, game_pot) => {
+  document.getElementById(
+    'min_bet',
+  ).innerHTML = `Min Bet: ${min_bet.toString()}`;
+  document.getElementById(
+    'game_pot',
+  ).innerHTML = `Game Pot: ${game_pot.toString()}`;
 });
