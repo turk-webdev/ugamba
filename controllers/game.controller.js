@@ -243,6 +243,7 @@ const actionHandler = async (req) => {
         User.updateMoneyById(user.id, results + action_amount);
         const gamePot = await Game.getGamePot(game_id);
         Game.updateGamePot(game_id, gamePot + action_amount);
+        Game.updateMinBet(game_id, action_amount);
       } else {
         console.log('User does not have enough money');
       }

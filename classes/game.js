@@ -109,6 +109,10 @@ class Game {
   static getMinBet(id) {
     return db.one(`SELECT min_bet FROM game WHERE id=$1;`, [id]);
   }
+
+  static updateMinBet(id, min_bet) {
+    return db.none(`UPDATE game SET min_bet=$1 WHERE id=$2;`, [id, min_bet]);
+  }
 }
 
 module.exports = Game;
