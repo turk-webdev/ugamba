@@ -34,7 +34,7 @@ const createOrJoin = async (req, res) => {
       allGamesFull = false;
       try {
         Deck.createNewDeck().then((deck) => {
-          newGame = new Game(undefined, 1, deck.id, 0);
+          newGame = new Game(undefined, deck.id, 0);
           newGame
             .save()
             .then((game) => {
@@ -68,18 +68,16 @@ const createOrJoin = async (req, res) => {
           gameIdToJoin = existingGame.id;
           const gamePlayer = new GamePlayer(undefined, gameIdToJoin, id);
           gamePlayer.save();
-          Game.updateNumPlayers(gameIdToJoin, existingGame.num_players + 1);
           allGamesFull = false;
           break;
         }
       }
       if (allGamesFull === true) {
         console.log('ALL GAMES ARE FULL MAKE A NEW ONE');
-        // eslint-disable-next-line no-unused-vars
         allGamesFull = false;
         try {
           Deck.createNewDeck().then((deck) => {
-            newGame = new Game(undefined, 1, deck.id, 0);
+            newGame = new Game(undefined, deck.id, 0);
             newGame
               .save()
               .then((game) => {
@@ -132,7 +130,6 @@ const findById = async (req, res) => {
 
 const update = async (req, res) => {
   const { id } = req.params;
-  const { num_players } = req.body;
   const { id_deck } = req.body;
   const { game_pot } = req.body;
   const { min_bet } = req.body;
@@ -141,7 +138,6 @@ const update = async (req, res) => {
 
   Game.updateGame(
     id,
-    num_players,
     id_deck,
     game_pot,
     min_bet,

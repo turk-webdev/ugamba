@@ -48,7 +48,6 @@ class Game {
 
   static updateGame(
     id,
-    num_players,
     id_deck,
     game_pot,
     min_bet,
@@ -56,16 +55,8 @@ class Game {
     curr_game_player_id,
   ) {
     return db.none(
-      `UPDATE game SET num_players= '$1', id_deck = '$2', game_pot = '$3', min_bet = '$4', game_round = '$5', curr_game_player_id = '$6' WHERE id= $7;`,
-      [
-        num_players,
-        id_deck,
-        game_pot,
-        min_bet,
-        game_round,
-        curr_game_player_id,
-        id,
-      ],
+      `UPDATE game SET id_deck = '$1', game_pot = '$2', min_bet = '$3', game_round = '$4', curr_game_player_id = '$5' WHERE id= $6;`,
+      [id_deck, game_pot, min_bet, game_round, curr_game_player_id, id],
     );
   }
 
@@ -91,15 +82,11 @@ class Game {
     return db.none(`DELETE FROM game WHERE id=$1`, [id]);
   }
 
-  static updateNumPlayers(id, num_players) {
-    return db.none(`UPDATE game SET num_players=$1 WHERE id=$2;`, [
-      num_players,
-      id,
-    ]);
-  }
-
-  static getNumPlayers(id) {
-    return db.one(`SELECT num_players FROM game WHERE id=$1;`, [id]);
+  static getNumPlayers(game_id) {
+    return db.one(
+      `SELECT COUNT(*) FROM game_player AS gp WHERE gp.id_game=$1;`,
+      [game_id],
+    );
   }
 }
 

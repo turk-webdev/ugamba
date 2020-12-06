@@ -6,11 +6,6 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true,
       },
-      num_players: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 1,
-      },
       id_deck: {
         type: Sequelize.INTEGER,
         allowNull: false,
