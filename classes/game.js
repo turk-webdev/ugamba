@@ -11,7 +11,7 @@ class Game {
   save() {
     return db.one(
       `INSERT INTO game (id, id_deck, game_pot, min_bet, game_round, curr_game_player_id) VALUES (DEFAULT, $1, $2, $3, $4, $5) RETURNING id;`,
-      [this.id_deck, this.game_pot, 10, 0, 0],
+      [this.id_deck, this.game_pot, 0, 0, 0],
     );
   }
 
@@ -72,8 +72,8 @@ class Game {
 
   static updateGameRound(id, game_round) {
     return db.none(`UPDATE game SET game_round = $1 WHERE id = $2;`, [
-      id,
       game_round,
+      id,
     ]);
   }
 
@@ -97,7 +97,7 @@ class Game {
   }
 
   static updateMinBet(id, min_bet) {
-    return db.none(`UPDATE game SET min_bet=$1 WHERE id=$2;`, [id, min_bet]);
+    return db.none(`UPDATE game SET min_bet=$1 WHERE id=$2;`, [min_bet, id]);
   }
 }
 

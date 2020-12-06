@@ -2,7 +2,6 @@
 const socket = io();
 const actionButtons = document.getElementsByClassName('action-button');
 const messages = document.getElementById('messages');
-const actionAmount = document.getElementById('action-amount').value;
 const gameId = document.getElementById('game').getAttribute('data-it');
 const chatText = document.getElementById('chat-input');
 const chatSubmit = document.getElementById('chat-submit');
@@ -15,6 +14,7 @@ const PlayerActions = {
   RAISE: 'raise',
   FOLD: 'fold',
   LEAVE: 'leave',
+  RESET: 'reset',
 };
 const messageTypes = [
   'has-text-primary',
@@ -106,9 +106,11 @@ Array.from(actionButtons).forEach((button) => {
       gameAction === PlayerActions.BET ||
       gameAction === PlayerActions.RAISE
     ) {
+      const actionAmount = document.getElementById('action-amount').value;
       makeGameActionRequest(gameAction, { amount: actionAmount });
+    } else {
+      makeGameActionRequest(gameAction);
     }
-    makeGameActionRequest(gameAction);
   });
 });
 
@@ -169,5 +171,5 @@ socket.on('subscribe chat', (user) => {
 });
 
 socket.on('not enough money', () => {
-  document.getElementById('action-amount').value = 'Not Enough Money';
+  document.getElementById('action-amount').value = 0;
 });

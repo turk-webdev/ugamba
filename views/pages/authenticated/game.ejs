@@ -37,7 +37,7 @@ include('../../partials/navbar.ejs') -%>
       <div class="field column p-0 m-0 is-2">
         <div class="control has-icons-left has-icons-right">
           <input id="action-amount" class="input is-small " type="number" type="number" min="1"
-          step="any" value=<%=parseInt(player.money)/2%>>
+          step="any" value=<%= game.min_bet%>>
           <span class="icon is-left">
             <i class="fas fa-dollar-sign"></i>
           </span>
@@ -46,13 +46,22 @@ include('../../partials/navbar.ejs') -%>
     </div>
     <div class="field has-addons">
       <p class="control">
-        <button name="call" class="action-button button m-0">Call</button>
-      </p>
-      <p class="control">
         <button name="bet" class="action-button button m-0">Bet</button>
       </p>
       <p class="control">
+        <button name="check" class="action-button button m-0">Check</button>
+      </p>
+      <p class="control">
+        <button name="call" class="action-button button m-0">Call</button>
+      </p>
+      <p class="control">
+        <button name="raise" class="action-button button m-0">Raise</button>
+      </p>
+      <p class="control">
         <button name="fold" class="action-button button m-0">Fold</button>
+      </p>
+      <p class="control">
+        <button name="reset" class="action-button button m-0">Reset</button>
       </p>
     </div>
     <div class="field has-addons">
