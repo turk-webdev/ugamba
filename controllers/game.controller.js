@@ -236,7 +236,7 @@ const actionHandler = async (req) => {
       // literally nothing happens, signify in user game window by greying
       // out actions for that 'turn'?
       console.log('check called');
-      io.to(userSocket).emit('msg', 'Checked.');
+      io.to(userSocket).emit('status-msg', 'Checked.');
       break;
     case PlayerActions.BET:
       {
@@ -265,12 +265,9 @@ const actionHandler = async (req) => {
             i_action_amount,
             i_game_pot + i_action_amount,
           );
-        } else if (i_action_amount < i_min_bid) {
-          console.log('Bid not big enough');
-          io.to(userSocket).emit('msg', 'Bid not big enough');
         } else {
           console.log('User does not have enough money');
-          io.to(userSocket).emit('msg', 'not enough money');
+          io.to(userSocket).emit('status-msg', 'not enough money');
         }
       }
       break;
@@ -297,7 +294,7 @@ const actionHandler = async (req) => {
           io.to(game_id).emit('game update', i_min_bid, i_game_pot + i_min_bid);
         } else {
           console.log('User does not have enough money');
-          io.to(userSocket).emit('msg', 'not enough money');
+          io.to(userSocket).emit('status-msg', 'not enough money');
         }
       }
       break;
@@ -336,17 +333,20 @@ const actionHandler = async (req) => {
           );
         } else if (i_action_amount === 0) {
           console.log('Thats not a raise, just call instead');
-          io.to(userSocket).emit('msg', 'Thats not a raise, just call instead');
+          io.to(userSocket).emit(
+            'status-msg',
+            'Thats not a raise, just call instead',
+          );
         } else {
           console.log('User does not have enough money');
-          io.to(userSocket).emit('msg', 'not enough money');
+          io.to(userSocket).emit('status-msg', 'not enough money');
         }
       }
       break;
     case PlayerActions.FOLD:
       console.log('EMITTING TESTING TO GAME_ID => ', game_id);
       io.to(game_id).emit('testing');
-      io.to(userSocket).emit('msg', 'Folded');
+      io.to(userSocket).emit('status-msg', 'Folded');
       break;
     case PlayerActions.RESET:
       {

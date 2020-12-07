@@ -170,7 +170,7 @@ socket.on('subscribe chat', (user) => {
   messages.scrollTop = messages.scrollHeight;
 });
 
-socket.on('msg', (msg) => {
+socket.on('status-msg', (msg) => {
   document.getElementsByClassName('error').innerHTML = msg;
 });
 
@@ -180,10 +180,10 @@ socket.on('user update', (user_money) => {
 });
 
 socket.on('game update', (min_bet, game_pot) => {
-  document.getElementsByClassName(
+  document.getElementById(
     'min_bet',
-  )[0].innerHTML = `Min Bet: ${min_bet.toString()}`;
-  document.getElementsByClassName(
+  ).innerHTML = `Min Bet: ${min_bet.toString()}`;
+  document.getElementById(
     'game_pot',
-  )[0].innerHTML = `Game Pot: ${game_pot.toString()}`;
+  ).innerHTML = `Game Pot: ${game_pot.toString()}`;
 });

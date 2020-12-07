@@ -8,8 +8,8 @@ include('../../partials/navbar.ejs') -%>
     <p>UserID: <%= user.id%></p>
     <br />
     <p>GameID: <%= game.id%></p>
-    <p class="game_pot">Game Pot: <%= game.game_pot%></p>
-    <p class="min_bet">MinBet: <%= game.min_bet%></p>
+    <p id="game_pot">Game Pot: <%= game.game_pot%></p>
+    <p id="min_bet">MinBet: <%= game.min_bet%></p>
     <p>Action on player: <%= game.curr_game_player_id%></p>
     <p>Game Round: <%= game.game_round%></p>
     <br />
