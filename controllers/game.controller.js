@@ -251,14 +251,6 @@ const actionHandler = async (req) => {
         console.log(parseInt(action_amount));
         const i_user_money = parseInt(Object.values(user_money));
         const i_min_bid = parseInt(Object.values(min_bid));
-        if (i_min_bid > 0) {
-          console.log('you can only raise or call if a bet has been made');
-          io.to(userSocket).emit(
-            'msg',
-            'you can only raise or call if a bet has been made',
-          );
-          break;
-        }
         if (i_user_money >= i_action_amount && i_action_amount >= i_min_bid) {
           const new_value = i_user_money - i_action_amount;
           console.log('new value =>', new_value);
@@ -275,10 +267,10 @@ const actionHandler = async (req) => {
           );
         } else if (i_action_amount < i_min_bid) {
           console.log('Bid not big enough');
-          io.to(userSocket).emit('not enough money');
+          io.to(userSocket).emit('msg', 'Bid not big enough');
         } else {
           console.log('User does not have enough money');
-          io.to(userSocket).emit('not enough money');
+          io.to(userSocket).emit('msg', 'not enough money');
         }
       }
       break;
@@ -305,7 +297,7 @@ const actionHandler = async (req) => {
           io.to(game_id).emit('game update', i_min_bid, i_game_pot + i_min_bid);
         } else {
           console.log('User does not have enough money');
-          io.to(userSocket).emit('not enough money');
+          io.to(userSocket).emit('msg', 'not enough money');
         }
       }
       break;
@@ -347,7 +339,7 @@ const actionHandler = async (req) => {
           io.to(userSocket).emit('msg', 'Thats not a raise, just call instead');
         } else {
           console.log('User does not have enough money');
-          io.to(userSocket).emit('not enough money');
+          io.to(userSocket).emit('msg', 'not enough money');
         }
       }
       break;
