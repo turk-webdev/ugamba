@@ -118,12 +118,9 @@ const addClick = () => {
 };
 
 const addButtons = () => {
-  console.log(document.getElementById('min_bet').innerHTML);
   const min_bet = parseInt(
     document.getElementById('min_bet').innerHTML.slice(8),
   );
-  console.log(min_bet);
-  console.log(min_bet === 0);
   const pClassArr = ['control'];
   const bClassArr = ['action-button', 'button', 'm-0'];
   const firstPNode = document.createElement('P');
@@ -178,10 +175,6 @@ socket.on('leave game', () => {
   console.log('hello world');
   window.location.href = `/`;
 });
-socket.on('testing', () => {
-  alert('testing');
-  console.log('hello');
-});
 
 const loadIntoGameRoom = () => {
   console.log('gameId => ', gameId);
@@ -229,27 +222,19 @@ socket.on('status-msg', (msg) => {
 });
 
 socket.on('user update', (user) => {
-  console.log(
-    'FrontEnd Money Before: ',
-    document.getElementById(user.id).childNodes[1].innerHTML,
-  );
   document.getElementById(
     user.id,
   ).childNodes[1].innerHTML = `Money: ${user.money.toString()}`;
-  console.log(
-    'FrontEnd Money After: ',
-    document.getElementById(user.id).childNodes[1].innerHTML,
-  );
   document.getElementById('error').innerHTML = '';
 });
 
-socket.on('game update', (min_bet, game_pot) => {
+socket.on('game update', (game) => {
   document.getElementById(
     'min_bet',
-  ).innerHTML = `Min Bet: ${min_bet.toString()}`;
+  ).innerHTML = `Min Bet: ${game.min_bet.toString()}`;
   document.getElementById(
     'game_pot',
-  ).innerHTML = `Game Pot: ${game_pot.toString()}`;
+  ).innerHTML = `Game Pot: ${game.game_pot.toString()}`;
   removeButtons();
   addButtons();
 });

@@ -20,7 +20,7 @@ require('dotenv').config();
 const db = require('./db');
 
 // Initialize session table
-const dropSessionOnStart = false;
+const dropSessionOnStart = process.env.NODE_ENV !== 'dev';
 if (dropSessionOnStart) {
   const fullPath = path.join(__dirname, './sql/initSession.sql'); // generating full path;
   db.any(new QueryFile(fullPath, { minify: true })).then(() => {
