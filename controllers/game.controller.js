@@ -359,13 +359,16 @@ const actionHandler = async (req) => {
         await Game.updateGamePot(game_id, 0);
         await Game.updateMinBet(game_id, 0);
         await User.updateMoneyById(user.id, 1000);
-        // const user_money = await User.getMoneyById(user.id);
+        const user_money = await User.getMoneyById(user.id);
         const min_bid = await Game.getMinBet(game_id);
-        // const i_user_money = parseInt(Object.values(user_money));
+        const i_user_money = parseInt(Object.values(user_money));
         const i_min_bid = parseInt(Object.values(min_bid));
         const gamePot = await Game.getGamePot(game_id);
         const i_game_pot = parseInt(Object.values(gamePot));
-        io.to(userSocket).emit('user update', user);
+        io.to(userSocket).emit('user update', {
+          id: user.id,
+          money: i_user_money,
+        });
         io.to(game_id).emit('game update', i_min_bid, i_game_pot);
       }
       break;
