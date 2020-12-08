@@ -69,6 +69,12 @@ const addButtons = () => {
 };
 window.onload = addButtons();
 
+const removeButtons = () => {
+  const buttons = document.getElementById('user-action-buttons');
+  buttons.removeChild(buttons.lastElementChild);
+  buttons.removeChild(buttons.lastElementChild);
+};
+
 const chatMenuItem = document.getElementsByClassName('chat-menu-item');
 if (chatMenuItem) {
   Array.from(chatMenuItem).forEach((button) => {
@@ -241,4 +247,6 @@ socket.on('game update', (min_bet, game_pot) => {
   document.getElementById(
     'game_pot',
   ).innerHTML = `Game Pot: ${game_pot.toString()}`;
+  removeButtons();
+  addButtons();
 });
