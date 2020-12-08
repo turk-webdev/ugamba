@@ -259,7 +259,10 @@ const actionHandler = async (req) => {
           const i_game_pot = parseInt(Object.values(gamePot));
           await Game.updateGamePot(game_id, i_game_pot + i_action_amount);
           await Game.updateMinBet(game_id, i_action_amount);
-          io.to(userSocket).emit('user update', user);
+          io.to(userSocket).emit('user update', {
+            id: user.id,
+            money: new_value,
+          });
           io.to(game_id).emit(
             'game update',
             i_action_amount,
@@ -325,7 +328,10 @@ const actionHandler = async (req) => {
             i_game_pot + i_action_amount + i_min_bid,
           );
           await Game.updateMinBet(game_id, i_action_amount + i_min_bid);
-          io.to(userSocket).emit('user update', user);
+          io.to(userSocket).emit('user update', {
+            id: user.id,
+            money: new_value,
+          });
           io.to(game_id).emit(
             'game update',
             i_action_amount + i_min_bid,
