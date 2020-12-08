@@ -25,56 +25,6 @@ const messageTypes = [
   'has-text-danger',
 ];
 
-const addButtons = () => {
-  console.log(document.getElementById('min_bet').innerHTML);
-  const min_bet = parseInt(
-    document.getElementById('min_bet').innerHTML.slice(8),
-  );
-  console.log(min_bet);
-  console.log(min_bet === 0);
-  const pClassArr = ['control'];
-  const bClassArr = ['action-button', 'button', 'm-0'];
-  const firstPNode = document.createElement('P');
-  const secondPNode = document.createElement('P');
-  const firstButtonNode = document.createElement('button');
-  const secondButtonNode = document.createElement('button');
-  firstPNode.classList.add(...pClassArr);
-  firstButtonNode.classList.add(...bClassArr);
-  secondPNode.classList.add(...pClassArr);
-  secondButtonNode.classList.add(...bClassArr);
-
-  if (min_bet === 0) {
-    const betText = document.createTextNode('Bet');
-    const checkText = document.createTextNode('Check');
-    firstButtonNode.appendChild(betText);
-    firstButtonNode.setAttribute('name', 'bet');
-    secondButtonNode.appendChild(checkText);
-    secondButtonNode.setAttribute('name', 'check');
-    firstPNode.appendChild(firstButtonNode);
-    secondPNode.appendChild(secondButtonNode);
-    document.getElementById('user-action-buttons').appendChild(firstPNode);
-    document.getElementById('user-action-buttons').appendChild(secondPNode);
-  } else {
-    const callText = document.createTextNode('Call');
-    const raiseText = document.createTextNode('Raise');
-    firstButtonNode.appendChild(callText);
-    firstButtonNode.setAttribute('name', 'call');
-    secondButtonNode.appendChild(raiseText);
-    secondButtonNode.setAttribute('name', 'raise');
-    firstPNode.appendChild(firstButtonNode);
-    secondPNode.appendChild(secondButtonNode);
-    document.getElementById('user-action-buttons').appendChild(firstPNode);
-    document.getElementById('user-action-buttons').appendChild(secondPNode);
-  }
-};
-window.onload = addButtons();
-
-const removeButtons = () => {
-  const buttons = document.getElementById('user-action-buttons');
-  buttons.removeChild(buttons.lastElementChild);
-  buttons.removeChild(buttons.lastElementChild);
-};
-
 const chatMenuItem = document.getElementsByClassName('chat-menu-item');
 if (chatMenuItem) {
   Array.from(chatMenuItem).forEach((button) => {
@@ -150,20 +100,73 @@ const makeGameActionRequest = async (gameAction = '', body = {}) => {
   });
 };
 
-Array.from(actionButtons).forEach((button) => {
-  const gameAction = button.getAttribute('name');
-  button.addEventListener('click', () => {
-    if (
-      gameAction === PlayerActions.BET ||
-      gameAction === PlayerActions.RAISE
-    ) {
-      const actionAmount = document.getElementById('action-amount').value;
-      makeGameActionRequest(gameAction, { amount: actionAmount });
-    } else {
-      makeGameActionRequest(gameAction);
-    }
+const addClick = () => {
+  Array.from(actionButtons).forEach((button) => {
+    const gameAction = button.getAttribute('name');
+    button.addEventListener('click', () => {
+      if (
+        gameAction === PlayerActions.BET ||
+        gameAction === PlayerActions.RAISE
+      ) {
+        const actionAmount = document.getElementById('action-amount').value;
+        makeGameActionRequest(gameAction, { amount: actionAmount });
+      } else {
+        makeGameActionRequest(gameAction);
+      }
+    });
   });
-});
+};
+
+const addButtons = () => {
+  console.log(document.getElementById('min_bet').innerHTML);
+  const min_bet = parseInt(
+    document.getElementById('min_bet').innerHTML.slice(8),
+  );
+  console.log(min_bet);
+  console.log(min_bet === 0);
+  const pClassArr = ['control'];
+  const bClassArr = ['action-button', 'button', 'm-0'];
+  const firstPNode = document.createElement('P');
+  const secondPNode = document.createElement('P');
+  const firstButtonNode = document.createElement('button');
+  const secondButtonNode = document.createElement('button');
+  firstPNode.classList.add(...pClassArr);
+  firstButtonNode.classList.add(...bClassArr);
+  secondPNode.classList.add(...pClassArr);
+  secondButtonNode.classList.add(...bClassArr);
+
+  if (min_bet === 0) {
+    const betText = document.createTextNode('Bet');
+    const checkText = document.createTextNode('Check');
+    firstButtonNode.appendChild(betText);
+    firstButtonNode.setAttribute('name', 'bet');
+    secondButtonNode.appendChild(checkText);
+    secondButtonNode.setAttribute('name', 'check');
+    firstPNode.appendChild(firstButtonNode);
+    secondPNode.appendChild(secondButtonNode);
+    document.getElementById('user-action-buttons').appendChild(firstPNode);
+    document.getElementById('user-action-buttons').appendChild(secondPNode);
+  } else {
+    const callText = document.createTextNode('Call');
+    const raiseText = document.createTextNode('Raise');
+    firstButtonNode.appendChild(callText);
+    firstButtonNode.setAttribute('name', 'call');
+    secondButtonNode.appendChild(raiseText);
+    secondButtonNode.setAttribute('name', 'raise');
+    firstPNode.appendChild(firstButtonNode);
+    secondPNode.appendChild(secondButtonNode);
+    document.getElementById('user-action-buttons').appendChild(firstPNode);
+    document.getElementById('user-action-buttons').appendChild(secondPNode);
+  }
+  addClick();
+};
+window.onload = addButtons();
+
+const removeButtons = () => {
+  const buttons = document.getElementById('user-action-buttons');
+  buttons.removeChild(buttons.lastElementChild);
+  buttons.removeChild(buttons.lastElementChild);
+};
 
 /*
  * **************************************************************

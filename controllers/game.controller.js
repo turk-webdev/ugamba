@@ -293,7 +293,10 @@ const actionHandler = async (req) => {
           const gamePot = await Game.getGamePot(game_id);
           const i_game_pot = parseInt(Object.values(gamePot));
           await Game.updateGamePot(game_id, i_game_pot + i_min_bid);
-          io.to(userSocket).emit('user update', user);
+          io.to(userSocket).emit('user update', {
+            id: user.id,
+            money: new_value,
+          });
           io.to(game_id).emit('game update', i_min_bid, i_game_pot + i_min_bid);
         } else {
           console.log('User does not have enough money');
