@@ -177,7 +177,7 @@ socket.on('status-msg', (msg) => {
 socket.on('user update', (user) => {
   document.getElementById(
     user.id,
-  ).childNodes[1].innerText = `Money: ${user.money.toString()}`; // get the user element, and then update the player money value, which should be the second child element
+  ).children[1].innerHTML = `Money: ${user.money.toString()}`; // get the user element, and then update the player money value, which should be the second child element
   document.getElementById('error').innerHTML = '';
 });
 
