@@ -30,8 +30,10 @@ include('../../partials/navbar.ejs') -%>
     <!-- <div class="game-card jack spade"></div> -->
     <!-- </div> -->
     <%players.forEach((player)=>{%>
-    <p><%= player.username%></p>  
-    <p class="player_money">Money: <%= player.money%></p>
+      <div id=<%=player.id%>
+        <p><%= player.username%></p>  
+        <p>Money: <%= player.money%></p>
+      </div>
     <% if(player.id === user.id){%>
     <div class="columns m-0 p-0">
       <div class="field column p-0 m-0 is-2">
@@ -44,7 +46,7 @@ include('../../partials/navbar.ejs') -%>
         </div>
       </div>
     </div>
-    <div class="field has-addons">
+    <div id="user-action-buttons" class="field has-addons">
       <p class="control">
         <button name="bet" class="action-button button m-0">Bet</button>
       </p>
@@ -68,7 +70,7 @@ include('../../partials/navbar.ejs') -%>
       <p class="control">
         <button name="leave" class="action-button button m-0">Leave Game</button>
       </p>
-      <p class="error"></p>
+      <p id="error"></p>
     </div>
     <%}})%>
   </div>

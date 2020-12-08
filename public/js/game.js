@@ -171,12 +171,14 @@ socket.on('subscribe chat', (user) => {
 });
 
 socket.on('status-msg', (msg) => {
-  document.getElementsByClassName('error').innerHTML = msg;
+  document.getElementById('error').innerHTML = msg;
 });
 
-socket.on('user update', (user_money) => {
-  document.getElementsByClassName('player_money')[0].innerHTML = user_money;
-  document.getElementsByClassName('error')[0].innerHTML = '';
+socket.on('user update', (user) => {
+  document.getElementById(
+    user.id,
+  ).childNodes[1].innerText = `Money: ${user.money.toString()}`; // get the user element, and then update the player money value, which should be the second child element
+  document.getElementById('error').innerHTML = '';
 });
 
 socket.on('game update', (min_bet, game_pot) => {
