@@ -8,8 +8,8 @@ include('../../partials/navbar.ejs') -%>
     <p>UserID: <%= user.id%></p>
     <br />
     <p>GameID: <%= game.id%></p>
-    <p>Game Pot: <%= game.game_pot%></p>
-    <p>MinBet: <%= game.min_bet%></p>
+    <p id="game_pot">Game Pot: <%= game.game_pot%></p>
+    <p id="min_bet">MinBet: <%= game.min_bet%></p>
     <p>Action on player: <%= game.curr_game_player_id%></p>
     <p>Game Round: <%= game.game_round%></p>
     <br />
@@ -30,35 +30,35 @@ include('../../partials/navbar.ejs') -%>
     <!-- <div class="game-card jack spade"></div> -->
     <!-- </div> -->
     <%players.forEach((player)=>{%>
-    <p><%= player.username%></p>  
-    <p>Money: <%= player.money%></p>
+      <div id=<%=player.id%>>
+        <p>Money: <%= player.money%></p>
+        <p><%= player.username%></p>  
+      </div>
     <% if(player.id === user.id){%>
     <div class="columns m-0 p-0">
       <div class="field column p-0 m-0 is-2">
         <div class="control has-icons-left has-icons-right">
           <input id="action-amount" class="input is-small " type="number" type="number" min="1"
-          step="any" value=<%=parseInt(player.money)/2%>>
+          step="any" value=<%= game.min_bet%>>
           <span class="icon is-left">
             <i class="fas fa-dollar-sign"></i>
           </span>
         </div>
       </div>
     </div>
-    <div class="field has-addons">
-      <p class="control">
-        <button name="call" class="action-button button m-0">Call</button>
-      </p>
-      <p class="control">
-        <button name="bet" class="action-button button m-0">Bet</button>
-      </p>
+    <div id="user-action-buttons" class="field has-addons">
       <p class="control">
         <button name="fold" class="action-button button m-0">Fold</button>
+      </p>
+      <p class="control">
+        <button name="reset" class="action-button button m-0">Reset</button>
       </p>
     </div>
     <div class="field has-addons">
       <p class="control">
         <button name="leave" class="action-button button m-0">Leave Game</button>
       </p>
+      <p id="error"></p>
     </div>
     <%}})%>
   </div>

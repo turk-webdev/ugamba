@@ -2,7 +2,6 @@
 const socket = io();
 const actionButtons = document.getElementsByClassName('action-button');
 const messages = document.getElementById('messages');
-const actionAmount = document.getElementById('action-amount').value;
 const gameId = document.getElementById('game').getAttribute('data-it');
 const chatText = document.getElementById('chat-input');
 const chatSubmit = document.getElementById('chat-submit');
@@ -15,6 +14,7 @@ const PlayerActions = {
   RAISE: 'raise',
   FOLD: 'fold',
   LEAVE: 'leave',
+  RESET: 'reset',
 };
 const messageTypes = [
   'has-text-primary',
@@ -89,6 +89,7 @@ if (chatInput) {
     }
   });
 }
+
 const makeGameActionRequest = async (gameAction = '', body = {}) => {
   await fetch(`${gameId}/${gameAction}`, {
     method: 'POST',
@@ -99,18 +100,70 @@ const makeGameActionRequest = async (gameAction = '', body = {}) => {
   });
 };
 
-Array.from(actionButtons).forEach((button) => {
-  const gameAction = button.getAttribute('name');
-  button.addEventListener('click', () => {
-    if (
-      gameAction === PlayerActions.BET ||
-      gameAction === PlayerActions.RAISE
-    ) {
-      makeGameActionRequest(gameAction, { amount: actionAmount });
-    }
-    makeGameActionRequest(gameAction);
+const addClick = () => {
+  Array.from(actionButtons).forEach((button) => {
+    const gameAction = button.getAttribute('name');
+    button.addEventListener('click', () => {
+      if (
+        gameAction === PlayerActions.BET ||
+        gameAction === PlayerActions.RAISE
+      ) {
+        const actionAmount = document.getElementById('action-amount').value;
+        makeGameActionRequest(gameAction, { amount: actionAmount });
+      } else {
+        makeGameActionRequest(gameAction);
+      }
+    });
   });
-});
+};
+
+const addButtons = () => {
+  const min_bet = parseInt(
+    document.getElementById('min_bet').innerHTML.slice(8),
+  );
+  const pClassArr = ['control'];
+  const bClassArr = ['action-button', 'button', 'm-0'];
+  const firstPNode = document.createElement('P');
+  const secondPNode = document.createElement('P');
+  const firstButtonNode = document.createElement('button');
+  const secondButtonNode = document.createElement('button');
+  firstPNode.classList.add(...pClassArr);
+  firstButtonNode.classList.add(...bClassArr);
+  secondPNode.classList.add(...pClassArr);
+  secondButtonNode.classList.add(...bClassArr);
+
+  if (min_bet === 0) {
+    const betText = document.createTextNode('Bet');
+    const checkText = document.createTextNode('Check');
+    firstButtonNode.appendChild(betText);
+    firstButtonNode.setAttribute('name', 'bet');
+    secondButtonNode.appendChild(checkText);
+    secondButtonNode.setAttribute('name', 'check');
+    firstPNode.appendChild(firstButtonNode);
+    secondPNode.appendChild(secondButtonNode);
+    document.getElementById('user-action-buttons').appendChild(firstPNode);
+    document.getElementById('user-action-buttons').appendChild(secondPNode);
+  } else {
+    const callText = document.createTextNode('Call');
+    const raiseText = document.createTextNode('Raise');
+    firstButtonNode.appendChild(callText);
+    firstButtonNode.setAttribute('name', 'call');
+    secondButtonNode.appendChild(raiseText);
+    secondButtonNode.setAttribute('name', 'raise');
+    firstPNode.appendChild(firstButtonNode);
+    secondPNode.appendChild(secondButtonNode);
+    document.getElementById('user-action-buttons').appendChild(firstPNode);
+    document.getElementById('user-action-buttons').appendChild(secondPNode);
+  }
+  addClick();
+};
+window.onload = addButtons();
+
+const removeButtons = () => {
+  const buttons = document.getElementById('user-action-buttons');
+  buttons.removeChild(buttons.lastElementChild);
+  buttons.removeChild(buttons.lastElementChild);
+};
 
 /*
  * **************************************************************
@@ -121,10 +174,6 @@ socket.on('leave game', () => {
   socket.emit('unsubscribe chat', gameId);
   console.log('hello world');
   window.location.href = `/`;
-});
-socket.on('testing', () => {
-  alert('testing');
-  console.log('hello');
 });
 
 const loadIntoGameRoom = () => {
@@ -166,4 +215,26 @@ socket.on('subscribe chat', (user) => {
   div.append(li);
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
+});
+
+socket.on('status-msg', (msg) => {
+  document.getElementById('error').innerHTML = msg;
+});
+
+socket.on('user update', (user) => {
+  document.getElementById(
+    user.id,
+  ).childNodes[1].innerHTML = `Money: ${user.money.toString()}`;
+  document.getElementById('error').innerHTML = '';
+});
+
+socket.on('game update', (game) => {
+  document.getElementById(
+    'min_bet',
+  ).innerHTML = `Min Bet: ${game.min_bet.toString()}`;
+  document.getElementById(
+    'game_pot',
+  ).innerHTML = `Game Pot: ${game.game_pot.toString()}`;
+  removeButtons();
+  addButtons();
 });
