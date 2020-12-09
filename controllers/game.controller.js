@@ -234,7 +234,11 @@ const actionHandler = async (req) => {
   if (curr_game_player_id !== user.id) {
     // its not that users turn
     console.log('its not that users turn');
-    io.to(userSocket).emit('status-msg', 'Its not your turn!');
+    io.to(userSocket).emit('status-msg', {
+      type: 'error',
+      msg: 'Its not your turn!',
+    });
+    return;
   }
   // eslint-disable-next-line
   switch (game_action) {
@@ -242,7 +246,10 @@ const actionHandler = async (req) => {
       // literally nothing happens, signify in user game window by greying
       // out actions for that 'turn'?
       console.log('check called');
-      io.to(userSocket).emit('status-msg', 'Checked.');
+      io.to(userSocket).emit('status-msg', {
+        type: 'success',
+        msg: 'Checked!',
+      });
       break;
     case PlayerActions.BET:
       {
@@ -269,7 +276,10 @@ const actionHandler = async (req) => {
             game_pot: i_game_pot + i_action_amount,
           });
         } else {
-          io.to(userSocket).emit('status-msg', 'not enough money');
+          io.to(userSocket).emit('status-msg', {
+            type: 'error',
+            msg: 'You dont have enough money!',
+          });
           return;
         }
       }
@@ -298,7 +308,10 @@ const actionHandler = async (req) => {
             game_pot: i_game_pot + i_min_bid,
           });
         } else {
-          io.to(userSocket).emit('status-msg', 'not enough money');
+          io.to(userSocket).emit('status-msg', {
+            type: 'error',
+            msg: 'You dont have enough money!',
+          });
           return;
         }
       }
@@ -334,19 +347,25 @@ const actionHandler = async (req) => {
             game_pot: i_game_pot + i_action_amount + i_min_bid,
           });
         } else if (i_action_amount === 0) {
-          io.to(userSocket).emit(
-            'status-msg',
-            'Thats not a raise, just call instead',
-          );
+          io.to(userSocket).emit('status-msg', {
+            type: 'error',
+            msg: 'Thats not a raise, use Call instead!',
+          });
           return;
         } else {
-          io.to(userSocket).emit('status-msg', 'not enough money');
+          io.to(userSocket).emit('status-msg', {
+            type: 'error',
+            msg: 'You dont have enough money!',
+          });
           return;
         }
       }
       break;
     case PlayerActions.FOLD:
-      io.to(userSocket).emit('status-msg', 'Folded');
+      io.to(userSocket).emit('status-msg', {
+        type: 'success',
+        msg: 'Folded!',
+      });
       break;
     case PlayerActions.RESET:
       {
@@ -367,10 +386,18 @@ const actionHandler = async (req) => {
           min_bet: i_min_bid,
           game_pot: i_game_pot,
         });
+        io.to(userSocket).emit('status-msg', {
+          type: 'success',
+          msg: 'Reset!',
+        });
       }
       break;
     case PlayerActions.LEAVE:
       await GamePlayer.removePlayer(user.id, game_id);
+      io.to(userSocket).emit('status-msg', {
+        type: 'success',
+        msg: 'Leaving...',
+      });
       io.to(userSocket).emit('leave game');
       return;
   }
