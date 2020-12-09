@@ -1,55 +1,63 @@
 /* eslint-disable*/
 
 // This file will help build the initial object used by winChecker.js
+require('lodash.combinations');
+let _ = require('lodash');
+
 const Deck = require('./deck');
 const GamePlayer = require('./game_player');
 
-const getAllPlayersInGame = (gameId) => {
-    let gamePlayers = [];
+const getAllPlayersPossibleHands = (gameId) => {
+    let deckId;
+    let gamePlayerIds = [];
+    let dealerId;
+    let dealerHand = [];
+    let playerHands = {};
+
+    // First we want to populate the player & dealer id's
     GamePlayer.getAllPlayersInGame(gameId)
     .then(data => {
-        for (const gamePlayer in data) {
-            gamePlayers.push(parseInt(data[gamePlayer].id));
+        for (const player in data) {
+            gamePlayerIds.push(data[player].id);
+        }
+
+        return GamePlayer.getGameDealer(gameId);
+    })
+    .then(data => {
+        dealerId = data[0].id;
+        // Now we need the deck id
+        return Deck.getDeckByGameId(gameId);
+    })
+    .then(data => {
+        deckId = data.id_deck;
+        // Populate the static dealer hand array
+        return Deck.getAllOwnedCardsOfPlayer(deckId, dealerId);
+    })
+    .then(data => {
+        for (const card in data) {
+            dealerHand.push(data[card].id_card);
+        }
+    })
+    .then(() => {
+        for (let i=0; i<gamePlayerIds.length; i++) {
+            Deck.getAllOwnedCardsOfPlayer(deckId, gamePlayerIds[i])
+            .then(data => {
+                let playerHand = [];
+                for (const card in data) {
+                    playerHand.push(data[card].id_card);
+                }
+
+                playerHands[gamePlayerIds[i]] = { hands: [] };
+                
+                let combinations = _.combinations(dealerHand.concat(playerHand), 5);
+                playerHands[gamePlayerIds[i]].hands.push(combinations);
+
+                console.log(playerHands);
+            })
+            .catch(err => console.log(err));
         }
     })
     .catch(err => console.log(err));
-    
-    return gamePlayers;
-};
-
-const getGameDealer = (gameId) => {
-    let dealer;
-
-    GamePlayer.getGameDealer(gameId)
-    .then(data => {
-        dealer = data[0].id;
-    })
-    .catch(err => console.log(err));
-
-    return dealer;
-};
-
-const getDeckId = (gameId) => {
-    let deckId;
-
-    Deck.getDeckByGameId(gameId)
-    .then(data => {
-        deckId = parseInt(data.id);
-    })
-    .catch(err => console.log(err));
-
-    return deckId;
-}
-
-// Constructs the JSON object that is needed by winChecker.getWinningPlayer()
-const getAllPlayersPossibleHands = (gameId) => {
-    let deckId = getDeckId(gameId);
-    let gamePlayers = getAllPlayersInGame(gameId);
-    let dealer = getGameDealer(gameId);
-    let playerHands = {};
-    let dealerCards = [];
-
-    
 };
 
 module.exports = {
