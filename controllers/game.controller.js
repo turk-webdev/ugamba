@@ -381,6 +381,8 @@ const actionHandler = async (req) => {
    *
    */
   console.log('after switch');
+
+  // GAME TURN CODE
   const old_curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
   console.log('OLD CURR GAME PLAYER ID => ', old_curr_game_player_id);
   const nonFoldedPlayers = await GamePlayer.findAllNonFoldedPlayers(game_id);

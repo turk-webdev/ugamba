@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-undef
 const socket = io();
 const actionButtons = document.getElementsByClassName('action-button');
+const dynamicButtons = document.getElementsByClassName('dynamic');
 const messages = document.getElementById('messages');
 const gameId = document.getElementById('game').getAttribute('data-it');
 const chatText = document.getElementById('chat-input');
@@ -100,8 +101,8 @@ const makeGameActionRequest = async (gameAction = '', body = {}) => {
   });
 };
 
-const addClick = () => {
-  Array.from(actionButtons).forEach((button) => {
+const addClick = (buttonList) => {
+  Array.from(buttonList).forEach((button) => {
     const gameAction = button.getAttribute('name');
     button.addEventListener('click', () => {
       if (
@@ -117,7 +118,7 @@ const addClick = () => {
   });
 };
 
-const addButtons = () => {
+const addButtons = (buttonList) => {
   const min_bet = parseInt(
     document.getElementById('min_bet').innerHTML.slice(8),
   );
@@ -155,9 +156,9 @@ const addButtons = () => {
     document.getElementById('user-action-buttons').appendChild(firstPNode);
     document.getElementById('user-action-buttons').appendChild(secondPNode);
   }
-  addClick();
+  addClick(buttonList);
 };
-window.onload = addButtons();
+window.onload = addButtons(actionButtons);
 
 const removeButtons = () => {
   const buttons = document.getElementById('user-action-buttons');
@@ -236,5 +237,5 @@ socket.on('game update', (game) => {
     'game_pot',
   ).innerHTML = `Game Pot: ${game.game_pot.toString()}`;
   removeButtons();
-  addButtons();
+  addButtons(dynamicButtons);
 });
