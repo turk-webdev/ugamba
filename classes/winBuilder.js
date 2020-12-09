@@ -39,6 +39,8 @@ const getAllPlayersPossibleHands = (gameId) => {
         }
     })
     .then(() => {
+        // This is where I'm having trouble... building the JSON object
+        // that matches the format of the expected one in winChecker.getWinningPlayer() 
         for (let i=0; i<gamePlayerIds.length; i++) {
             Deck.getAllOwnedCardsOfPlayer(deckId, gamePlayerIds[i])
             .then(data => {
