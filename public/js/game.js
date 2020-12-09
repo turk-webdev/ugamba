@@ -160,6 +160,19 @@ const addButtons = (buttonList) => {
 };
 window.onload = addButtons(actionButtons);
 
+const turnOnHighlight = () => {
+  const divClassArr = [
+    'notification',
+    'is-warning',
+    'column',
+    'is-one-fifth',
+    'is-light',
+  ];
+  const curr_turn = document.getElementById('curr_turn').innerHTML.slice(18);
+  document.getElementById(curr_turn).classList.add(...divClassArr);
+};
+window.onload = turnOnHighlight();
+
 const removeButtons = () => {
   const buttons = document.getElementById('user-action-buttons');
   buttons.removeChild(buttons.lastElementChild);
@@ -262,7 +275,8 @@ socket.on('turn-notification-on', (id) => {
     'notification',
     'is-warning',
     'column',
-    'is-one-quarter',
+    'is-one-fifth',
+    'is-light',
   ];
   document.getElementById(id).classList.add(...divClassArr);
 });
@@ -272,7 +286,8 @@ socket.on('turn-notification-off', (id) => {
     'notification',
     'is-warning',
     'column',
-    'is-one-quarter',
+    'is-one-fifth',
+    'is-light',
   ];
   document.getElementById(id).classList.remove(...divClassArr);
 });

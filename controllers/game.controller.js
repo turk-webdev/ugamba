@@ -246,7 +246,6 @@ const actionHandler = async (req) => {
       type: 'error',
       msg: 'Its not your turn!',
     });
-    return;
   }
   // eslint-disable-next-line
   switch (game_action) {
