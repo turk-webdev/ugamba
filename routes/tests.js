@@ -18,7 +18,7 @@ router.get('/', (_, response) => {
 
 // Before posting here, you must create a game
 // Manually populate players into the game
-router.post('/init-game', (req,res) => {
+router.get('/winBuilder', (req,res) => {
   // Adjust these based on your test game
   const MY_PORT = 3000;
   const GAME_ID = 0;
