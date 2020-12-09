@@ -230,6 +230,15 @@ const actionHandler = async (req) => {
    */
 
   console.log('game_action => ', game_action);
+  if (game_action === PlayerActions.LEAVE) {
+    await GamePlayer.removePlayer(user.id, game_id);
+    io.to(userSocket).emit('status-msg', {
+      type: 'success',
+      msg: 'Leaving...',
+    });
+    io.to(userSocket).emit('leave game');
+    return;
+  }
   const curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
   if (curr_game_player_id !== user.id) {
     // its not that users turn
@@ -392,14 +401,6 @@ const actionHandler = async (req) => {
         });
       }
       break;
-    case PlayerActions.LEAVE:
-      await GamePlayer.removePlayer(user.id, game_id);
-      io.to(userSocket).emit('status-msg', {
-        type: 'success',
-        msg: 'Leaving...',
-      });
-      io.to(userSocket).emit('leave game');
-      return;
   }
   // list of game actions
   /*
