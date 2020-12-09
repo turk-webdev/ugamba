@@ -237,6 +237,7 @@ const actionHandler = async (req) => {
       msg: 'Leaving...',
     });
     io.to(userSocket).emit('leave game');
+    return;
   }
   const curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
   if (curr_game_player_id !== user.id) {
@@ -246,6 +247,7 @@ const actionHandler = async (req) => {
       type: 'error',
       msg: 'Its not your turn!',
     });
+    return;
   }
   // eslint-disable-next-line
   switch (game_action) {
