@@ -4,13 +4,13 @@ include('../../partials/navbar.ejs') -%>
 
 <div class="columns">
   <div class="column" id="users-list-container">
-    <% if(game.game_round === 1){%>
-      YOUR CARDS
-      <div class="game-card ace spade"></div>
-      <div class="game-card king club"></div>
-      <%player_cards.forEach((card, index)=>{%>
+    <% if(game.game_round === 2){%>
+      TABLE CARDS
+      <!-- <div class="game-card ace spade"></div>
+      <div class="game-card king club"></div> -->
+      <!-- <%table_cards.forEach((card, index)=>{%>
         <div>CARD<%= index+1%> ID is: <%= card.id_card%></div>
-      <%})%>
+      <%})%> -->
     <% } %>
     <p>Username: <%= user.username%></p>
     <p>UserID: <%= user.id%></p>
@@ -27,6 +27,7 @@ include('../../partials/navbar.ejs') -%>
   <div
     id="game"
     data-it="<%=game.id%>"
+    gameround="<%=game.game_round%>"
     class="column is-flex is-flex-direction-column is-two-thirds"
   >
     <!-- Body of game goes here -->
@@ -38,12 +39,14 @@ include('../../partials/navbar.ejs') -%>
     <!-- <div class="game-card jack spade"></div> -->
     <!-- </div> -->
     <%players.forEach((player)=>{%>
-      <div id=<%=player.id%>>
-        <p>Money: <%= player.money%></p>
-        <p><%= player.username%></p>  
-      </div>
     <% if(player.id === user.id){%>
     <div id="<%= player.id%>">
+      <p>Money: <%= player.money%></p>
+      <p><%= player.username%></p>  
+      <% if(game.game_round === 1){%>  
+        <div class="game-card <%= translatedCard1.value%> <%= translatedCard1.suit%>"></div>
+        <div class="game-card <%= translatedCard2.value%> <%= translatedCard2.suit%>"></div>
+      <% } %>
     </div>
     <div class="columns m-0 p-0">
       <div class="field column p-0 m-0 is-2">

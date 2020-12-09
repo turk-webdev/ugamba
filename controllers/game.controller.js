@@ -46,6 +46,7 @@ const addCard = (gameId, gpid) => {
 
 const createOrJoin = async (req, res) => {
   const io = req.app.get('io');
+  // const socket = io();
   /* 
     - we fetch all available games with < max num of players.
     - If there is a game with < max num of players: join the game
@@ -105,22 +106,14 @@ const createOrJoin = async (req, res) => {
           gamePlayer.save().then((gp) => {
             addCard(existingGame.id, gp.id);
             addCard(existingGame.id, gp.id);
-            // eslint-disable-next-line max-len
-            // Deck.getAllOwnedCardsOfPlayer(existingGame.id_deck, gp.id).then(
-            //   (results) => {
-            //     console.log('---- PLAYER CARDS: ', results);
-            //   },
-            // );
           });
-          // io.to(existingGame.id).emit('testing', {
-          //   message: 'Add 2 Cards',
-          // });
+
           if (
             parseInt(numOfPlayersInGame.count) ===
             MAX_NUM_PLAYER_IN_GAME - 1
           ) {
             console.log('---- YOU ARE THE LAST PLAYER TO JOIN THE GAME');
-            console.log('---- GAME_ROUND UPDATING');
+            console.log('---- GAME_ROUND UPDATING AND SENDING SOCKET MESSAGE');
             Game.updateGameRound(existingGame.id, 1);
           }
 

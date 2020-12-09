@@ -45,6 +45,12 @@ class Game {
     return db.oneOrNone(`SELECT * FROM game AS U WHERE U.id = $1`, [id]);
   }
 
+  static findDeckByGameId(game_id) {
+    return db.any(`SELECT game.id_deck FROM game WHERE game.id = $1`, [
+      game_id,
+    ]);
+  }
+
   static updateGame(
     id,
     id_deck,
