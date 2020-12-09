@@ -166,6 +166,13 @@ const removeButtons = () => {
   buttons.removeChild(buttons.lastElementChild);
 };
 
+const removeNotification = () => {
+  document
+    .getElementById('error-field')
+    .classList.remove('is-success', 'is-danger', 'column', 'is-one-quarter');
+  document.getElementById('error').innerHTML = '';
+};
+
 /*
  * **************************************************************
  *                          Sockets
@@ -219,7 +226,17 @@ socket.on('subscribe chat', (user) => {
 });
 
 socket.on('status-msg', (msg) => {
-  document.getElementById('error').innerHTML = msg;
+  let divClassArr = [];
+  console.log(msg.type);
+  if (msg.type === 'success') {
+    divClassArr = ['notification', 'is-success', 'column', 'is-one-quarter'];
+  } else {
+    divClassArr = ['notification', 'is-danger', 'column', 'is-one-quarter'];
+  }
+  const target = document.getElementById('error-field');
+  target.classList.add(...divClassArr);
+  document.getElementById('error').innerHTML = msg.msg;
+  setTimeout(removeNotification, 3000);
 });
 
 socket.on('user update', (user) => {
