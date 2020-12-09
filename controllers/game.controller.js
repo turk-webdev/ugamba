@@ -4,7 +4,8 @@ const GamePlayer = require('../classes/game_player');
 const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
 
-const MAX_NUM_PLAYER_IN_GAME = 4;
+const MAX_NUM_PLAYER_IN_GAME = 2;
+const MAX_CARD_ID = 52;
 
 const findAll = async (_, res) => {
   Game.findAll()
@@ -16,6 +17,33 @@ const findAll = async (_, res) => {
     });
 };
 
+const addCard = (gameId, gpid) => {
+  Deck.getDeckByGameId(parseInt(gameId))
+    .then((data) => {
+      return parseInt(data.id_deck);
+    })
+    .then((deckId) => {
+      return Deck.getAllUnownedCardsInDeck(deckId);
+    })
+    .then((data) => {
+      const randIndex = Math.floor(Math.random() * data.length); // Generates random int 0 to data.length-1
+      return data[randIndex]; // Picks a random card from the dealable cards
+    })
+    .then((card) => {
+      const cardId = parseInt(card.id);
+      return Deck.assignDeckCardToPlayerHand(cardId, parseInt(gpid));
+    })
+    .then((result) => {
+      // return res.sendStatus(200);
+      return result;
+    })
+    .catch((error) => {
+      // TODO: Do some real error handling/checking
+      console.log(`Error adding card to deck: ${error}`);
+      // res.sendStatus(500);
+    });
+};
+
 const createOrJoin = async (req, res) => {
   const io = req.app.get('io');
   /* 
@@ -23,7 +51,7 @@ const createOrJoin = async (req, res) => {
     - If there is a game with < max num of players: join the game
     - else: create a game and wait until a new player joins to start the game.
     */
-  console.log('CREATEORJOINREQUEST: ', req.user);
+  console.log('---- CREATE OR JOIN USER INFO: ', req.user);
   const { id } = req.user;
   let gameIdToJoin;
   let allGamesFull = true;
@@ -31,16 +59,22 @@ const createOrJoin = async (req, res) => {
 
   GamePlayer.findAllGamesNotParticipating(id).then(async (games) => {
     if (games.length === 0) {
-      console.log('No games yet, make a deck, game and gameplayer');
+      console.log('---- NO GAMES');
       allGamesFull = false;
       try {
         Deck.createNewDeck().then((deck) => {
+          for (let i = 1; i <= MAX_CARD_ID; i++) {
+            Deck.createDeckCard(i, deck.id);
+          }
           newGame = new Game(undefined, deck.id, 0);
           newGame
             .save()
             .then((game) => {
               const gamePlayer = new GamePlayer(undefined, game.id, id);
-              gamePlayer.save();
+              gamePlayer.save().then((gp) => {
+                addCard(game.id, gp.id);
+                addCard(game.id, gp.id);
+              });
               // eslint-disable-next-line func-names
               setTimeout(function () {
                 io.to(req.session.passport.user.socket).emit('join game', {
@@ -58,32 +92,65 @@ const createOrJoin = async (req, res) => {
         res.send({ message: 'there was an error creating a game' });
       }
     } else {
-      console.log('There are games, just make a game_player and join the game');
+      console.log('---- SEARCHING fOR FIRST AVAILABLE GAME');
       for (const existingGame of games) {
         // eslint-disable-next-line
         const numOfPlayersInGame = await GamePlayer.getNumPlayersInGame(
           existingGame.id,
         );
         if (parseInt(numOfPlayersInGame.count) < MAX_NUM_PLAYER_IN_GAME) {
-          console.log('NUM PLAYERS IS LESS THAN MAX, ADDING PLAYER TO GAME');
+          console.log('---- ADDING PLAYER TO GAME');
           gameIdToJoin = existingGame.id;
           const gamePlayer = new GamePlayer(undefined, gameIdToJoin, id);
-          gamePlayer.save();
+          gamePlayer.save().then((gp) => {
+            addCard(existingGame.id, gp.id);
+            addCard(existingGame.id, gp.id);
+            // eslint-disable-next-line max-len
+            // Deck.getAllOwnedCardsOfPlayer(existingGame.id_deck, gp.id).then(
+            //   (results) => {
+            //     console.log('---- PLAYER CARDS: ', results);
+            //   },
+            // );
+          });
+          // io.to(existingGame.id).emit('testing', {
+          //   message: 'Add 2 Cards',
+          // });
+          if (
+            parseInt(numOfPlayersInGame.count) ===
+            MAX_NUM_PLAYER_IN_GAME - 1
+          ) {
+            console.log('---- YOU ARE THE LAST PLAYER TO JOIN THE GAME');
+            console.log('---- GAME_ROUND UPDATING');
+            Game.updateGameRound(existingGame.id, 1);
+          }
+
+          console.log('---- REDIRECTING TO GAME');
+          // eslint-disable-next-line func-names
+          setTimeout(function () {
+            io.to(req.session.passport.user.socket).emit('join game', {
+              game_id: existingGame.id,
+            });
+          }, 3000);
           allGamesFull = false;
           break;
         }
       }
       if (allGamesFull === true) {
-        console.log('ALL GAMES ARE FULL MAKE A NEW ONE');
-        allGamesFull = false;
+        console.log('---- ALL GAMES ARE FULL MAKE A NEW ONE');
         try {
           Deck.createNewDeck().then((deck) => {
+            for (let i = 1; i <= MAX_CARD_ID; i++) {
+              Deck.createDeckCard(i, deck.id);
+            }
             newGame = new Game(undefined, deck.id, 0);
             newGame
               .save()
               .then((game) => {
                 const gamePlayer = new GamePlayer(undefined, game.id, id);
-                gamePlayer.save();
+                gamePlayer.save().then((gp) => {
+                  addCard(game.id, gp.id);
+                  addCard(game.id, gp.id);
+                });
                 // eslint-disable-next-line func-names
                 setTimeout(function () {
                   io.to(req.session.passport.user.socket).emit('join game', {
@@ -102,14 +169,6 @@ const createOrJoin = async (req, res) => {
         } catch (e) {
           res.send({ message: 'there was an error creating a game' });
         }
-      } else {
-        console.log('REDIRECTING TO GAME');
-        // eslint-disable-next-line func-names
-        setTimeout(function () {
-          io.to(req.session.passport.user.socket).emit('join game', {
-            game_id: gameIdToJoin,
-          });
-        }, 3000);
       }
     }
   });

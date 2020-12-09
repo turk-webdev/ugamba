@@ -4,23 +4,50 @@ const router = express.Router();
 const Game = require('../../controllers/game.controller.js');
 const GameClass = require('../../classes/game.js');
 const GamePlayer = require('../../classes/game_player');
-// new routes with controllers
+const DeckClass = require('../../classes/deck');
 
-/* These are boilerplates for how we should handle game */
+const MAX_NUM_PLAYER_IN_GAME = 2;
 
 router.get('/:game_id', async (req, res) => {
-  // get game
-  // console.log('-----REQPARAMS: ', req.params);
   const { game_id } = req.params;
-  const io = req.app.get('io');
+  console.log(`----- ENTERING GAME ${game_id}!`);
+  console.log('----- USER INFO: ', req.user);
   const game = await GameClass.findById(game_id);
+  console.log('---- CURRENT GAME INFO: ', game);
+  const { game_round } = game;
   const games = await GamePlayer.findAllGamesByUserId(req.user.id);
   const players = await GamePlayer.findAllPlayersByGameId(game_id);
+  const current_game_player = await GamePlayer.getByUserIdAndGameId(
+    req.user.id,
+    game_id,
+  );
+  console.log('---- GAME PLAYER: ', current_game_player);
+  let player_cards = [];
+
+  // Page refresh logic.
+  if (parseInt(game_round) === 1) {
+    console.log('---- GAME ROUND: 1');
+    player_cards = await DeckClass.getAllOwnedCardsOfPlayer2(
+      game.id_deck,
+      current_game_player.id,
+    );
+    console.log('---- PLAYER CARDS: ', player_cards);
+    console.log('PLAYERS IN GAME: ', players);
+  } else {
+    console.log('---- GAME ROUND: ', game_round);
+  }
+
+  if (players.length === MAX_NUM_PLAYER_IN_GAME) {
+    console.log('~~~~ THERE ARE MAX PLAYERS IN THE GAME');
+  }
+
+  const io = req.app.get('io');
 
   io.to(req.session.passport.user.socket).emit('join game room', {
     game_id: game.id,
   });
-  res.render('authenticated/game', { game, games, players });
+
+  res.render('authenticated/game', { game, games, players, player_cards });
 });
 
 router.delete('/leave/:game_id', Game.leaveGame);
@@ -28,15 +55,6 @@ router.delete('/leave/:game_id', Game.leaveGame);
 router.post('/join', Game.createOrJoin);
 router.put('/fold/:game_id', Game.playerFold);
 router.put('/next/:game_id', Game.changeRound);
-// eslint-disable-next-line no-unused-vars
-
 router.post('/:game_id/:game_action', Game.actionHandler);
-// router.delete('/leave', Game.removePlayer);
-
-// router.post('/', Game.create);
-// router.get('/', Game.findAll);
-// router.get('/:id', Game.findById);
-// router.put('/:id', Game.update);
-// router.delete('/:id', Game.deleteGame);
 
 module.exports = router;

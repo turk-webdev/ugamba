@@ -4,6 +4,14 @@ include('../../partials/navbar.ejs') -%>
 
 <div class="columns">
   <div class="column" id="users-list-container">
+    <% if(game.game_round === 1){%>
+      YOUR CARDS
+      <div class="game-card ace spade"></div>
+      <div class="game-card king club"></div>
+      <%player_cards.forEach((card, index)=>{%>
+        <div>CARD<%= index+1%> ID is: <%= card.id_card%></div>
+      <%})%>
+    <% } %>
     <p>Username: <%= user.username%></p>
     <p>UserID: <%= user.id%></p>
     <br />
@@ -35,6 +43,8 @@ include('../../partials/navbar.ejs') -%>
         <p><%= player.username%></p>  
       </div>
     <% if(player.id === user.id){%>
+    <div id="<%= player.id%>">
+    </div>
     <div class="columns m-0 p-0">
       <div class="field column p-0 m-0 is-2">
         <div class="control has-icons-left has-icons-right">
