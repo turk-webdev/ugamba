@@ -83,6 +83,19 @@ class Game_player {
       game_id,
     ]);
   }
+
+  // Returns all non-dealers in game
+  static getAllPlayersInGame(game_id) {
+    return db.any(`SELECT * FROM game_player WHERE id_game=$1 AND id_user>0;`, [
+      game_id,
+    ]);
+  }
+
+  static getGameDealer(game_id) {
+    return db.any(`SELECT * FROM game_player WHERE id_game=$1 AND id_user=0;`, [
+      game_id,
+    ]);
+  }
 }
 
 module.exports = Game_player;
