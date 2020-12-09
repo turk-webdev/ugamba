@@ -3,20 +3,21 @@ const Deck = require('../classes/deck');
 const MAX_CARD_ID = 52;
 
 const initDeckForGame = (req, res) => {
+  console.log('here');
   // First, create a new deck entry
   Deck.createNewDeck()
     .then((deckId) => {
       // Using deckId, create 52 new cards for that deck
       // eslint-disable-next-line no-plusplus
       for (let i = 1; i <= MAX_CARD_ID; i++) {
-        Deck.createDeckCard(i, deckId);
+        Deck.createDeckCard(i, deckId.id);
       }
 
       return deckId;
     })
     .then((deckId) => {
       // Then, modify the given gameId in body with the new deck
-      return Deck.assignDeckToGame(deckId, parseInt(req.params.gameId));
+      return Deck.assignDeckToGame(deckId.id, parseInt(req.params.gameId));
     })
     .then(() => {
       return res.sendStatus(200);
