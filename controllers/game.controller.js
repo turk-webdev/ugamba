@@ -230,6 +230,12 @@ const actionHandler = async (req) => {
    */
 
   console.log('game_action => ', game_action);
+  const curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
+  if (curr_game_player_id !== user.id) {
+    // its not that users turn
+    console.log('its not that users turn');
+    io.to(userSocket).emit('status-msg', 'Its not your turn!');
+  }
   // eslint-disable-next-line
   switch (game_action) {
     case PlayerActions.CHECK:
@@ -264,6 +270,7 @@ const actionHandler = async (req) => {
           });
         } else {
           io.to(userSocket).emit('status-msg', 'not enough money');
+          return;
         }
       }
       break;
@@ -292,6 +299,7 @@ const actionHandler = async (req) => {
           });
         } else {
           io.to(userSocket).emit('status-msg', 'not enough money');
+          return;
         }
       }
       break;
@@ -330,8 +338,10 @@ const actionHandler = async (req) => {
             'status-msg',
             'Thats not a raise, just call instead',
           );
+          return;
         } else {
           io.to(userSocket).emit('status-msg', 'not enough money');
+          return;
         }
       }
       break;
@@ -370,7 +380,23 @@ const actionHandler = async (req) => {
    * check for minimum bet at all, set ui accordingly
    *
    */
-  console.log('hello world');
+  console.log('after switch');
+  const old_curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
+  console.log('OLD CURR GAME PLAYER ID => ', old_curr_game_player_id);
+  const nonFoldedPlayers = await GamePlayer.findAllNonFoldedPlayers(game_id);
+  const isCurrPlayer = (element) =>
+    element.id_user === old_curr_game_player_id.curr_game_player_id;
+  const currPlayerIndex = nonFoldedPlayers.findIndex(isCurrPlayer);
+  if (currPlayerIndex + 1 === nonFoldedPlayers.length) {
+    await Game.setCurrGamePlayerId(game_id, nonFoldedPlayers[0].id_user);
+  } else {
+    await Game.setCurrGamePlayerId(
+      game_id,
+      nonFoldedPlayers[currPlayerIndex + 1].id_user,
+    );
+  }
+  const new_curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
+  console.log('NEW CURR GAME PLAYER ID => ', new_curr_game_player_id);
   /*
    * after handling the player actions, here is where we send events
    * back to the entire table,

@@ -70,6 +70,19 @@ class Game_player {
       id_game,
     ]);
   }
+
+  static findAllNonFoldedPlayers(game_id) {
+    return db.any(
+      `SELECT id_user FROM game_player WHERE id_game=$1 AND player_folded=0;`,
+      [game_id],
+    );
+  }
+
+  static testFindAllPlayers(game_id) {
+    return db.any(`SELECT id_user FROM game_player WHERE id_game=$1;`, [
+      game_id,
+    ]);
+  }
 }
 
 module.exports = Game_player;
