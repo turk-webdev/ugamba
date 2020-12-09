@@ -5,6 +5,7 @@ const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
 
 const MAX_NUM_PLAYER_IN_GAME = 2;
+const MIN_NUM_BEFORE_GAME_START = MAX_NUM_PLAYER_IN_GAME - 1;
 const MAX_CARD_ID = 52;
 
 const findAll = async (_, res) => {
@@ -14,33 +15,6 @@ const findAll = async (_, res) => {
     })
     .catch((err) => {
       return res.send({ error: err.message });
-    });
-};
-
-const addCard = (gameId, gpid) => {
-  Deck.getDeckByGameId(parseInt(gameId))
-    .then((data) => {
-      return parseInt(data.id_deck);
-    })
-    .then((deckId) => {
-      return Deck.getAllUnownedCardsInDeck(deckId);
-    })
-    .then((data) => {
-      const randIndex = Math.floor(Math.random() * data.length); // Generates random int 0 to data.length-1
-      return data[randIndex]; // Picks a random card from the dealable cards
-    })
-    .then((card) => {
-      const cardId = parseInt(card.id);
-      return Deck.assignDeckCardToPlayerHand(cardId, parseInt(gpid));
-    })
-    .then((result) => {
-      // return res.sendStatus(200);
-      return result;
-    })
-    .catch((error) => {
-      // TODO: Do some real error handling/checking
-      console.log(`Error adding card to deck: ${error}`);
-      // res.sendStatus(500);
     });
 };
 
@@ -72,10 +46,7 @@ const createOrJoin = async (req, res) => {
             .save()
             .then((game) => {
               const gamePlayer = new GamePlayer(undefined, game.id, id);
-              gamePlayer.save().then((gp) => {
-                addCard(game.id, gp.id);
-                addCard(game.id, gp.id);
-              });
+              gamePlayer.save();
               // eslint-disable-next-line func-names
               setTimeout(function () {
                 io.to(req.session.passport.user.socket).emit('join game', {
@@ -103,18 +74,18 @@ const createOrJoin = async (req, res) => {
           console.log('---- ADDING PLAYER TO GAME');
           gameIdToJoin = existingGame.id;
           const gamePlayer = new GamePlayer(undefined, gameIdToJoin, id);
-          gamePlayer.save().then((gp) => {
-            addCard(existingGame.id, gp.id);
-            addCard(existingGame.id, gp.id);
-          });
+          gamePlayer.save();
+          // .then((gp) => {
+          //   addCard(existingGame.id, gp.id);
+          //   addCard(existingGame.id, gp.id);
+          // });
 
           if (
-            parseInt(numOfPlayersInGame.count) ===
-            MAX_NUM_PLAYER_IN_GAME - 1
+            parseInt(numOfPlayersInGame.count) === MIN_NUM_BEFORE_GAME_START
           ) {
             console.log('---- YOU ARE THE LAST PLAYER TO JOIN THE GAME');
-            console.log('---- GAME_ROUND UPDATING AND SENDING SOCKET MESSAGE');
-            Game.updateGameRound(existingGame.id, 1);
+            console.log('---- GAME_ROUND UPDATING AND STARTING GAME');
+            // Game.updateGameRound(existingGame.id, 1);
           }
 
           console.log('---- REDIRECTING TO GAME');
@@ -140,10 +111,7 @@ const createOrJoin = async (req, res) => {
               .save()
               .then((game) => {
                 const gamePlayer = new GamePlayer(undefined, game.id, id);
-                gamePlayer.save().then((gp) => {
-                  addCard(game.id, gp.id);
-                  addCard(game.id, gp.id);
-                });
+                gamePlayer.save();
                 // eslint-disable-next-line func-names
                 setTimeout(function () {
                   io.to(req.session.passport.user.socket).emit('join game', {

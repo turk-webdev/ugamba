@@ -57,7 +57,7 @@ const assignDeckCardToPlayerHand = (cardId, playerHandId) => {
   );
 };
 
-const getAllOwnedCardsOfPlayer2 = (deckId, playerHandId) => {
+const getAllDeckCardsByDeckIdAndGamePlayerId = (deckId, playerHandId) => {
   return db.many(
     'SELECT deck_card.id, deck_card.id_card, deck_card.id_game_player_hand, deck_card.id_deck FROM deck_card' +
       ' WHERE deck_card.id_deck = $1 AND deck_card.id_game_player_hand = $2',
@@ -94,6 +94,6 @@ module.exports = {
   getAllOwnedCardsInDeck,
   assignDeckCardToPlayerHand,
   getAllOwnedCardsOfPlayer,
-  getAllOwnedCardsOfPlayer2,
+  getAllDeckCardsByDeckIdAndGamePlayerId,
   unassignAllCardsInDeck,
 };
