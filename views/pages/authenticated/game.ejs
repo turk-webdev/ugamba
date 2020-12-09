@@ -18,7 +18,7 @@ include('../../partials/navbar.ejs') -%>
     <p>GameID: <%= game.id%></p>
     <p id="game_pot">Game Pot: <%= game.game_pot%></p>
     <p id="min_bet">MinBet: <%= game.min_bet%></p>
-    <p>Action on player: <%= game.curr_game_player_id%></p>
+    <p id="curr_turn">Action on player: <%= game.curr_game_player_id%></p>
     <p>Game Round: <%= game.game_round%></p>
     <br />
     <p>IDDeck: <%= game.id_deck%></p>
@@ -71,6 +71,8 @@ include('../../partials/navbar.ejs') -%>
       <p class="control">
         <button name="leave" class="action-button button m-0">Leave Game</button>
       </p>
+    </div>
+    <div id="error-field">
       <p id="error"></p>
     </div>
     <%}})%>
