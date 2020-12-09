@@ -38,14 +38,14 @@ const getAllUnownedCardsInDeck = (deckId) => {
   // eslint-disable-next-line no-console
   console.log(`deckId=${deckId}`);
   return db.many(
-    'SELECT * FROM deck_card WHERE id_deck = $1 AND id_game_player_hand IS NULL',
+    'SELECT * FROM deck_card WHERE id_deck = $1 AND game_player_id IS NULL',
     [deckId],
   );
 };
 
 const getAllOwnedCardsInDeck = (deckId) => {
   return db.many(
-    'SELECT * FROM deck_card WHERE id_deck = $1 AND id_game_player_hand IS NOT NULL',
+    'SELECT * FROM deck_card WHERE id_deck = $1 AND game_player_id IS NOT NULL',
     [deckId],
   );
 };
@@ -54,7 +54,7 @@ const getAllOwnedCardsInDeck = (deckId) => {
 // playerHandId should be 0
 const assignDeckCardToPlayerHand = (cardId, playerHandId) => {
   return db.none(
-    'UPDATE deck_card SET id_game_player_hand = $1 WHERE id = $2',
+    'UPDATE deck_card SET game_player_id = $1 WHERE id = $2',
     [playerHandId, cardId],
   );
 };
@@ -63,17 +63,17 @@ const assignDeckCardToPlayerHand = (cardId, playerHandId) => {
 // playerHandId should be 0
 const getAllOwnedCardsOfPlayer = (deckId, playerHandId) => {
   return db.many(
-    'SELECT card.id, card.suit, card.suit_display, card.value, card.value_display FROM card' +
+    'SELECT * FROM card' +
       ' INNER JOIN deck_card' +
       ' ON card.id = deck_card.id_card' +
-      ' WHERE deck_card.id_deck = $1 AND deck_card.id_game_player_hand = $2',
+      ' WHERE deck_card.id_deck = $1 AND deck_card.game_player_id = $2',
     [deckId, playerHandId],
   );
 };
 
 const unassignAllCardsInDeck = (deckId) => {
   return db.none(
-    'UPDATE deck_card SET id_game_player_hand = NULL WHERE id_deck = $1',
+    'UPDATE deck_card SET game_player_id = NULL WHERE id_deck = $1',
     [deckId],
   );
 };
