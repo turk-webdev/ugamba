@@ -426,6 +426,14 @@ const actionHandler = async (req) => {
   }
   const new_curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
   console.log('NEW CURR GAME PLAYER ID => ', new_curr_game_player_id);
+  io.to(game_id).emit(
+    'turn-notification-off',
+    curr_game_player_id.curr_game_player_id,
+  );
+  io.to(game_id).emit(
+    'turn-notification-on',
+    new_curr_game_player_id.curr_game_player_id,
+  );
   /*
    * after handling the player actions, here is where we send events
    * back to the entire table,
