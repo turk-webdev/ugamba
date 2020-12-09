@@ -24,7 +24,7 @@ const initDeckForGame = (req, res) => {
     .catch((error) => {
       // TODO: Do some real error handling/checking
       console.log(error);
-      return res.sendStatus(500);
+      res.sendStatus(500);
     });
 };
 

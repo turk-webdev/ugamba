@@ -50,6 +50,8 @@ const getAllOwnedCardsInDeck = (deckId) => {
   );
 };
 
+// If the card is being dealt to the table,
+// playerHandId should be 0
 const assignDeckCardToPlayerHand = (cardId, playerHandId) => {
   return db.none(
     'UPDATE deck_card SET id_game_player_hand = $1 WHERE id = $2',
@@ -57,6 +59,8 @@ const assignDeckCardToPlayerHand = (cardId, playerHandId) => {
   );
 };
 
+// If we want to get the cards on the table,
+// playerHandId should be 0
 const getAllOwnedCardsOfPlayer = (deckId, playerHandId) => {
   return db.many(
     'SELECT card.id, card.suit, card.suit_display, card.value, card.value_display FROM card' +
