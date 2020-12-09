@@ -256,3 +256,23 @@ socket.on('game update', (game) => {
   removeButtons();
   addButtons(dynamicButtons);
 });
+
+socket.on('turn-notification-on', (id) => {
+  const divClassArr = [
+    'notification',
+    'is-warning',
+    'column',
+    'is-one-quarter',
+  ];
+  document.getElementById(id).classList.add(...divClassArr);
+});
+
+socket.on('turn-notification-off', (id) => {
+  const divClassArr = [
+    'notification',
+    'is-warning',
+    'column',
+    'is-one-quarter',
+  ];
+  document.getElementById(id).classList.remove(...divClassArr);
+});
