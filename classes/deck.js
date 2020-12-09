@@ -35,8 +35,6 @@ const getAllCardsInDeck = (deckId) => {
 };
 
 const getAllUnownedCardsInDeck = (deckId) => {
-  // eslint-disable-next-line no-console
-  console.log(`deckId=${deckId}`);
   return db.many(
     'SELECT * FROM deck_card WHERE id_deck = $1 AND game_player_id IS NULL',
     [deckId],
