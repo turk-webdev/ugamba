@@ -383,12 +383,11 @@ const actionHandler = async (req) => {
   console.log('after switch');
 
   // GAME TURN CODE
-  const old_curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
-  console.log('OLD CURR GAME PLAYER ID => ', old_curr_game_player_id);
+  console.log('OLD CURR GAME PLAYER ID => ', curr_game_player_id);
   const nonFoldedPlayers = await GamePlayer.findAllNonFoldedPlayers(game_id);
-  const isCurrPlayer = (element) =>
-    element.id_user === old_curr_game_player_id.curr_game_player_id;
-  const currPlayerIndex = nonFoldedPlayers.findIndex(isCurrPlayer);
+  const currPlayerIndex = nonFoldedPlayers.findIndex(
+    (element) => element.id_user === curr_game_player_id.curr_game_player_id,
+  );
   if (currPlayerIndex + 1 === nonFoldedPlayers.length) {
     await Game.setCurrGamePlayerId(game_id, nonFoldedPlayers[0].id_user);
   } else {
