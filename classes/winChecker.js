@@ -148,6 +148,9 @@ const findWinner = (bestWinningHands) => {
         : highestRankKey;
   }
 
+  // Adding the id as a field to the response being sent back
+  // eslint-disable-next-line dot-notation
+  bestWinningHands[highestRankKey]['id'] = highestRankKey;
   return bestWinningHands[highestRankKey];
 };
 
