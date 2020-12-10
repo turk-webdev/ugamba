@@ -391,6 +391,7 @@ const actionHandler = async (req) => {
         type: 'success',
         msg: 'Folded!',
       });
+      await GamePlayer.setPlayertoFold(user.id, game_id);
       await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
       break;
     case PlayerActions.RESET:
@@ -462,6 +463,12 @@ const actionHandler = async (req) => {
    * winner of round, gather all cards, distrubute cards etc.
    * these should all be throguh sockets
    */
+
+  // Game Round Checks Here
+  // if 1 bet/raise and rest folds - that one person won the game?
+  // if 1 bet/raise and rest 
+  const player_actions = await GamePlayer.getPlayerLastActions(game_id);
+  console.log(player_actions);
   // return res.send('hello world');
 };
 
