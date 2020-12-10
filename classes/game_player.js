@@ -91,6 +91,18 @@ class Game_player {
     ]);
   }
 
+  // Returns all non-dealers in game
+  static getAllPlayersInGame(game_id) {
+    return db.any(`SELECT * FROM game_player WHERE id_game=$1 AND id_user>0;`, [
+      game_id,
+    ]);
+  }
+
+  static getGameDealer(game_id) {
+    return db.one(`SELECT * FROM game_player WHERE id_game=$1 AND id_user=0;`, [
+      game_id,
+    ]);
+    
   static updatePlayerLastAction(id_game, id_user, user_action) {
     return db.none(
       `UPDATE game_player SET player_last_action = $1 WHERE id_user = $2 AND id_game = $3;`,
