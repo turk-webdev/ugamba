@@ -7,59 +7,37 @@ let _ = require('lodash');
 const Deck = require('./deck');
 const GamePlayer = require('./game_player');
 
-const getAllPlayersPossibleHands = (gameId) => {
-    let deckId;
-    let gamePlayerIds = [];
-    let dealerId;
-    let dealerHand = [];
-    let playerHands = {};
+const getAllPlayersPossibleHands = async (gameId) => {
+    let deckId = await Deck.getDeckByGameId(gameId);
+    let playersInGame = await GamePlayer.getAllPlayersInGame(gameId);
+    let dealer = await GamePlayer.getGameDealer(gameId);
+    let dealerHand = await Deck.getAllOwnedCardsOfPlayer(deckId.id_deck, dealer.id);
+    let resultObj = {};
 
-    // First we want to populate the player & dealer id's
-    GamePlayer.getAllPlayersInGame(gameId)
-    .then(data => {
-        for (const player in data) {
-            gamePlayerIds.push(data[player].id);
+    for (const index in playersInGame) {
+        let playerCards = await Deck.getAllOwnedCardsOfPlayer(deckId.id_deck, playersInGame[index].id)
+        let comboObject = {};
+
+        let playerHand = [];
+        for (const playerCardIndex in playerCards) {
+            playerHand.push(playerCards[playerCardIndex].id_card);
         }
 
-        return GamePlayer.getGameDealer(gameId);
-    })
-    .then(data => {
-        dealerId = data[0].id;
-        // Now we need the deck id
-        return Deck.getDeckByGameId(gameId);
-    })
-    .then(data => {
-        deckId = data.id_deck;
-        // Populate the static dealer hand array
-        return Deck.getAllOwnedCardsOfPlayer(deckId, dealerId);
-    })
-    .then(data => {
-        for (const card in data) {
-            dealerHand.push(data[card].id_card);
+        let dealerHandArr = [];
+        for (const dealerCardIndex in dealerHand) {
+            dealerHandArr.push(dealerHand[dealerCardIndex].id_card);
         }
-    })
-    .then(() => {
-        // This is where I'm having trouble... building the JSON object
-        // that matches the format of the expected one in winChecker.getWinningPlayer() 
-        for (let i=0; i<gamePlayerIds.length; i++) {
-            Deck.getAllOwnedCardsOfPlayer(deckId, gamePlayerIds[i])
-            .then(data => {
-                let playerHand = [];
-                for (const card in data) {
-                    playerHand.push(data[card].id_card);
-                }
-
-                playerHands[gamePlayerIds[i]] = { hands: [] };
-                
-                let combinations = _.combinations(dealerHand.concat(playerHand), 5);
-                playerHands[gamePlayerIds[i]].hands.push(combinations);
-
-                console.log(playerHands);
-            })
-            .catch(err => console.log(err));
+        
+        let combinations = _.combinations(dealerHandArr.concat(playerHand), 5);
+        for (const comboIndex in combinations) {
+            comboObject[comboIndex] = combinations[comboIndex];
         }
-    })
-    .catch(err => console.log(err));
+        
+        let handObject = { hands: comboObject };
+        resultObj[playersInGame[index].id] = handObject;
+    }
+
+    return resultObj;
 };
 
 module.exports = {
