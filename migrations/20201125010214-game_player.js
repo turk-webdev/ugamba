@@ -22,6 +22,10 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
+      player_last_action: {
+        type: Sequelize.STRING,
+        allowNULL: true,
+      },
     });
   },
   // eslint-disable-next-line no-unused-vars

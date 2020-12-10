@@ -71,17 +71,24 @@ class Game_player {
     ]);
   }
 
-  static findAllNonFoldedPlayers(game_id) {
+  static findAllNonFoldedPlayers(id_game) {
     return db.any(
       `SELECT id_user FROM game_player WHERE id_game=$1 AND player_folded=0;`,
-      [game_id],
+      [id_game],
     );
   }
 
-  static testFindAllPlayers(game_id) {
+  static testFindAllPlayers(id_game) {
     return db.any(`SELECT id_user FROM game_player WHERE id_game=$1;`, [
-      game_id,
+      id_game,
     ]);
+  }
+
+  static updatePlayerLastAction(id_game, id_user, user_action) {
+    return db.none(
+      `UPDATE game_player SET player_last_action = $1 WHERE id_user = $2 AND id_game = $3;`,
+      [user_action, id_user, id_game],
+    );
   }
 }
 
