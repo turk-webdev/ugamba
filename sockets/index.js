@@ -1,7 +1,6 @@
 const socketIo = require('socket.io');
 const _ = require('lodash');
 
-// const GamePlayer = require('../classes/game_player');
 const DeckClass = require('../classes/deck');
 const Game = require('../classes/game');
 
@@ -17,9 +16,6 @@ const init = (server, session) => {
       const user = socket.request.session.passport;
       // join global chat on connection always
       socket.join('chat-0');
-      // eslint-disable-next-line max-len
-      // io.to(`user-${id}`).emit('game init', {cards: Deck.getallcardsforuser, id});
-      // socket.join(`user-${user.user.id}`);
 
       if (user && user.user) {
         user.user.color = _.random(5);
