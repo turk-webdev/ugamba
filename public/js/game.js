@@ -182,8 +182,8 @@ const turnOnHighlight = () => {
     'is-one-fifth',
     'is-light',
   ];
-  const curr_turn = document.getElementById('curr_turn').innerHTML.slice(18);
-  // document.getElementById(curr_turn).classList.add(...divClassArr);
+  document.getElementById('curr_turn').innerHTML.slice(18);
+  document.getElementById('curr_turn').classList.add(...divClassArr);
 };
 window.onload = turnOnHighlight();
 
