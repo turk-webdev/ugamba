@@ -5,6 +5,7 @@ const router = express.Router();
 const db = require('../db');
 
 const WinBuilder = require('../classes/winBuilder');
+const WinChecker = require('../classes/winChecker');
 
 router.get('/', (_, response) => {
   db.any(`INSERT INTO "game" ("num_players") VALUES (${69420})`)
@@ -72,9 +73,11 @@ router.get('/winBuilder', (req,res) => {
         }).then(console.log)
 });
 
-router.post('/win', (req,res) => {
+router.post('/win', async (req,res) => {
   const { game_id } = req.body;
-  WinBuilder.getAllPlayersPossibleHands(game_id);
+  const playerHands = await WinBuilder.getAllPlayersPossibleHands(game_id);
+  const winner = WinChecker.getWinningPlayer(playerHands);
+  console.log(winner);
 });
 
 module.exports = router;
