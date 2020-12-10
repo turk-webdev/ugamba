@@ -1,10 +1,78 @@
 const Game = require('../classes/game');
 const Deck = require('../classes/deck');
 const GamePlayer = require('../classes/game_player');
+const Card = require('../classes/card');
 const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
 
 const MAX_NUM_PLAYER_IN_GAME = 4;
+const MIN_NUM_BEFORE_GAME_START = 2;
+const MAX_CARD_ID = 52;
+
+const joinGame = async (req, res) => {
+  const io = req.app.get('io');
+
+  const { game_id } = req.params;
+  let game = await Game.findById(game_id);
+  const { game_round } = game;
+  const games = await GamePlayer.findAllGamesByUserId(req.user.id);
+  const players = await GamePlayer.findAllPlayersByGameId(game_id);
+  const current_game_player = await GamePlayer.getByUserIdAndGameId(
+    req.user.id,
+    game_id,
+  );
+
+  let player_cards = [];
+
+  if (
+    players.length === MIN_NUM_BEFORE_GAME_START &&
+    parseInt(game_round) === 0 &&
+    player_cards.length === 0
+  ) {
+    players.forEach((player) => {
+      Card.addCard(game_id, player.id);
+      Card.addCard(game_id, player.id);
+    });
+    await Game.updateGameRound(game_id, 1);
+    game = await Game.findById(game_id);
+  }
+  // Placeholder empty div elements that get loaded properly when time is right.
+  let translatedCard1 = {
+    value: 'two',
+    suit: 'spade',
+  };
+  let translatedCard2 = {
+    value: 'two',
+    suit: 'spade',
+  };
+
+  if (
+    players.length === MAX_NUM_PLAYER_IN_GAME &&
+    parseInt(game.game_round) === 1 &&
+    player_cards.length === 0
+  ) {
+    player_cards = await Deck.getAllDeckCardsByDeckIdAndGamePlayerId(
+      game.id_deck,
+      current_game_player.id,
+    );
+    if (player_cards.length === 2) {
+      translatedCard1 = Card.translateCard(player_cards[0].id_card);
+      translatedCard2 = Card.translateCard(player_cards[1].id_card);
+    }
+  }
+
+  const yourCards = { translatedCard1, translatedCard2 };
+  io.to(req.session.passport.user.socket).emit('join game room', {
+    game_id: game.id,
+  });
+
+  res.render('authenticated/game', {
+    game,
+    games,
+    players,
+    yourCards,
+  });
+};
 
 const findAll = async (_, res) => {
   Game.findAll()
@@ -18,12 +86,13 @@ const findAll = async (_, res) => {
 
 const createOrJoin = async (req, res) => {
   const io = req.app.get('io');
+  // const socket = io();
   /* 
     - we fetch all available games with < max num of players.
     - If there is a game with < max num of players: join the game
     - else: create a game and wait until a new player joins to start the game.
     */
-  console.log('CREATEORJOINREQUEST: ', req.user);
+  console.log('---- CREATE OR JOIN USER INFO: ', req.user);
   const { id } = req.user;
   let gameIdToJoin;
   let allGamesFull = true;
@@ -31,10 +100,13 @@ const createOrJoin = async (req, res) => {
 
   GamePlayer.findAllGamesNotParticipating(id).then(async (games) => {
     if (games.length === 0) {
-      console.log('No games yet, make a deck, game and gameplayer');
+      console.log('---- NO GAMES');
       allGamesFull = false;
       try {
         Deck.createNewDeck().then((deck) => {
+          for (let i = 1; i <= MAX_CARD_ID; i++) {
+            Deck.createDeckCard(i, deck.id);
+          }
           newGame = new Game(undefined, deck.id, 0);
           newGame
             .save()
@@ -58,26 +130,35 @@ const createOrJoin = async (req, res) => {
         res.send({ message: 'there was an error creating a game' });
       }
     } else {
-      console.log('There are games, just make a game_player and join the game');
+      console.log('---- SEARCHING fOR FIRST AVAILABLE GAME');
       for (const existingGame of games) {
         // eslint-disable-next-line
         const numOfPlayersInGame = await GamePlayer.getNumPlayersInGame(
           existingGame.id,
         );
         if (parseInt(numOfPlayersInGame.count) < MAX_NUM_PLAYER_IN_GAME) {
-          console.log('NUM PLAYERS IS LESS THAN MAX, ADDING PLAYER TO GAME');
+          console.log('---- ADDING PLAYER TO GAME');
           gameIdToJoin = existingGame.id;
           const gamePlayer = new GamePlayer(undefined, gameIdToJoin, id);
           gamePlayer.save();
+          console.log('---- REDIRECTING TO GAME');
+          // eslint-disable-next-line func-names
+          setTimeout(function () {
+            io.to(req.session.passport.user.socket).emit('join game', {
+              game_id: existingGame.id,
+            });
+          }, 3000);
           allGamesFull = false;
           break;
         }
       }
       if (allGamesFull === true) {
-        console.log('ALL GAMES ARE FULL MAKE A NEW ONE');
-        allGamesFull = false;
+        console.log('---- ALL GAMES ARE FULL MAKE A NEW ONE');
         try {
           Deck.createNewDeck().then((deck) => {
+            for (let i = 1; i <= MAX_CARD_ID; i++) {
+              Deck.createDeckCard(i, deck.id);
+            }
             newGame = new Game(undefined, deck.id, 0);
             newGame
               .save()
@@ -102,14 +183,6 @@ const createOrJoin = async (req, res) => {
         } catch (e) {
           res.send({ message: 'there was an error creating a game' });
         }
-      } else {
-        console.log('REDIRECTING TO GAME');
-        // eslint-disable-next-line func-names
-        setTimeout(function () {
-          io.to(req.session.passport.user.socket).emit('join game', {
-            game_id: gameIdToJoin,
-          });
-        }, 3000);
       }
     }
   });
@@ -467,6 +540,7 @@ const actionHandler = async (req) => {
 
 module.exports = {
   createOrJoin,
+  joinGame,
   findAll,
   findById,
   update,

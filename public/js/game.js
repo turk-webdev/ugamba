@@ -7,6 +7,7 @@ const gameId = document.getElementById('game').getAttribute('data-it');
 const chatText = document.getElementById('chat-input');
 const chatSubmit = document.getElementById('chat-submit');
 const chatInput = document.getElementById('chat-input');
+const gameRound = document.getElementById('game').getAttribute('gameround');
 
 const PlayerActions = {
   CHECK: 'check',
@@ -48,6 +49,19 @@ if (chatMenuItem) {
       socket.emit('subscribe chat', id);
     });
   });
+}
+
+// Check Game Round Conditions
+if (gameRound && parseInt(gameRound) === 0) {
+  console.log('~~~~ Game Round Is 0, Waiting On More Players');
+} else if (gameRound && parseInt(gameRound) === 1) {
+  console.log(`~~~~ game_round: ${gameRound}`);
+  const data = {
+    game_id: gameId,
+  };
+  socket.emit('init game', data);
+} else {
+  console.log('NO GAME STATUS');
 }
 /*
  * **************************************************************
@@ -168,8 +182,8 @@ const turnOnHighlight = () => {
     'is-one-fifth',
     'is-light',
   ];
-  const curr_turn = document.getElementById('curr_turn').innerHTML.slice(18);
-  document.getElementById(curr_turn).classList.add(...divClassArr);
+  document.getElementById('curr_turn').innerHTML.slice(18);
+  document.getElementById('curr_turn').classList.add(...divClassArr);
 };
 window.onload = turnOnHighlight();
 
@@ -177,6 +191,69 @@ const removeButtons = () => {
   const buttons = document.getElementById('user-action-buttons');
   buttons.removeChild(buttons.lastElementChild);
   buttons.removeChild(buttons.lastElementChild);
+};
+
+const translateCard = (id_card) => {
+  let suit;
+  let value;
+  if (parseInt(id_card) > 0 && parseInt(id_card) < 14) {
+    suit = 'club';
+    value = parseInt(id_card) + 1;
+  } else if (parseInt(id_card) > 13 && parseInt(id_card) < 27) {
+    suit = 'diamond';
+    value = parseInt(id_card) + 1 - 14;
+  } else if (parseInt(id_card) > 26 && parseInt(id_card) < 40) {
+    suit = 'heart';
+    value = parseInt(id_card) + 1 - 28;
+  } else if (parseInt(id_card) > 39 && parseInt(id_card) < 53) {
+    suit = 'spade';
+    value = parseInt(id_card) + 1 - 42;
+  }
+
+  switch (value) {
+    case 2:
+      value = 'two';
+      break;
+    case 3:
+      value = 'three';
+      break;
+    case 4:
+      value = 'four';
+      break;
+    case 5:
+      value = 'five';
+      break;
+    case 6:
+      value = 'six';
+      break;
+    case 7:
+      value = 'seven';
+      break;
+    case 8:
+      value = 'eight';
+      break;
+    case 9:
+      value = 'nine';
+      break;
+    case 10:
+      value = 'ten';
+      break;
+    case 11:
+      value = 'jack';
+      break;
+    case 12:
+      value = 'queen';
+      break;
+    case 13:
+      value = 'king';
+      break;
+    case 14:
+      value = 'ace';
+      break;
+    default:
+      break;
+  }
+  return { value, suit };
 };
 
 const removeNotification = () => {
@@ -191,6 +268,25 @@ const removeNotification = () => {
  *                          Sockets
  * **************************************************************
  */
+socket.on('init game', (results) => {
+  console.log('---- SOCKET STARTING THE GAME, RESULTS:', results);
+  results.cards.forEach((card) => {
+    if (document.getElementById(card.id_game_player_hand)) {
+      const translatedCard = translateCard(card.id_card);
+
+      const cardDivClassArr = [
+        'game-card',
+        translatedCard.value,
+        translatedCard.suit,
+      ];
+      const carddiv = document.createElement('div');
+      carddiv.classList.add(...cardDivClassArr);
+
+      document.getElementById(card.id_game_player_hand).appendChild(carddiv);
+    }
+  });
+});
+
 socket.on('leave game', () => {
   socket.emit('unsubscribe chat', gameId);
   console.log('hello world');

@@ -19,6 +19,7 @@ include('../../partials/navbar.ejs') -%>
   <div
     id="game"
     data-it="<%=game.id%>"
+    gameround="<%=game.game_round%>"
     class="column is-flex is-flex-direction-column is-two-thirds"
   >
     <!-- Body of game goes here -->
@@ -30,11 +31,15 @@ include('../../partials/navbar.ejs') -%>
     <!-- <div class="game-card jack spade"></div> -->
     <!-- </div> -->
     <%players.forEach((player)=>{%>
-      <div id=<%=player.id%>>
-        <p>Money: <%= player.money%></p>
-        <p><%= player.username%></p>  
-      </div>
+    <p>Money: <%= player.money%></p>
+    <p><%= player.username%></p>  
     <% if(player.id === user.id){%>
+    <% if(game.game_round === 1){%>  
+      <div class="game-card <%= yourCards.translatedCard1.value%> <%= yourCards.translatedCard1.suit%>"></div>
+      <div class="game-card <%= yourCards.translatedCard2.value%> <%= yourCards.translatedCard2.suit%>"></div>
+    <% } %>
+    <div id="<%= player.id%>">
+    </div>
     <div class="columns m-0 p-0">
       <div class="field column p-0 m-0 is-2">
         <div class="control has-icons-left has-icons-right">

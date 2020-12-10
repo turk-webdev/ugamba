@@ -1,6 +1,9 @@
 const socketIo = require('socket.io');
 const _ = require('lodash');
 
+const DeckClass = require('../classes/deck');
+const Game = require('../classes/game');
+
 let io = {};
 
 const init = (server, session) => {
@@ -13,11 +16,28 @@ const init = (server, session) => {
       const user = socket.request.session.passport;
       // join global chat on connection always
       socket.join('chat-0');
+
       if (user && user.user) {
         user.user.color = _.random(5);
         user.user.socket = socket.id;
         socket.request.session.save();
       }
+
+      socket.on('init game', (data) => {
+        console.log('---- SOCKET_INIT_GAME DATA: ', data);
+        console.log('---- USER INFO: ', user.user.id);
+        Game.findDeckByGameId(data.game_id).then((deck) => {
+          // eslint-disable-next-line max-len
+          DeckClass.getAllOwnedCardsInDeck(deck[0].id_deck).then(
+            (playercards) => {
+              console.log('---- SOCKETS PLAYERCARDS: ', playercards);
+              socket.to(data.game_id).emit('init game', {
+                cards: playercards,
+              });
+            },
+          );
+        });
+      });
 
       socket.on('chat message', (msg) => {
         io.to(msg.room).emit('chat message', {

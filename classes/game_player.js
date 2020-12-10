@@ -9,7 +9,7 @@ class Game_player {
 
   save() {
     return db.oneOrNone(
-      `INSERT INTO game_player (id, id_game, id_user, blind_status, player_folded) VALUES (DEFAULT, $1, $2, $3, $4);`,
+      `INSERT INTO game_player (id, id_game, id_user, blind_status, player_folded) VALUES (DEFAULT, $1, $2, $3, $4) RETURNING id;`,
       [this.id_game, this.id_user, 0, 0],
     );
   }
@@ -18,6 +18,13 @@ class Game_player {
     return db.one(
       `SELECT COUNT(*) FROM game_player AS gp WHERE gp.id_game=$1;`,
       [game_id],
+    );
+  }
+
+  static getByUserIdAndGameId(user_id, game_id) {
+    return db.one(
+      `SELECT * FROM game_player AS gp WHERE gp.id_user=$1 AND gp.id_game=$2;`,
+      [user_id, game_id],
     );
   }
 
