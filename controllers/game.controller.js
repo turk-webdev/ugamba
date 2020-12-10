@@ -56,8 +56,10 @@ const joinGame = async (req, res) => {
       game.id_deck,
       current_game_player.id,
     );
-    translatedCard1 = Card.translateCard(player_cards[0].id_card);
-    translatedCard2 = Card.translateCard(player_cards[1].id_card);
+    if (player_cards.length === 2) {
+      translatedCard1 = Card.translateCard(player_cards[0].id_card);
+      translatedCard2 = Card.translateCard(player_cards[1].id_card);
+    }
   }
 
   const yourCards = { translatedCard1, translatedCard2 };
