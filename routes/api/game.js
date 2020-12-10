@@ -26,14 +26,13 @@ router.get('/:game_id', async (req, res) => {
     game_id,
   );
   console.log('---- CURRENT GAME PLAYER: ', current_game_player);
-  // if (player_cards.length === 2) {
-  //   let translatedCard1;
-  //   let translatedCard2;
+  let player_cards = [];
 
-  // }
-  // let cardsLoaded = false;
-
-  if (players.length === MAX_NUM_PLAYER_IN_GAME && parseInt(game_round) === 0) {
+  if (
+    players.length === MAX_NUM_PLAYER_IN_GAME &&
+    parseInt(game_round) === 0 &&
+    player_cards.length === 0
+  ) {
     console.log('---- GAME ROUND: 0 HAND OUT CARDS AND UPDATE ROUND');
     console.log('---- PLAYERS IN GAME: ', players);
     players.forEach((player) => {
@@ -42,20 +41,9 @@ router.get('/:game_id', async (req, res) => {
       CardClass.addCard(game_id, player.id);
       console.log('--- ADDED CARD TO USER');
     });
-    // cardsLoaded = true;
     await GameClass.updateGameRound(game_id, 1);
-    // .then(() => {
-    //   player_cards = DeckClass.getAllDeckCardsByDeckIdAndGamePlayerId(
-    //     game.id_deck,
-    //     current_game_player.id,
-    //   );
-    //   console.log('---- LAST PLAYERS CARDS: ', player_cards);
-    //   translatedCard1 = CardClass.translateCard(player_cards[0].id_card);
-    //   translatedCard2 = CardClass.translateCard(player_cards[1].id_card);
-    // });
+    game = await GameClass.findById(game_id);
   }
-
-  game = await GameClass.findById(game_id);
 
   let translatedCard1 = {
     value: 'two',
@@ -68,9 +56,13 @@ router.get('/:game_id', async (req, res) => {
 
   if (
     players.length === MAX_NUM_PLAYER_IN_GAME &&
-    parseInt(game.game_round) === 1
+    parseInt(game.game_round) === 1 &&
+    player_cards.length === 0
   ) {
-    const player_cards = await DeckClass.getAllDeckCardsByDeckIdAndGamePlayerId(
+    console.log(
+      `---ABOUT TO FETCH PLAYER CARDS WITH, iddeck  ${game.id_deck}, and gpid ${current_game_player.id}`,
+    );
+    player_cards = await DeckClass.getAllDeckCardsByDeckIdAndGamePlayerId(
       game.id_deck,
       current_game_player.id,
     );
@@ -78,29 +70,6 @@ router.get('/:game_id', async (req, res) => {
     translatedCard1 = CardClass.translateCard(player_cards[0].id_card);
     translatedCard2 = CardClass.translateCard(player_cards[1].id_card);
   }
-
-  // if (cardsLoaded && parseInt(game.game_round) === 1) {
-  //   player_cards = await DeckClass.getAllDeckCardsByDeckIdAndGamePlayerId(
-  //     game.id_deck,
-  //     current_game_player.id,
-  //   );
-  //   console.log('---- LAST PLAYERS CARDS: ', player_cards);
-  //   translatedCard1 = CardClass.translateCard(player_cards[0].id_card);
-  //   translatedCard2 = CardClass.translateCard(player_cards[1].id_card);
-  // }
-
-  // if (!cardsLoaded) {
-  //   game = await GameClass.findById(game_id);
-  //   await GameClass.updateGameRound(game_id, 1);
-  // }
-
-  // if (players.length === MAX_NUM_PLAYER_IN_GAME) {
-  //   console.log('~~~~ THERE ARE MAX PLAYERS IN THE GAME');
-  //   // io.to(game_id).emit('init game', {
-  //   //   id: game.id,
-  //   //   cards: player_cards,
-  //   // });
-  // }
 
   io.to(req.session.passport.user.socket).emit('join game room', {
     game_id: game.id,
