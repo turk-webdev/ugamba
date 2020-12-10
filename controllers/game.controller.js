@@ -1,12 +1,78 @@
 const Game = require('../classes/game');
 const Deck = require('../classes/deck');
 const GamePlayer = require('../classes/game_player');
+const Card = require('../classes/card');
 const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
 
-const MAX_NUM_PLAYER_IN_GAME = 2;
+// eslint-disable-next-line import/prefer-default-export
+export const MAX_NUM_PLAYER_IN_GAME = 4;
+
 const MIN_NUM_BEFORE_GAME_START = MAX_NUM_PLAYER_IN_GAME - 1;
 const MAX_CARD_ID = 52;
+
+const joinGame = async (req, res) => {
+  const io = req.app.get('io');
+
+  const { game_id } = req.params;
+  let game = await Game.findById(game_id);
+  const { game_round } = game;
+  const games = await GamePlayer.findAllGamesByUserId(req.user.id);
+  const players = await GamePlayer.findAllPlayersByGameId(game_id);
+  const current_game_player = await GamePlayer.getByUserIdAndGameId(
+    req.user.id,
+    game_id,
+  );
+
+  let player_cards = [];
+
+  if (
+    players.length === MAX_NUM_PLAYER_IN_GAME &&
+    parseInt(game_round) === 0 &&
+    player_cards.length === 0
+  ) {
+    players.forEach((player) => {
+      Card.addCard(game_id, player.id);
+      Card.addCard(game_id, player.id);
+    });
+    await Game.updateGameRound(game_id, 1);
+    game = await Game.findById(game_id);
+  }
+  // Placeholder empty div elements that get loaded properly when time is right.
+  let translatedCard1 = {
+    value: 'two',
+    suit: 'spade',
+  };
+  let translatedCard2 = {
+    value: 'two',
+    suit: 'spade',
+  };
+
+  if (
+    players.length === MAX_NUM_PLAYER_IN_GAME &&
+    parseInt(game.game_round) === 1 &&
+    player_cards.length === 0
+  ) {
+    player_cards = await Deck.getAllDeckCardsByDeckIdAndGamePlayerId(
+      game.id_deck,
+      current_game_player.id,
+    );
+    translatedCard1 = Card.translateCard(player_cards[0].id_card);
+    translatedCard2 = Card.translateCard(player_cards[1].id_card);
+  }
+
+  const yourCards = { translatedCard1, translatedCard2 };
+  io.to(req.session.passport.user.socket).emit('join game room', {
+    game_id: game.id,
+  });
+
+  res.render('authenticated/game', {
+    game,
+    games,
+    players,
+    yourCards,
+  });
+};
 
 const findAll = async (_, res) => {
   Game.findAll()
@@ -466,6 +532,7 @@ const actionHandler = async (req) => {
 
 module.exports = {
   createOrJoin,
+  joinGame,
   findAll,
   findById,
   update,
