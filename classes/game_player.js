@@ -92,7 +92,7 @@ class Game_player {
   }
 
   static getGameDealer(game_id) {
-    return db.any(`SELECT * FROM game_player WHERE id_game=$1 AND id_user=0;`, [
+    return db.one(`SELECT * FROM game_player WHERE id_game=$1 AND id_user=0;`, [
       game_id,
     ]);
   }
