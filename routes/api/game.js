@@ -15,41 +15,84 @@ router.get('/:game_id', async (req, res) => {
   const { game_id } = req.params;
   console.log(`----- ENTERING GAME ${game_id}!`);
   console.log('----- USER INFO: ', req.user);
-  const game = await GameClass.findById(game_id);
+  let game = await GameClass.findById(game_id);
   console.log('---- CURRENT GAME INFO: ', game);
   const { game_round } = game;
   const games = await GamePlayer.findAllGamesByUserId(req.user.id);
   const players = await GamePlayer.findAllPlayersByGameId(game_id);
+  console.log('---- ALL GAME PLAYERS: ', players);
   const current_game_player = await GamePlayer.getByUserIdAndGameId(
     req.user.id,
     game_id,
   );
-  console.log('---- GAME PLAYER: ', current_game_player);
-  let player_cards = [];
-  let translatedCard1;
-  let translatedCard2;
-  // Page refresh logic.
-  // if (parseInt(game_round) === 1) {
-  if (players.length === MAX_NUM_PLAYER_IN_GAME) {
-    console.log('---- GAME ROUND: 1');
-    GameClass.updateGameRound(game_id, 1);
-    CardClass.addCard(game_id, current_game_player.id);
-    CardClass.addCard(game_id, current_game_player.id);
+  console.log('---- CURRENT GAME PLAYER: ', current_game_player);
+  // if (player_cards.length === 2) {
+  //   let translatedCard1;
+  //   let translatedCard2;
 
-    player_cards = await DeckClass.getAllDeckCardsByDeckIdAndGamePlayerId(
+  // }
+  // let cardsLoaded = false;
+
+  if (players.length === MAX_NUM_PLAYER_IN_GAME && parseInt(game_round) === 0) {
+    console.log('---- GAME ROUND: 0 HAND OUT CARDS AND UPDATE ROUND');
+    console.log('---- PLAYERS IN GAME: ', players);
+    players.forEach((player) => {
+      CardClass.addCard(game_id, player.id);
+      console.log('--- ADDED CARD TO USER');
+      CardClass.addCard(game_id, player.id);
+      console.log('--- ADDED CARD TO USER');
+    });
+    // cardsLoaded = true;
+    await GameClass.updateGameRound(game_id, 1);
+    // .then(() => {
+    //   player_cards = DeckClass.getAllDeckCardsByDeckIdAndGamePlayerId(
+    //     game.id_deck,
+    //     current_game_player.id,
+    //   );
+    //   console.log('---- LAST PLAYERS CARDS: ', player_cards);
+    //   translatedCard1 = CardClass.translateCard(player_cards[0].id_card);
+    //   translatedCard2 = CardClass.translateCard(player_cards[1].id_card);
+    // });
+  }
+
+  game = await GameClass.findById(game_id);
+
+  let translatedCard1 = {
+    value: 'two',
+    suit: 'spade',
+  };
+  let translatedCard2 = {
+    value: 'two',
+    suit: 'spade',
+  };
+
+  if (
+    players.length === MAX_NUM_PLAYER_IN_GAME &&
+    parseInt(game.game_round) === 1
+  ) {
+    const player_cards = await DeckClass.getAllDeckCardsByDeckIdAndGamePlayerId(
       game.id_deck,
       current_game_player.id,
     );
-    console.log('---- PLAYER CARDS: ', player_cards);
-
+    console.log('---- CURRENT PLAYER CARDS: ', player_cards);
     translatedCard1 = CardClass.translateCard(player_cards[0].id_card);
     translatedCard2 = CardClass.translateCard(player_cards[1].id_card);
-
-    console.log('---- PLAYERS IN GAME: ', players);
-  } else {
-    console.log('---- GAME ROUND: ', game_round);
-    console.log('---- Player length: ', players.length);
   }
+
+  // if (cardsLoaded && parseInt(game.game_round) === 1) {
+  //   player_cards = await DeckClass.getAllDeckCardsByDeckIdAndGamePlayerId(
+  //     game.id_deck,
+  //     current_game_player.id,
+  //   );
+  //   console.log('---- LAST PLAYERS CARDS: ', player_cards);
+  //   translatedCard1 = CardClass.translateCard(player_cards[0].id_card);
+  //   translatedCard2 = CardClass.translateCard(player_cards[1].id_card);
+  // }
+
+  // if (!cardsLoaded) {
+  //   game = await GameClass.findById(game_id);
+  //   await GameClass.updateGameRound(game_id, 1);
+  // }
 
   // if (players.length === MAX_NUM_PLAYER_IN_GAME) {
   //   console.log('~~~~ THERE ARE MAX PLAYERS IN THE GAME');
@@ -64,12 +107,12 @@ router.get('/:game_id', async (req, res) => {
   });
 
   const yourCards = { translatedCard1, translatedCard2 };
+  console.log('---- YOUR CARDS BEFORE RENDING GAME: ', yourCards);
 
   res.render('authenticated/game', {
     game,
     games,
     players,
-    player_cards,
     yourCards,
   });
 });

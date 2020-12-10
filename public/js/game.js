@@ -274,15 +274,15 @@ socket.on('init game', (results) => {
     if (document.getElementById(card.id_game_player_hand)) {
       const translatedCard = translateCard(card.id_card);
 
-      const divClassArr = [
+      const cardDivClassArr = [
         'game-card',
         translatedCard.value,
         translatedCard.suit,
       ];
-      const div = document.createElement('div');
-      div.classList.add(...divClassArr);
+      const carddiv = document.createElement('div');
+      carddiv.classList.add(...cardDivClassArr);
 
-      document.getElementById(card.id_game_player_hand).appendChild(div);
+      document.getElementById(card.id_game_player_hand).appendChild(carddiv);
     }
   });
 });

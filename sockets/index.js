@@ -34,7 +34,7 @@ const init = (server, session) => {
           // eslint-disable-next-line max-len
           DeckClass.getAllOwnedCardsInDeck(deck[0].id_deck).then(
             (playercards) => {
-              console.log('---- PLAYERCARDS: ', playercards);
+              console.log('---- SOCKETS PLAYERCARDS: ', playercards);
               socket.to(data.game_id).emit('init game', {
                 cards: playercards,
               });
