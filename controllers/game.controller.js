@@ -6,8 +6,7 @@ const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
 
 const MAX_NUM_PLAYER_IN_GAME = 4;
-
-const MIN_NUM_BEFORE_GAME_START = MAX_NUM_PLAYER_IN_GAME - 1;
+const MIN_NUM_BEFORE_GAME_START = 2;
 const MAX_CARD_ID = 52;
 
 const joinGame = async (req, res) => {
@@ -26,7 +25,7 @@ const joinGame = async (req, res) => {
   let player_cards = [];
 
   if (
-    players.length === MAX_NUM_PLAYER_IN_GAME &&
+    players.length === MIN_NUM_BEFORE_GAME_START &&
     parseInt(game_round) === 0 &&
     player_cards.length === 0
   ) {
@@ -142,19 +141,6 @@ const createOrJoin = async (req, res) => {
           gameIdToJoin = existingGame.id;
           const gamePlayer = new GamePlayer(undefined, gameIdToJoin, id);
           gamePlayer.save();
-          // .then((gp) => {
-          //   addCard(existingGame.id, gp.id);
-          //   addCard(existingGame.id, gp.id);
-          // });
-
-          if (
-            parseInt(numOfPlayersInGame.count) === MIN_NUM_BEFORE_GAME_START
-          ) {
-            console.log('---- YOU ARE THE LAST PLAYER TO JOIN THE GAME');
-            console.log('---- GAME_ROUND UPDATING AND STARTING GAME');
-            // Game.updateGameRound(existingGame.id, 1);
-          }
-
           console.log('---- REDIRECTING TO GAME');
           // eslint-disable-next-line func-names
           setTimeout(function () {
