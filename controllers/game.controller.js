@@ -5,8 +5,7 @@ const Card = require('../classes/card');
 const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
 
-// eslint-disable-next-line import/prefer-default-export
-export const MAX_NUM_PLAYER_IN_GAME = 4;
+const MAX_NUM_PLAYER_IN_GAME = 4;
 
 const MIN_NUM_BEFORE_GAME_START = MAX_NUM_PLAYER_IN_GAME - 1;
 const MAX_CARD_ID = 52;
