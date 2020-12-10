@@ -291,3 +291,9 @@ socket.on('turn-notification-off', (id) => {
   ];
   document.getElementById(id).classList.remove(...divClassArr);
 });
+
+socket.on('update-turn', (id) => {
+  document.getElementById(
+    'curr_turn',
+  ).innerHTML = `Action on player ${id.toString()}`;
+});

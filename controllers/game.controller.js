@@ -240,7 +240,7 @@ const actionHandler = async (req) => {
     return;
   }
   const curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
-  if (curr_game_player_id !== user.id) {
+  if (curr_game_player_id.curr_game_player_id !== user.id) {
     // its not that users turn
     console.log('its not that users turn');
     io.to(userSocket).emit('status-msg', {
@@ -255,6 +255,7 @@ const actionHandler = async (req) => {
       // literally nothing happens, signify in user game window by greying
       // out actions for that 'turn'?
       console.log('check called');
+      await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
       io.to(userSocket).emit('status-msg', {
         type: 'success',
         msg: 'Checked!',
@@ -276,6 +277,11 @@ const actionHandler = async (req) => {
           const i_game_pot = parseInt(Object.values(gamePot));
           await Game.updateGamePot(game_id, i_game_pot + i_action_amount);
           await Game.updateMinBet(game_id, i_action_amount);
+          await GamePlayer.updatePlayerLastAction(
+            game_id,
+            user.id,
+            game_action,
+          );
           io.to(userSocket).emit('user update', {
             id: user.id,
             money: new_value,
@@ -308,6 +314,11 @@ const actionHandler = async (req) => {
           const gamePot = await Game.getGamePot(game_id);
           const i_game_pot = parseInt(Object.values(gamePot));
           await Game.updateGamePot(game_id, i_game_pot + i_min_bid);
+          await GamePlayer.updatePlayerLastAction(
+            game_id,
+            user.id,
+            game_action,
+          );
           io.to(userSocket).emit('user update', {
             id: user.id,
             money: new_value,
@@ -347,6 +358,11 @@ const actionHandler = async (req) => {
             i_game_pot + i_action_amount + i_min_bid,
           );
           await Game.updateMinBet(game_id, i_action_amount + i_min_bid);
+          await GamePlayer.updatePlayerLastAction(
+            game_id,
+            user.id,
+            game_action,
+          );
           io.to(userSocket).emit('user update', {
             id: user.id,
             money: new_value,
@@ -375,6 +391,7 @@ const actionHandler = async (req) => {
         type: 'success',
         msg: 'Folded!',
       });
+      await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
       break;
     case PlayerActions.RESET:
       {
@@ -426,6 +443,10 @@ const actionHandler = async (req) => {
   }
   const new_curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
   console.log('NEW CURR GAME PLAYER ID => ', new_curr_game_player_id);
+  io.to(game_id).emit(
+    'update-turn',
+    new_curr_game_player_id.curr_game_player_id,
+  );
   io.to(game_id).emit(
     'turn-notification-off',
     curr_game_player_id.curr_game_player_id,
