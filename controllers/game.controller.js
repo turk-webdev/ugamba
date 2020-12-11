@@ -3,6 +3,7 @@ const Deck = require('../classes/deck');
 const GamePlayer = require('../classes/game_player');
 const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
+const { getGameRound } = require('../classes/game');
 
 const MAX_NUM_PLAYER_IN_GAME = 4;
 
@@ -498,6 +499,8 @@ const actionHandler = async (req) => {
     }
     if (count === 1) {
       console.log('update game round here');
+      const curr_game_round = await Game.getGameRound(game_id);
+      await Game.updateGameRound(game_id, curr_game_round.game_round + 1);
     }
   }
   if (player_actions.length === 1) {
