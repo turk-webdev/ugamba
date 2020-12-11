@@ -474,6 +474,24 @@ const actionHandler = async (req) => {
   const currPlayerActionIndex = player_actions.findIndex(
     (element) => element.id_user === curr_game_player_id.curr_game_player_id,
   );
+  let target_index = currPlayerActionIndex + 1;
+  if (target_index === player_actions.length) {
+    target_index = 0;
+  }
+  if (
+    (player_actions[currPlayerActionIndex].player_last_action ===
+      PlayerActions.CHECK ||
+      player_actions[currPlayerActionIndex].player_last_action ===
+        PlayerActions.CALL) &&
+    (player_actions[target_index].player_last_action === PlayerActions.BET ||
+      player_actions[target_index].player_last_action === PlayerActions.RAISE)
+  ) {
+    console.log('update game round here');
+  }
+  if (player_actions.length === 1) {
+    console.log('WINNER => ', user.id);
+  }
+
   // return res.send('hello world');
 };
 
