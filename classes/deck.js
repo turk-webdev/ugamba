@@ -66,7 +66,6 @@ const getAllDeckCardsByDeckIdAndGamePlayerId = (deckId, gamePlayerId) => {
   );
 };
 
-
 // If we want to get the cards on the table,
 // playerHandId should be 0
 const getAllOwnedCardsOfPlayer = (deckId, playerHandId) => {

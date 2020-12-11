@@ -10,7 +10,7 @@ class Game_player {
   save() {
     return db.oneOrNone(
       `INSERT INTO game_player (id, id_game, id_user, blind_status, player_folded) VALUES (DEFAULT, $1, $2, $3, $4) RETURNING id;`,
-      [this.id_game, this.id_user, 0, 0],
+      [this.id_game, this.id_user, 0, 1],
     );
   }
 
@@ -61,6 +61,13 @@ class Game_player {
     return db.none(
       `UPDATE game_player SET player_folded = 0 WHERE id_user = $1 AND id_game = $2;`,
       [id_user, id_game],
+    );
+  }
+
+  static setPlayertoUnfoldByPlayerId(id_player, id_game) {
+    return db.none(
+      `UPDATE game_player SET player_folded = 0 WHERE id = $1 AND id_game = $2;`,
+      [id_player, id_game],
     );
   }
 

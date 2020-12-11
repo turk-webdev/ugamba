@@ -270,10 +270,12 @@ const removeNotification = () => {
  */
 socket.on('init game', (results) => {
   console.log('---- SOCKET STARTING THE GAME, RESULTS:', results);
-  results.cards.forEach((card) => {
+  const twoCardDiv = document.createElement('div');
+  let gpid;
+  results.cards.forEach((card, index) => {
     if (document.getElementById(card.game_player_id)) {
       const translatedCard = translateCard(card.id_card);
-
+      gpid = card.game_player_id;
       const cardDivClassArr = [
         'game-card',
         translatedCard.value,
@@ -281,10 +283,14 @@ socket.on('init game', (results) => {
       ];
       const carddiv = document.createElement('div');
       carddiv.classList.add(...cardDivClassArr);
-
-      document.getElementById(card.game_player_id).appendChild(carddiv);
+      twoCardDiv.appendChild(carddiv);
     }
   });
+  if (document.getElementById(gpid)) {
+    document
+      .getElementById(gpid)
+      .appendChild(twoCardDiv, document.getElementById(gpid).children[0]);
+  }
 });
 
 socket.on('leave game', () => {
