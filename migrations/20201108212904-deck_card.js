@@ -14,7 +14,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      id_game_player_hand: {
+      game_player_id: {
         type: Sequelize.INTEGER,
         allowNull: true,
       },

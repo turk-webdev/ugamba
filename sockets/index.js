@@ -39,6 +39,22 @@ const init = (server, session) => {
         });
       });
 
+      socket.on('send community cards', (data) => {
+        console.log('---- SOCKET SEND COMMUNITY CARDS DATA: ', data);
+        console.log('---- USER INFO: ', user.user.id);
+        Game.findDeckByGameId(data.game_id).then((deck) => {
+          // eslint-disable-next-line max-len
+          DeckClass.getAllCommunityCardsInDeck(deck[0].id_deck).then(
+            (communitycards) => {
+              console.log('---- SOCKETS COMMUNITYCARDS: ', communitycards);
+              socket.to(data.game_id).emit('send community cards', {
+                cards: communitycards,
+              });
+            },
+          );
+        });
+      });
+
       socket.on('chat message', (msg) => {
         io.to(msg.room).emit('chat message', {
           username: user.user.username,

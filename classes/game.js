@@ -110,10 +110,10 @@ class Game {
     return db.one(`SELECT curr_game_player_id FROM game WHERE id=$1;`, [id]);
   }
 
-  static setCurrGamePlayerId(id, new_curr_player_id) {
+  static setCurrGamePlayerId(game_id, new_curr_player_id) {
     return db.none(`UPDATE game SET curr_game_player_id=$1 WHERE id=$2;`, [
       new_curr_player_id,
-      id,
+      game_id,
     ]);
   }
 }

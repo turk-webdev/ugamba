@@ -8,6 +8,7 @@ const chatText = document.getElementById('chat-input');
 const chatSubmit = document.getElementById('chat-submit');
 const chatInput = document.getElementById('chat-input');
 const gameRound = document.getElementById('game').getAttribute('gameround');
+const communityCards = document.getElementById('community-cards');
 
 const PlayerActions = {
   CHECK: 'check',
@@ -51,7 +52,11 @@ if (chatMenuItem) {
   });
 }
 
-// Check Game Round Conditions
+/*
+ * **************************************************************
+ *                      Check Game Round Conditions
+ * **************************************************************
+ */
 if (gameRound && parseInt(gameRound) === 0) {
   console.log('~~~~ Game Round Is 0, Waiting On More Players');
 } else if (gameRound && parseInt(gameRound) === 1) {
@@ -60,6 +65,12 @@ if (gameRound && parseInt(gameRound) === 0) {
     game_id: gameId,
   };
   socket.emit('init game', data);
+} else if (gameRound && parseInt(gameRound) === 2) {
+  console.log(`~~~~ game_round: ${gameRound}`);
+  const data = {
+    game_id: gameId,
+  };
+  socket.emit('send community cards', data);
 } else {
   console.log('NO GAME STATUS');
 }
@@ -270,10 +281,12 @@ const removeNotification = () => {
  */
 socket.on('init game', (results) => {
   console.log('---- SOCKET STARTING THE GAME, RESULTS:', results);
+  const twoCardDiv = document.createElement('div');
+  let gpid;
   results.cards.forEach((card) => {
-    if (document.getElementById(card.id_game_player_hand)) {
+    if (document.getElementById(card.game_player_id)) {
       const translatedCard = translateCard(card.id_card);
-
+      gpid = card.game_player_id;
       const cardDivClassArr = [
         'game-card',
         translatedCard.value,
@@ -281,10 +294,33 @@ socket.on('init game', (results) => {
       ];
       const carddiv = document.createElement('div');
       carddiv.classList.add(...cardDivClassArr);
-
-      document.getElementById(card.id_game_player_hand).appendChild(carddiv);
+      twoCardDiv.appendChild(carddiv);
     }
   });
+  if (document.getElementById(gpid)) {
+    document.getElementById(gpid).appendChild(twoCardDiv);
+  }
+});
+
+socket.on('send community cards', (results) => {
+  console.log('---- SOCKET GOT THE COMMUNITY CARDS, RESULTS:', results);
+  const threeCardDiv = document.createElement('div');
+  results.cards.forEach((card) => {
+    if (communityCards) {
+      const translatedCard = translateCard(card.id_card);
+      const cardDivClassArr = [
+        'game-card',
+        translatedCard.value,
+        translatedCard.suit,
+      ];
+      const carddiv = document.createElement('div');
+      carddiv.classList.add(...cardDivClassArr);
+      threeCardDiv.appendChild(carddiv);
+    }
+  });
+  if (communityCards) {
+    communityCards.appendChild(threeCardDiv);
+  }
 });
 
 socket.on('leave game', () => {

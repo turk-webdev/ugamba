@@ -4,7 +4,7 @@ const GamePlayer = require('../classes/game_player');
 const Card = require('../classes/card');
 const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
-const { getGameRound } = require('../classes/game');
+// const { getGameRound } = require('../classes/game');
 
 const MAX_NUM_PLAYER_IN_GAME = 4;
 const MIN_NUM_BEFORE_GAME_START = 2;
@@ -18,47 +18,69 @@ const joinGame = async (req, res) => {
   const { game_round } = game;
   const games = await GamePlayer.findAllGamesByUserId(req.user.id);
   const players = await GamePlayer.findAllPlayersByGameId(game_id);
-  const current_game_player = await GamePlayer.getByUserIdAndGameId(
-    req.user.id,
-    game_id,
-  );
+  let game_player = await GamePlayer.getByUserIdAndGameId(req.user.id, game_id);
 
   let player_cards = [];
 
-  if (
-    players.length === MIN_NUM_BEFORE_GAME_START &&
-    parseInt(game_round) === 0 &&
-    player_cards.length === 0
-  ) {
-    players.forEach((player) => {
-      Card.addCard(game_id, player.id);
-      Card.addCard(game_id, player.id);
-    });
-    await Game.updateGameRound(game_id, 1);
-    game = await Game.findById(game_id);
-  }
   // Placeholder empty div elements that get loaded properly when time is right.
   let translatedCard1 = {
-    value: 'two',
-    suit: 'spade',
+    value: '',
+    suit: '',
   };
   let translatedCard2 = {
-    value: 'two',
-    suit: 'spade',
+    value: '',
+    suit: '',
   };
 
   if (
-    players.length === MAX_NUM_PLAYER_IN_GAME &&
-    parseInt(game.game_round) === 1 &&
-    player_cards.length === 0
+    players.length >= MIN_NUM_BEFORE_GAME_START &&
+    players.length <= MAX_NUM_PLAYER_IN_GAME
   ) {
-    player_cards = await Deck.getAllDeckCardsByDeckIdAndGamePlayerId(
-      game.id_deck,
-      current_game_player.id,
-    );
-    if (player_cards.length === 2) {
-      translatedCard1 = Card.translateCard(player_cards[0].id_card);
-      translatedCard2 = Card.translateCard(player_cards[1].id_card);
+    if (parseInt(game_round) === 0) {
+      const unorderedPlayers = [];
+      players.forEach((player) => {
+        Card.addCard(game_id, player.id);
+        Card.addCard(game_id, player.id);
+        GamePlayer.setPlayertoUnfoldByPlayerId(player.id, game_id);
+        unorderedPlayers.push(parseInt(player.id));
+        // TODO: Should set the blind status and player order here
+      });
+      unorderedPlayers.sort((a, b) => a - b);
+      await Game.setCurrGamePlayerId(game_id, unorderedPlayers[0]);
+      await Game.updateGameRound(game_id, 1);
+      game = await Game.findById(game_id);
+    }
+
+    game_player = await GamePlayer.getByUserIdAndGameId(req.user.id, game_id);
+    if (parseInt(game_player.player_folded) === 0) {
+      player_cards = await Deck.getAllDeckCardsByDeckIdAndGamePlayerId(
+        game.id_deck,
+        game_player.id,
+      );
+      if (player_cards.length === 2) {
+        translatedCard1 = Card.translateCard(player_cards[0].id_card);
+        translatedCard2 = Card.translateCard(player_cards[1].id_card);
+      }
+    }
+
+    if (parseInt(game_round) === 2) {
+      Card.addCard(game_id, 0);
+      Card.addCard(game_id, 0);
+      Card.addCard(game_id, 0);
+      await Game.updateGameRound(game_id, 3);
+      game = await Game.findById(game_id);
+    }
+
+    if (parseInt(game_round) === 3) {
+      Card.addCard(game_id, 0);
+      await Game.updateGameRound(game_id, 4);
+      game = await Game.findById(game_id);
+    }
+
+    if (parseInt(game_round) === 4) {
+      Card.addCard(game_id, 0);
+      await Game.updateGameRound(game_id, 5); // Where winner gets decided ande reset to 0
+      game = await Game.findById(game_id);
     }
   }
 
