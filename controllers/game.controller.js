@@ -466,9 +466,14 @@ const actionHandler = async (req) => {
 
   // Game Round Checks Here
   // if 1 bet/raise and rest folds - that one person won the game?
-  // if 1 bet/raise and rest 
-  const player_actions = await GamePlayer.getPlayerLastActions(game_id);
+  // if 1 bet/raise and rest
+  const player_actions = await GamePlayer.getNonFoldedPlayerLastActions(
+    game_id,
+  );
   console.log(player_actions);
+  const currPlayerActionIndex = player_actions.findIndex(
+    (element) => element.id_user === curr_game_player_id.curr_game_player_id,
+  );
   // return res.send('hello world');
 };
 

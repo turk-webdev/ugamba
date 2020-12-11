@@ -91,9 +91,9 @@ class Game_player {
     );
   }
 
-  static getPlayerLastActions(id_game) {
+  static getNonFoldedPlayerLastActions(id_game) {
     return db.any(
-      `SELECT player_last_action FROM game_player WHERE id_game=$1;`,
+      `SELECT id_user, player_last_action FROM game_player WHERE id_game=$1 AND player_folded=0 ORDER BY id_user;`,
       [id_game],
     );
   }
