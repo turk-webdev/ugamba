@@ -62,6 +62,26 @@ const joinGame = async (req, res) => {
         translatedCard2 = Card.translateCard(player_cards[1].id_card);
       }
     }
+
+    if (parseInt(game_round) === 2) {
+      Card.addCard(game_id, 0);
+      Card.addCard(game_id, 0);
+      Card.addCard(game_id, 0);
+      await Game.updateGameRound(game_id, 3);
+      game = await Game.findById(game_id);
+    }
+
+    if (parseInt(game_round) === 3) {
+      Card.addCard(game_id, 0);
+      await Game.updateGameRound(game_id, 4);
+      game = await Game.findById(game_id);
+    }
+
+    if (parseInt(game_round) === 4) {
+      Card.addCard(game_id, 0);
+      await Game.updateGameRound(game_id, 5); // Where winner gets decided ande reset to 0
+      game = await Game.findById(game_id);
+    }
   }
 
   const yourCards = { translatedCard1, translatedCard2 };

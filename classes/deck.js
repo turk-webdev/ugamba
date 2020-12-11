@@ -48,11 +48,17 @@ const getAllOwnedCardsInDeck = (deckId) => {
   );
 };
 
+const getAllCommunityCardsInDeck = (deckId) => {
+  return db.many(
+    'SELECT * FROM deck_card WHERE id_deck = $1 AND game_player_id = 0',
+    [deckId],
+  );
+};
 // If the card is being dealt to the table,
-// playerHandId should be 0
-const assignDeckCardToPlayerHand = (cardId, playerHandId) => {
+// gamePlayerId should be 0
+const assignDeckCardToPlayerHand = (cardId, gamePlayerId) => {
   return db.none('UPDATE deck_card SET game_player_id = $1 WHERE id = $2', [
-    playerHandId,
+    gamePlayerId,
     cardId,
   ]);
 };
@@ -94,6 +100,7 @@ module.exports = {
   getDeckByGameId,
   getAllCardsInDeck,
   getAllUnownedCardsInDeck,
+  getAllCommunityCardsInDeck,
   getAllOwnedCardsInDeck,
   assignDeckCardToPlayerHand,
   getAllOwnedCardsOfPlayer,
