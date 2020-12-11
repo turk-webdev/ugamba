@@ -57,11 +57,12 @@ const assignDeckCardToPlayerHand = (cardId, playerHandId) => {
   ]);
 };
 
-const getAllDeckCardsByDeckIdAndGamePlayerId = (deckId, playerHandId) => {
+// Returns a gameplayers first 2 cards
+const getAllDeckCardsByDeckIdAndGamePlayerId = (deckId, gamePlayerId) => {
   return db.many(
-    'SELECT deck_card.id, deck_card.id_card, deck_card.id_game_player_hand, deck_card.id_deck FROM deck_card' +
-      ' WHERE deck_card.id_deck = $1 AND deck_card.id_game_player_hand = $2',
-    [deckId, playerHandId],
+    'SELECT deck_card.id, deck_card.id_card, deck_card.game_player_id, deck_card.id_deck FROM deck_card' +
+      ' WHERE deck_card.id_deck = $1 AND deck_card.game_player_id = $2',
+    [deckId, gamePlayerId],
   );
 };
 

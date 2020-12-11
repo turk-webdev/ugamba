@@ -271,7 +271,7 @@ const removeNotification = () => {
 socket.on('init game', (results) => {
   console.log('---- SOCKET STARTING THE GAME, RESULTS:', results);
   results.cards.forEach((card) => {
-    if (document.getElementById(card.id_game_player_hand)) {
+    if (document.getElementById(card.game_player_id)) {
       const translatedCard = translateCard(card.id_card);
 
       const cardDivClassArr = [
@@ -282,7 +282,7 @@ socket.on('init game', (results) => {
       const carddiv = document.createElement('div');
       carddiv.classList.add(...cardDivClassArr);
 
-      document.getElementById(card.id_game_player_hand).appendChild(carddiv);
+      document.getElementById(card.game_player_id).appendChild(carddiv);
     }
   });
 });

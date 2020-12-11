@@ -4,7 +4,7 @@ const GamePlayer = require('../classes/game_player');
 const Card = require('../classes/card');
 const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
-const { getGameRound } = require('../classes/game');
+// const { getGameRound } = require('../classes/game');
 
 const MAX_NUM_PLAYER_IN_GAME = 4;
 const MIN_NUM_BEFORE_GAME_START = 2;
@@ -26,7 +26,8 @@ const joinGame = async (req, res) => {
   let player_cards = [];
 
   if (
-    players.length === MIN_NUM_BEFORE_GAME_START &&
+    players.length >= MIN_NUM_BEFORE_GAME_START &&
+    players.length <= MAX_NUM_PLAYER_IN_GAME &&
     parseInt(game_round) === 0 &&
     player_cards.length === 0
   ) {
@@ -47,19 +48,30 @@ const joinGame = async (req, res) => {
     suit: 'spade',
   };
 
+  // This happens if someone joins mid-game and round is already 1
   if (
-    players.length === MAX_NUM_PLAYER_IN_GAME &&
+    players.length >= MIN_NUM_BEFORE_GAME_START &&
+    players.length <= MAX_NUM_PLAYER_IN_GAME &&
     parseInt(game.game_round) === 1 &&
     player_cards.length === 0
   ) {
-    player_cards = await Deck.getAllDeckCardsByDeckIdAndGamePlayerId(
-      game.id_deck,
-      current_game_player.id,
-    );
-    if (player_cards.length === 2) {
-      translatedCard1 = Card.translateCard(player_cards[0].id_card);
-      translatedCard2 = Card.translateCard(player_cards[1].id_card);
-    }
+    console.log('---- SOMEONE JOINED THE GAME MID-ROUND1');
+    translatedCard1 = {
+      value: '',
+      suit: '',
+    };
+    translatedCard2 = {
+      value: '',
+      suit: '',
+    };
+    // player_cards = await Deck.getAllDeckCardsByDeckIdAndGamePlayerId(
+    //   game.id_deck,
+    //   current_game_player.id,
+    // );
+    // if (player_cards.length === 2) {
+    //   translatedCard1 = Card.translateCard(player_cards[0].id_card);
+    //   translatedCard2 = Card.translateCard(player_cards[1].id_card);
+    // }
   }
 
   const yourCards = { translatedCard1, translatedCard2 };
