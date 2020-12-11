@@ -4,6 +4,7 @@ const GamePlayer = require('../classes/game_player');
 const Card = require('../classes/card');
 const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
+const { getGameRound } = require('../classes/game');
 
 const MAX_NUM_PLAYER_IN_GAME = 4;
 const MIN_NUM_BEFORE_GAME_START = 2;
@@ -539,9 +540,46 @@ const actionHandler = async (req) => {
 
   // Game Round Checks Here
   // if 1 bet/raise and rest folds - that one person won the game?
-  // if 1 bet/raise and rest 
-  const player_actions = await GamePlayer.getPlayerLastActions(game_id);
+  // if 1 bet/raise and rest
+  const player_actions = await GamePlayer.getNonFoldedPlayerLastActions(
+    game_id,
+  );
   console.log(player_actions);
+  const currPlayerActionIndex = player_actions.findIndex(
+    (element) => element.id_user === curr_game_player_id.curr_game_player_id,
+  );
+  let target_index = currPlayerActionIndex + 1;
+  if (target_index === player_actions.length) {
+    target_index = 0;
+  }
+  const lastPlayerAction =
+    player_actions[currPlayerActionIndex].player_last_action;
+  const nextPlayerAction = player_actions[target_index].player_last_action;
+  if (
+    (lastPlayerAction === PlayerActions.CHECK ||
+      lastPlayerAction === PlayerActions.CALL) &&
+    (nextPlayerAction === PlayerActions.BET ||
+      nextPlayerAction === PlayerActions.RAISE)
+  ) {
+    let count = 0;
+    for (const action in player_actions) {
+      if (
+        action.player_last_action === PlayerActions.BET ||
+        action.player_last_action === PlayerActions.RAISE
+      ) {
+        count += 1;
+      }
+    }
+    if (count === 1) {
+      console.log('update game round here');
+      const curr_game_round = await Game.getGameRound(game_id);
+      await Game.updateGameRound(game_id, curr_game_round.game_round + 1);
+    }
+  }
+  if (player_actions.length === 1) {
+    console.log('WINNER => ', user.id);
+  }
+
   // return res.send('hello world');
 };
 
