@@ -91,6 +91,14 @@ const unassignAllCardsInDeck = (deckId) => {
   );
 };
 
+const getDisplayValueFromValue = (value) => {
+  return db.many('SELECT value_display FROM card WHERE value=$1', [value]);
+};
+
+const getDisplaySuitFromSuit = (suit) => {
+  return db.many('SELECT suit_display FROM card WHERE suit=$1', [suit]);
+};
+
 module.exports = {
   getCardById,
   getDeckCardById,
@@ -106,4 +114,6 @@ module.exports = {
   getAllOwnedCardsOfPlayer,
   getAllDeckCardsByDeckIdAndGamePlayerId,
   unassignAllCardsInDeck,
+  getDisplayValueFromValue,
+  getDisplaySuitFromSuit,
 };

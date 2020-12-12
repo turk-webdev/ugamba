@@ -1,5 +1,4 @@
 /* eslint-disable */
-const { is } = require('sequelize/types/lib/operators');
 const Deck = require('./deck');
 
 // These are according to the cards database
@@ -47,11 +46,25 @@ const stringToSuitCode = (string) => {
 
 const stringToValueCode = (string) => {
     return Object.keys(VALUES).find(key => VALUES[key] === string);
-}
+};
+
+// Takes a value code [1..13] and returns the string value of a card
+const getValueFromCode = async (value) => {
+    const card = await Deck.getDisplayValueFromValue(value);
+    return card[0].value_display;
+};
+
+// Takes a suit code [1..4] and returns the string suit of a card
+const getSuitFromCode = async (suit) => {
+    const card = await Deck.getDisplaySuitFromSuit(suit);
+    return card[0].suit_display;
+};
 
 module.exports = {
     cardIdToObj,
     codeToString,
     stringToSuitCode,
     stringToValueCode,
+    getValueFromCode,
+    getSuitFromCode,
 }

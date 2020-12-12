@@ -83,7 +83,8 @@ router.post('/win', async (req,res) => {
 router.post('/translate', async (req,res) => {
   const { card_id } = req.body;
   const obj = require('../classes/cardTranslate');
-  console.log(obj.cardIdToObj(card_id));
+  const re = await obj.getValueFromCode(card_id);
+  console.log(re);
 })
 
 module.exports = router;
