@@ -46,7 +46,7 @@ class Game {
   }
 
   static findDeckByGameId(game_id) {
-    return db.any(`SELECT game.id_deck FROM game WHERE game.id = $1`, [
+    return db.one(`SELECT game.id_deck FROM game WHERE game.id = $1`, [
       game_id,
     ]);
   }

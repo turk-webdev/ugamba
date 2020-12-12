@@ -1,20 +1,24 @@
-<%- include('../../partials/htmlStructure/head.ejs') -%> <%-
-include('../../partials/navbar.ejs') -%>
-<link rel="stylesheet" type="text/css" href="/css/cards.css" />
+<%- include('../../partials/htmlStructure/head.ejs') -%>
+<%-include('../../partials/navbar.ejs') -%>
 
-<div class="columns">
-  <div class="column" id="users-list-container">
-    <p>Username: <%= user.username%></p>
-    <p>UserID: <%= user.id%></p>
+<div class="columns playingCards fourColours rotateHand">
+  <div class="column is-one-fifth" id="users-list-container">
+    <div>GameID: <%= game.id%></div>
+    <div id="game_pot" data-it="<%=game.game_pot%>">
+      Game Pot: <%= game.game_pot%>
+    </div>
+    <div id="min_bet" data-it="<%=game.min_bet%>">
+      Min Bet: <%= game.min_bet%>
+    </div>
+    <div id="curr_turn" data-it="<%=game.curr_game_player_id%>">
+      Current player turn: <%= game.curr_game_player_id%>
+    </div>
+    <div id="game_round" data-it="<%=game.game_round%>">
+      Game Round: <%= game.game_round%>
+    </div>
     <br />
-    <p>GameID: <%= game.id%></p>
-    <p id="game_pot">Game Pot: <%= game.game_pot%></p>
-    <p id="min_bet">MinBet: <%= game.min_bet%></p>
-    <p id="curr_turn">Action on player: <%= game.curr_game_player_id%></p>
-    <p>Game Round: <%= game.game_round%></p>
-    <br />
-    <p>IDDeck: <%= game.id_deck%></p>
-    <p>Gameplayer info and card info.</p>
+    <div>IDDeck: <%= game.id_deck%></div>
+    <div>Gameplayer info and card info.</div>
   </div>
   <div
     id="game"
@@ -22,72 +26,95 @@ include('../../partials/navbar.ejs') -%>
     gameround="<%=game.game_round%>"
     class="column is-flex is-flex-direction-column is-two-thirds"
   >
-    <!-- Body of game goes here -->
-    <!-- <div id="dealer-cards" class="hand"> -->
-    <!-- <div class="game-card ace spade"></div> -->
-    <!-- <div class="game-card king club"></div> -->
-    <!-- <div class="game-card eight heart"></div> -->
-    <!-- <div class="game-card queen diamond"></div> -->
-    <!-- <div class="game-card jack spade"></div> -->
-    <!-- </div> -->
-    <%players.forEach((player)=>{%>
-    <p>Money: <%= player.money%></p>
-    <p><%= player.username%></p>  
-    <% if(player.id === user.id){%>
-    <% if(game.game_round === 1){%>  
-      <div class="game-card <%= yourCards.translatedCard1.value%> <%= yourCards.translatedCard1.suit%>"></div>
-      <div class="game-card <%= yourCards.translatedCard2.value%> <%= yourCards.translatedCard2.suit%>"></div>
-    <% } %>
-    <div id="<%= player.id%>">
-    </div>
     <div id="community-cards">
-      COMMUNITY CARDS
+      COMMUNITY CARDS <%if(community.length!==0){%> <%community.forEach((card)
+      => {%>
+
+      <div class="card rank-<%=card.value%> <%=card.suit%>">
+        <span class="rank"><%=card.value%></span>
+        <span class="suit">&<%=card.suit%>;</span>
+      </div>
+      <%})}%>
     </div>
-    <div class="columns m-0 p-0">
-      <div class="field column p-0 m-0 is-2">
-        <div class="control has-icons-left has-icons-right">
-          <input id="action-amount" class="input is-small " type="number" type="number" min="1"
-          step="any" value=<%= game.min_bet%>>
-          <span class="icon is-left">
-            <i class="fas fa-dollar-sign"></i>
-          </span>
+    <br />
+    <br />
+    <div id="players">
+      <%players.forEach((player)=>{%>
+      <div id="<%= player.gpid%>" class="is-flex is-flex-direction-column">
+        <div id="<%=player.gpid%>info">
+          <p>Money: <%= player.money%></p>
+          <p><%= player.username%></p>
+        </div>
+        <% if(player.id === user.id){%>
+        <ul class="table">
+          <li id="card-hand<%=player.gpid%>">
+            <% if(game.game_round >=1 && !player.player_folded){%>
+            <div
+              class="card rank-<%= yourCards.translatedCard1.value%> <%= yourCards.translatedCard1.suit%>"
+            >
+              <span class="rank"><%= yourCards.translatedCard1.value%></span>
+              <span class="suit">&<%= yourCards.translatedCard1.suit%>;</span>
+            </div>
+            <div
+              class="card rank-<%= yourCards.translatedCard2.value%> <%= yourCards.translatedCard2.suit%>"
+            >
+              <span class="rank"><%= yourCards.translatedCard2.value%></span>
+              <span class="suit">&<%= yourCards.translatedCard2.suit%>;</span>
+            </div>
+            <%}%>
+          </li>
+        </ul>
+        <div class="columns m-0 p-0">
+          <div class="field column p-0 m-0 is-2">
+            <div class="control has-icons-left has-icons-right">
+              <input
+                id="action-amount"
+                class="input is-small"
+                type="number"
+                type="number"
+                min="1"
+                step="any"
+                value="<%=game.min_bet%>"
+              />
+              <span class="icon is-left">
+                <i class="fas fa-dollar-sign"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div id="user-action-buttons" class="field has-addons">
+          <p class="control">
+            <button name="fold" class="action-button button m-0">Fold</button>
+          </p>
+          <p class="control">
+            <button name="reset" class="action-button button m-0">Reset</button>
+          </p>
+        </div>
+        <div class="field has-addons">
+          <p class="control">
+            <button name="leave" class="action-button button m-0">
+              Leave Game
+            </button>
+          </p>
+        </div>
+        <div id="error-field">
+          <p id="error"></p>
         </div>
       </div>
-    </div>
-    <div id="user-action-buttons" class="field has-addons">
-      <p class="control">
-        <button name="fold" class="action-button button m-0">Fold</button>
-      </p>
-      <p class="control">
-        <button name="reset" class="action-button button m-0">Reset</button>
-      </p>
-    </div>
-    <div class="field has-addons">
-      <p class="control">
-        <button name="leave" class="action-button button m-0">Leave Game</button>
-      </p>
-    </div>
-    <div id="error-field">
-      <p id="error"></p>
+      <%}else{%>
+      <ul class="table">
+        <li class="card-hand<%=player.gpidid%>">
+          <div class="card back">*</div>
+          <div class="card back">*</div>
+        </li>
+      </ul>
     </div>
     <%}})%>
   </div>
+</div>
+<div>
   <div class="column"></div>
 </div>
 
 <%- include('../../partials/chat.ejs') -%> <%-
 include('../../partials/htmlStructure/gameFoot.ejs') -%>
-
-<!-- <table class="table is-striped" id="users-list">
-      <tr>
-        <td>Each user</td>
-        <td>SML BLIND</td>
-      </tr>
-      <tr>
-        <td>In game</td>
-        <td>BIG BLIND</td>
-      </tr>
-      <tr>
-        <td>Will go here</td>
-      </tr>
-    </table> -->

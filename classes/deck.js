@@ -48,10 +48,10 @@ const getAllOwnedCardsInDeck = (deckId) => {
   );
 };
 
-const getAllCommunityCardsInDeck = (deckId) => {
-  return db.many(
-    'SELECT * FROM deck_card WHERE id_deck = $1 AND game_player_id = 0',
-    [deckId],
+const getAllCommunityCardsInDeck = (deckId, dealer_id) => {
+  return db.any(
+    'SELECT * FROM deck_card WHERE id_deck = $1 AND game_player_id = $2',
+    [deckId, dealer_id],
   );
 };
 // If the card is being dealt to the table,
