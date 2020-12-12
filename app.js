@@ -24,13 +24,13 @@ const dropSessionOnStart = process.env.NODE_ENV !== 'dev';
 if (dropSessionOnStart) {
   const fullPath = path.join(__dirname, './sql/initSession.sql'); // generating full path;
   db.any(new QueryFile(fullPath, { minify: true })).then(() => {
-    console.log('Initialized session table');
+    ('Initialized session table');
   });
 }
 
 // Initialize static card data
 // const initalizeCardsOnStart = process.env.NOD_ENV !== 'dev';
-// const initalizeCardsOnStart =true;
+// const initalizeCardsOnStart = false;
 // if (initalizeCardsOnStart) {
 // const fullPath = path.join(__dirname, './csv/scripts.sql'); // generating full path;
 // db.any(new QueryFile(fullPath, { minify: true })).then(() => {
