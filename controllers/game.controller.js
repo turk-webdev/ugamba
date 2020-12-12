@@ -595,7 +595,44 @@ const actionHandler = async (req) => {
     if (count === 1) {
       console.log('update game round here');
       const curr_game_round = await Game.getGameRound(game_id);
-      await Game.updateGameRound(game_id, curr_game_round.game_round + 1);
+      const i_curr_game_round = curr_game_round.game_round;
+      // get the id_game_player via id_user of 0 and curr_game_id
+      const dealer_id = await GamePlayer.getByUserIdAndGameId(0, game_id);
+      // another switch goes here?
+      switch (i_curr_game_round) {
+        case (1):
+          // i.e. we are going from 1 to 2, so its three cards on the table
+          // if this case, do default case three times?
+          break;
+        default:
+          // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5, we just
+          // give the dealer one card
+          Deck.getDeckByGameId(parseInt(game_id))
+            .then((data) => {
+              return parseInt(data.id_deck);
+            })
+            .then((deckId) => {
+              return Deck.getAllUnownedCardsInDeck(deckId);
+            })
+            .then((data) => {
+              const randIndex = Math.floor(Math.random() * data.length); // Generates random int 0 to data.length-1
+              return data[randIndex]; // Picks a random card from the dealable cards
+            })
+            .then((card) => {
+              const cardId = parseInt(card.id);
+              return Deck.assignDeckCardToPlayerHand(cardId, parseInt(dealer_id));
+            })
+            .then(() => {
+              // socket shit
+            })
+            .catch((error) => {
+              // left over from cpypasta, needs to be addressed?
+              // TODO: Do some real error handling/checking
+              console.log(error);
+              res.sendStatus(500);
+            });
+
+      await Game.updateGameRound(game_id, i_curr_game_round + 1);
     }
   }
   if (player_actions.length === 1) {
