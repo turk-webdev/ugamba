@@ -600,46 +600,28 @@ const actionHandler = async (req) => {
       const dealer_id = await GamePlayer.getByUserIdAndGameId(0, game_id);
       // another switch goes here?
       switch (i_curr_game_round) {
-        case (1):
+        case 1:
           // i.e. we are going from 1 to 2, so its three cards on the table
           // if this case, do default case three times?
+          for (let i = 0; i < 3; i++) {
+            Card.addCard(game_id, dealer_id);
+          }
           break;
         default:
-          // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5, we just
+          // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5
           // give the dealer one card
-          Deck.getDeckByGameId(parseInt(game_id))
-            .then((data) => {
-              return parseInt(data.id_deck);
-            })
-            .then((deckId) => {
-              return Deck.getAllUnownedCardsInDeck(deckId);
-            })
-            .then((data) => {
-              const randIndex = Math.floor(Math.random() * data.length); // Generates random int 0 to data.length-1
-              return data[randIndex]; // Picks a random card from the dealable cards
-            })
-            .then((card) => {
-              const cardId = parseInt(card.id);
-              return Deck.assignDeckCardToPlayerHand(cardId, parseInt(dealer_id));
-            })
-            .then(() => {
-              // socket shit
-            })
-            .catch((error) => {
-              // left over from cpypasta, needs to be addressed?
-              // TODO: Do some real error handling/checking
-              console.log(error);
-              res.sendStatus(500);
-            });
-
+          Card.addCard(game_id, dealer_id);
+          break;
+      }
       await Game.updateGameRound(game_id, i_curr_game_round + 1);
+      return;
     }
-  }
-  if (player_actions.length === 1) {
-    console.log('WINNER => ', user.id);
-  }
+    if (player_actions.length === 1) {
+      console.log('WINNER => ', user.id);
+    }
 
-  // return res.send('hello world');
+    // return res.send('hello world');
+  }
 };
 
 module.exports = {
