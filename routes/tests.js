@@ -80,4 +80,11 @@ router.post('/win', async (req,res) => {
   console.log(winner);
 });
 
+router.post('/translate', async (req,res) => {
+  const { card_id } = req.body;
+  const obj = require('../classes/cardTranslate');
+  const re = await obj.getValueFromCode(card_id);
+  console.log(re);
+})
+
 module.exports = router;
