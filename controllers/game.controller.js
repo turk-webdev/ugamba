@@ -4,6 +4,8 @@ const GamePlayer = require('../classes/game_player');
 const Card = require('../classes/card');
 const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
+const { getAllPlayersPossibleHands } = require('../classes/winBuilder');
+const { getWinningPlayer } = require('../classes/winChecker');
 // const { getGameRound } = require('../classes/game');
 
 const MAX_NUM_PLAYER_IN_GAME = 7;
@@ -63,7 +65,6 @@ const joinGame = async (req, res) => {
       Game.findDeckByGameId(game_id).then((deck) => {
         // eslint-disable-next-line max-len
         Deck.getAllOwnedCardsInDeck(deck.id_deck).then((playercards) => {
-          console.log('playercards => ', playercards);
           io.to(game_id).emit('init game', {
             cards: playercards,
           });
@@ -79,8 +80,14 @@ const joinGame = async (req, res) => {
         game_player.id,
       );
       if (player_cards.length === 2) {
-        translatedCard1 = Card.translateCard(player_cards[0].id_card);
-        translatedCard2 = Card.translateCard(player_cards[1].id_card);
+        translatedCard1 = {
+          suit: player_cards[0].suit_display,
+          value: player_cards[0].value_display,
+        };
+        translatedCard2 = {
+          suit: player_cards[1].suit_display,
+          value: player_cards[1].value_display,
+        };
       }
     }
   }
@@ -91,8 +98,7 @@ const joinGame = async (req, res) => {
   });
   if (community.length !== 0) {
     community = community.map((card) => {
-      console.log('card => ', card);
-      return Card.translateCard(card.id_card);
+      return { value: card.value_display, suit: card.suit_display };
     });
   }
 
@@ -149,7 +155,6 @@ const createOrJoin = async (req, res) => {
               io.to(req.session.passport.user.socket).emit('join game', {
                 game_id: game.id,
               });
-              console.log('GAME INIT!!!!!!');
               return res.send(game);
             })
             .catch(() => {
@@ -331,7 +336,6 @@ const actionHandler = async (req, res) => {
 
     io.to(userSocket).emit('leave game');
     const numPlayers = await Game.getNumPlayers(game_id);
-    console.log('numPlayers => ', numPlayers.count.toString());
     if (numPlayers.count.toString() === 0) {
       await Game.delete(game_id);
       await GamePlayer.deleteAllPlayersFromGame(game_id);
@@ -575,20 +579,15 @@ const actionHandler = async (req, res) => {
   const currPlayerActionIndex = player_actions.findIndex(
     (element) => element.id === curr_game_player_id.curr_game_player_id,
   );
-  console.log('player_actions', player_actions);
-  console.log('currPlayerActionIndex => ', currPlayerActionIndex);
 
   let target_index = currPlayerActionIndex + 1;
   if (target_index === player_actions.length) {
     target_index = 0;
   }
-  console.log('currPlayerActionIndex => ', currPlayerActionIndex);
   const lastPlayerAction =
     player_actions[currPlayerActionIndex].player_last_action;
   const nextPlayerAction =
     player_actions[target_index].player_last_action || null;
-  console.log('lastPlayerAction => ', lastPlayerAction);
-  console.log('nextPlayerAction => ', nextPlayerAction);
   if (
     (lastPlayerAction === PlayerActions.CHECK ||
       lastPlayerAction === PlayerActions.CALL) &&
@@ -604,14 +603,14 @@ const actionHandler = async (req, res) => {
         count += 1;
       }
     }
-    console.log('count => ', count);
+    if (player_actions.length === 1) {
+      console.log('WINNER => ', user.id);
+    }
     if (count === 1) {
       const curr_game_round = await Game.getGameRound(game_id);
       const i_curr_game_round = curr_game_round.game_round;
       // get the id_game_player via id_user of 0 and curr_game_id
       const dealer = await GamePlayer.getByUserIdAndGameId(0, game_id);
-      console.log('dealer_id =>', dealer);
-      // another switch goes here?
       switch (i_curr_game_round) {
         case 1:
           // i.e. we are going from 1 to 2, so its three cards on the table
@@ -629,15 +628,31 @@ const actionHandler = async (req, res) => {
             );
           });
           break;
+        case 4:
+          const allPlayersPossibleHands = await getAllPlayersPossibleHands(
+            game_id,
+          );
+          const winningPlayer = getWinningPlayer(allPlayersPossibleHands);
+          console.log('winningPlayer.id => ', winningPlayer.id);
+          const winner = await GamePlayer.getByGamePlayerId(winningPlayer.id);
+          /*TODO: 
+            set all players to unfolded, 
+            send socket that shows winner,
+            send game pot to winner, 
+            set game round to 1, 
+            set current players turn to first player,
+            move blinds,
+            send cards out to players
+            */
+          console.log('WINNER => ', winner);
+          return;
         default:
           // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5
           // give the dealer one card
-          console.log('adding community card');
           Card.addCard(game_id, dealer.id);
           Game.findDeckByGameId(game_id).then((deck) => {
             Deck.getAllCommunityCardsInDeck(deck.id_deck, dealer.id).then(
               (communityCards) => {
-                console.log('communityCards => ', communityCards);
                 io.to(game_id).emit('update community cards', {
                   cards: communityCards,
                 });
@@ -646,11 +661,8 @@ const actionHandler = async (req, res) => {
           });
           break;
       }
+      io.emit('round update', i_curr_game_round + 1);
       await Game.updateGameRound(game_id, i_curr_game_round + 1);
-      return;
-    }
-    if (player_actions.length === 1) {
-      console.log('WINNER => ', user.id);
     }
 
     // return res.send('hello world');

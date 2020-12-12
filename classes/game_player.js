@@ -28,6 +28,13 @@ class Game_player {
     );
   }
 
+  static getByGamePlayerId(game_player_id) {
+    return db.one(
+      `SELECT * FROM game_player AS gp INNER JOIN users AS u ON gp.id_user = u.id WHERE gp.id = $1`,
+      [game_player_id],
+    );
+  }
+
   static findAllGamesByUserId(user_id) {
     return db.any(
       `SELECT game.id, game.game_pot, game.min_bet, game.game_round, game.curr_game_player_id FROM game INNER JOIN game_player ON game.id=game_player.id_game WHERE game_player.id_user=$1 ORDER BY game.id;`,

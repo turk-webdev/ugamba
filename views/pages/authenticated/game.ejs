@@ -27,8 +27,8 @@
     class="column is-flex is-flex-direction-column is-two-thirds"
   >
     <div id="community-cards">
-      COMMUNITY CARDS <%if(community.length!==0){%> <%community.forEach((card)
-      => {%>
+      COMMUNITY CARDS <%if(community.length!==0){%> 
+      <%community.forEach((card)=> {%>
 
       <div class="card rank-<%=card.value%> <%=card.suit%>">
         <span class="rank"><%=card.value%></span>
@@ -72,9 +72,9 @@
                 class="input is-small"
                 type="number"
                 type="number"
-                min="1"
+                min=<%=game.min_bet%>
                 step="any"
-                value="<%=game.min_bet%>"
+                value="<%=game.min_bet + 1%>"
               />
               <span class="icon is-left">
                 <i class="fas fa-dollar-sign"></i>
