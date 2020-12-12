@@ -595,14 +595,33 @@ const actionHandler = async (req) => {
     if (count === 1) {
       console.log('update game round here');
       const curr_game_round = await Game.getGameRound(game_id);
-      await Game.updateGameRound(game_id, curr_game_round.game_round + 1);
+      const i_curr_game_round = curr_game_round.game_round;
+      // get the id_game_player via id_user of 0 and curr_game_id
+      const dealer_id = await GamePlayer.getByUserIdAndGameId(0, game_id);
+      // another switch goes here?
+      switch (i_curr_game_round) {
+        case 1:
+          // i.e. we are going from 1 to 2, so its three cards on the table
+          // if this case, do default case three times?
+          for (let i = 0; i < 3; i++) {
+            Card.addCard(game_id, dealer_id);
+          }
+          break;
+        default:
+          // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5
+          // give the dealer one card
+          Card.addCard(game_id, dealer_id);
+          break;
+      }
+      await Game.updateGameRound(game_id, i_curr_game_round + 1);
+      return;
     }
-  }
-  if (player_actions.length === 1) {
-    console.log('WINNER => ', user.id);
-  }
+    if (player_actions.length === 1) {
+      console.log('WINNER => ', user.id);
+    }
 
-  // return res.send('hello world');
+    // return res.send('hello world');
+  }
 };
 
 module.exports = {
