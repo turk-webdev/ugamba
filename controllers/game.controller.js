@@ -4,6 +4,7 @@ const GamePlayer = require('../classes/game_player');
 const Card = require('../classes/card');
 const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
+const Helper = require('../classes/actionHandlerHelper');
 const { getAllPlayersPossibleHands } = require('../classes/winBuilder');
 const { getWinningPlayer } = require('../classes/winChecker');
 // const { getGameRound } = require('../classes/game');
@@ -21,6 +22,7 @@ const joinGame = async (req, res) => {
   const games = await GamePlayer.findAllGamesByUserId(req.user.id);
   let community = [];
   const dealer = await GamePlayer.getByUserIdAndGameId(0, game_id);
+
   Game.findDeckByGameId(game_id).then((deck) => {
     Deck.getAllCommunityCardsInDeck(deck.id_deck, dealer.id).then(
       (communityCards) => {
@@ -28,6 +30,7 @@ const joinGame = async (req, res) => {
       },
     );
   });
+
   let players = await GamePlayer.findAllPlayersByGameId(game_id);
   let game_player = await GamePlayer.getByUserIdAndGameId(req.user.id, game_id);
   const user = await User.findOneById(game_player.id_user);
@@ -52,8 +55,10 @@ const joinGame = async (req, res) => {
         await GamePlayer.setPlayertoUnfoldByPlayerId(player.gpid, game_id);
         // TODO: Should set the blind status and player order here
       });
+
       await Game.setCurrGamePlayerId(game_id, players[0].gpid);
       await Game.updateGameRound(game_id, 1);
+
       io.emit('round update', 1);
       io.emit('update-turn', players[0].gpid);
       io.emit('turn-notification-on', players[0].gpid);
@@ -324,6 +329,7 @@ const actionHandler = async (req, res) => {
 
   let i_game_pot;
   let updated_game_pot;
+
   /*
    *this is the main action handler
    * Each case should emit a socket action to the player making the action,
@@ -331,25 +337,12 @@ const actionHandler = async (req, res) => {
    */
 
   if (game_action === PlayerActions.LEAVE) {
-    io.to(userSocket).emit('status-msg', {
-      type: 'success',
-      msg: 'Leaving...',
-    });
-    const gameplayer = await GamePlayer.getByUserIdAndGameId(user.id, game_id);
-
-    io.to(userSocket).emit('leave game');
-    io.to(game_id).emit('user left', gameplayer);
-    await GamePlayer.removePlayer(user.id, game_id);
-    const numPlayers = await Game.getNumPlayers(game_id);
-    if (parseInt(numPlayers.count) <= 1) {
-      io.to(game_id).emit('game end');
-      await Game.delete(game_id);
-      await GamePlayer.deleteAllPlayersFromGame(game_id);
-    }
-    return res.send('error');
+    return Helper.processLeave(req, res);
   }
+
   const curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
   const game_player = await GamePlayer.getByUserIdAndGameId(user.id, game_id);
+
   if (curr_game_player_id.curr_game_player_id !== game_player.id) {
     // its not that users turn
     io.to(userSocket).emit('status-msg', {
@@ -358,147 +351,20 @@ const actionHandler = async (req, res) => {
     });
     return res.send('error');
   }
+
   // eslint-disable-next-line
   switch (game_action) {
     case PlayerActions.CHECK:
-      // literally nothing happens, signify in user game window by greying
-      // out actions for that 'turn'?
-      await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
-      io.to(userSocket).emit('status-msg', {
-        type: 'success',
-        msg: 'Checked!',
-      });
+      Helper.checkHandler(io);
       break;
     case PlayerActions.BET:
-      {
-        // we need to get the users money, validate bet
-        // if validated then we can remove the money from the user
-        // finally we can then add that amount to the game pot
-        const user_money = await User.getMoneyById(user.id);
-        const min_bid = await Game.getMinBet(game_id);
-        const i_user_money = parseInt(Object.values(user_money));
-        const i_min_bid = parseInt(Object.values(min_bid));
-        if (i_action_amount === 0) {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'Thats not a bet, use check instead!',
-          });
-          return res.send('error');
-        }
-        if (i_user_money >= i_action_amount && i_action_amount >= i_min_bid) {
-          const new_value = i_user_money - i_action_amount;
-          await User.updateMoneyById(user.id, new_value);
-          const gamePot = await Game.getGamePot(game_id);
-          i_game_pot = parseInt(Object.values(gamePot));
-          updated_game_pot = i_game_pot + i_action_amount;
-          await Game.updateGamePot(game_id, i_game_pot + i_action_amount);
-          await Game.updateMinBet(game_id, i_action_amount);
-          await GamePlayer.updatePlayerLastAction(
-            game_id,
-            user.id,
-            game_action,
-          );
-          io.to(userSocket).emit('user update', {
-            id: game_player.id,
-            money: new_value,
-          });
-          io.to(game_id).emit('game update', {
-            min_bet: i_action_amount,
-            game_pot: updated_game_pot,
-          });
-        } else {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'You dont have enough money!',
-          });
-          return res.send('error');
-        }
-      }
+      Helper.betHandler(req, res);
       break;
     case PlayerActions.CALL:
-      {
-        // we need to get the users money, validate bet
-        // if validated then we can remove the money from the user
-        // finally we can then add that amount to the game pot
-        const user_money = await User.getMoneyById(user.id);
-        const min_bid = await Game.getMinBet(game_id);
-        const i_user_money = parseInt(Object.values(user_money));
-        const i_min_bid = parseInt(Object.values(min_bid));
-        if (i_user_money >= i_min_bid) {
-          const new_value = i_user_money - i_min_bid;
-          await User.updateMoneyById(user.id, new_value);
-          const gamePot = await Game.getGamePot(game_id);
-          i_game_pot = parseInt(Object.values(gamePot));
-          updated_game_pot = i_game_pot + i_min_bid;
-          await Game.updateGamePot(game_id, i_game_pot + i_min_bid);
-          await GamePlayer.updatePlayerLastAction(
-            game_id,
-            user.id,
-            game_action,
-          );
-          io.to(userSocket).emit('user update', {
-            id: game_player.id,
-            money: new_value,
-          });
-          io.to(game_id).emit('game update', {
-            min_bet: i_min_bid,
-            game_pot: updated_game_pot,
-          });
-        } else {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'You dont have enough money!',
-          });
-        }
-      }
+      Helper.callHandler(req, res);
       break;
     case PlayerActions.RAISE:
-      {
-        // we need to get the users money, validate bet
-        // if validated then we can remove the money from the user
-        // finally we can then add that amount to the game pot
-        const user_money = await User.getMoneyById(user.id);
-        const min_bid = await Game.getMinBet(game_id);
-        const i_user_money = parseInt(Object.values(user_money));
-        const i_min_bid = parseInt(Object.values(min_bid));
-        if (
-          i_user_money >= i_action_amount + i_min_bid &&
-          i_action_amount !== 0
-        ) {
-          const new_value = i_user_money - i_action_amount - i_min_bid;
-          await User.updateMoneyById(user.id, new_value);
-          const gamePot = await Game.getGamePot(game_id);
-          i_game_pot = parseInt(Object.values(gamePot));
-          updated_game_pot = i_game_pot + i_action_amount + i_min_bid;
-          await Game.updateGamePot(game_id, updated_game_pot);
-          await Game.updateMinBet(game_id, i_action_amount + i_min_bid);
-          await GamePlayer.updatePlayerLastAction(
-            game_id,
-            user.id,
-            game_action,
-          );
-          io.to(userSocket).emit('user update', {
-            id: game_player.id,
-            money: new_value,
-          });
-          io.to(game_id).emit('game update', {
-            min_bet: i_action_amount + i_min_bid,
-            game_pot: updated_game_pot,
-          });
-        } else if (i_action_amount === 0) {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'Thats not a raise, use Call instead!',
-          });
-          return res.send('error');
-        } else {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'You dont have enough money!',
-          });
-          return res.send('error');
-        }
-      }
+      Helper.raiseHandler(req, res);
       break;
     case PlayerActions.FOLD:
       io.to(userSocket).emit('status-msg', {
@@ -509,29 +375,7 @@ const actionHandler = async (req, res) => {
       await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
       break;
     case PlayerActions.RESET:
-      {
-        await Game.updateGamePot(game_id, 0);
-        await Game.updateMinBet(game_id, 0);
-        await User.updateMoneyById(user.id, 1000);
-        const user_money = await User.getMoneyById(user.id);
-        const min_bid = await Game.getMinBet(game_id);
-        const i_user_money = parseInt(Object.values(user_money));
-        const i_min_bid = parseInt(Object.values(min_bid));
-        const gamePot = await Game.getGamePot(game_id);
-        i_game_pot = parseInt(Object.values(gamePot));
-        io.to(userSocket).emit('user update', {
-          id: user.id,
-          money: i_user_money,
-        });
-        io.to(game_id).emit('game update', {
-          min_bet: i_min_bid,
-          game_pot: i_game_pot,
-        });
-        io.to(userSocket).emit('status-msg', {
-          type: 'success',
-          msg: 'Reset!',
-        });
-      }
+      Helper.resetHandler(req, res);
       break;
   }
   // list of game actions
