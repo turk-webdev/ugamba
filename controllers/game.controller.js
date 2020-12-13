@@ -363,7 +363,9 @@ const actionHandler = async (req, res) => {
       }
       break;
     case PlayerActions.CALL:
-      Helper.callHandler(req, res);
+      if (Helper.callHandler(req, res) > 0) {
+        return res.send('error');
+      }
       break;
     case PlayerActions.RAISE:
       if (Helper.raiseHandler(req, res) > 0) {

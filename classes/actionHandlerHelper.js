@@ -105,7 +105,10 @@ const callHandler = async (req, res) => {
         type: 'error',
         msg: 'You dont have enough money!',
         });
+        return 1;
     }
+
+    return 0;
 };
 
 const updateCommunityCards = async (req, io) => {
