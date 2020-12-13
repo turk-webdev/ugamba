@@ -341,7 +341,7 @@ const actionHandler = async (req, res) => {
     io.to(game_id).emit('user left', gameplayer);
     await GamePlayer.removePlayer(user.id, game_id);
     const numPlayers = await Game.getNumPlayers(game_id);
-    if (parseInt(numPlayers.count) - 1 <= 1) {
+    if (parseInt(numPlayers.count) <= 1) {
       io.to(game_id).emit('game end');
       await Game.delete(game_id);
       await GamePlayer.deleteAllPlayersFromGame(game_id);
