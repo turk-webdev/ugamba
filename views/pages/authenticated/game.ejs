@@ -1,6 +1,13 @@
 <%- include('../../partials/htmlStructure/head.ejs') -%>
 <%-include('../../partials/navbar.ejs') -%>
 
+  <div id='winner-modal' class="modal">
+    <div class="modal-background"></div>
+    <article class="message is-large modal-content">
+  <div id='winner-modal-content' class="message-body">
+  </div>
+</article>
+  </div>
 <div class="columns playingCards fourColours rotateHand">
   <div class="column is-one-fifth" id="users-list-container">
     <div>GameID: <%= game.id%></div>

@@ -12,7 +12,6 @@ const init = (server, session) => {
       session(socket.request, {}, next);
     })
     .on('connection', (socket) => {
-      console.log('a user connected');
       const user = socket.request.session.passport;
       // join global chat on connection always
       socket.join('chat-0');
@@ -77,9 +76,7 @@ const init = (server, session) => {
         socket.join(game_id);
       });
 
-      socket.on('disconnect', () => {
-        console.log('user disconnected');
-      });
+      socket.on('disconnect', () => {});
     });
   return io;
 };

@@ -14,6 +14,20 @@ class Game_player {
     );
   }
 
+  static updateAllUsersOfGameToUnfold(game_id) {
+    return db.none(
+      `UPDATE game_player SET player_folded = 0 WHERE id_game = $1`,
+      [game_id],
+    );
+  }
+
+  static resetLastActionOfAllUsersInGame(game_id) {
+    return db.none(
+      `UPDATE game_player SET player_last_action = NULL WHERE id_game = $1`,
+      [game_id],
+    );
+  }
+
   static getNumPlayersInGame(game_id) {
     return db.one(
       `SELECT COUNT(*) FROM game_player AS gp WHERE gp.id_game=$1;`,
@@ -30,7 +44,7 @@ class Game_player {
 
   static getByGamePlayerId(game_player_id) {
     return db.one(
-      `SELECT * FROM game_player AS gp INNER JOIN users AS u ON gp.id_user = u.id WHERE gp.id = $1`,
+      `SELECT gp.id, gp.id_game, gp.id_user, gp.blind_status, gp.player_folded, gp.player_last_action,u.username,u.money FROM game_player AS gp INNER JOIN users AS u ON gp.id_user = u.id WHERE gp.id = $1`,
       [game_player_id],
     );
   }
@@ -94,7 +108,7 @@ class Game_player {
 
   static findAllNonFoldedPlayers(id_game) {
     return db.any(
-      `SELECT * FROM game_player WHERE id_game=$1 AND player_folded=0 ORDER BY game_player.id;`,
+      `SELECT * FROM game_player WHERE id_game=$1 AND player_folded=0 AND id_user > 0 ORDER BY game_player.id;`,
       [id_game],
     );
   }
