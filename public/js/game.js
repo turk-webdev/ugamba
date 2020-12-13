@@ -57,10 +57,6 @@ if (chatMenuItem) {
  *                      Check Game Round Conditions
  * **************************************************************
  */
-console.log(gameRound);
-if (parseInt(gameRound) === 0) {
-  console.log('~~~~ Game Round Is 0, Waiting On More Players');
-}
 /*
  * **************************************************************
  *                      Helper functions
@@ -77,7 +73,6 @@ const addMessageToChat = (res) => {
   li.appendChild(document.createTextNode(`${res.message}`));
   span.classList.add(...coloredNameClassArr);
   messages.appendChild(li);
-  console.log('scrollheight => ', messages.scrollHeight);
   messages.scrollTop = messages.scrollHeight;
 };
 if (chatInput) {
@@ -116,7 +111,6 @@ const addClick = () => {
   Array.from(actionButtons).forEach((button) => {
     const gameAction = button.getAttribute('name');
     button.addEventListener('click', () => {
-      console.log('hello it got here');
       if (
         gameAction === PlayerActions.BET ||
         gameAction === PlayerActions.RAISE
@@ -155,9 +149,6 @@ const addPlayerToPlayerDiv = (game_player) => {
   playerDiv.setAttribute('id', game_player.id);
   playerDiv.appendChild(infoDiv);
   playerDiv.appendChild(tableUl);
-  console.log(cardHandLi);
-  console.log(tableUl);
-  console.log(playerDiv);
   document.getElementById('players').appendChild(playerDiv);
 };
 
@@ -229,69 +220,6 @@ const removeButtons = () => {
   buttons.removeChild(buttons.lastElementChild);
 };
 
-const translateCard = (id_card) => {
-  let suit;
-  let value;
-  if (parseInt(id_card) > 0 && parseInt(id_card) < 14) {
-    suit = 'clubs';
-    value = parseInt(id_card) + 1;
-  } else if (parseInt(id_card) > 13 && parseInt(id_card) < 27) {
-    suit = 'diams';
-    value = parseInt(id_card) + 1 - 14;
-  } else if (parseInt(id_card) > 26 && parseInt(id_card) < 40) {
-    suit = 'hearts';
-    value = parseInt(id_card) + 1 - 28;
-  } else if (parseInt(id_card) > 39 && parseInt(id_card) < 53) {
-    suit = 'spades';
-    value = parseInt(id_card) + 1 - 42;
-  }
-
-  switch (value) {
-    case 2:
-      value = 2;
-      break;
-    case 3:
-      value = 3;
-      break;
-    case 4:
-      value = 4;
-      break;
-    case 5:
-      value = 5;
-      break;
-    case 6:
-      value = 6;
-      break;
-    case 7:
-      value = 7;
-      break;
-    case 8:
-      value = 8;
-      break;
-    case 9:
-      value = 9;
-      break;
-    case 10:
-      value = 10;
-      break;
-    case 11:
-      value = 'j';
-      break;
-    case 12:
-      value = 'q';
-      break;
-    case 13:
-      value = 'k';
-      break;
-    case 14:
-      value = 'a';
-      break;
-    default:
-      break;
-  }
-  return { value, suit };
-};
-
 const removeNotification = () => {
   document
     .getElementById('error-field')
@@ -305,24 +233,23 @@ const removeNotification = () => {
  * **************************************************************
  */
 socket.on('init game', (results) => {
-  console.log('---- SOCKET STARTING THE GAME, RESULTS:', results);
   let gpid;
   // document.getElementById(`card-hand${card.game_player_id}`).innerHTML = '';
   results.cards.forEach((card) => {
     if (document.getElementById(`card-hand${card.game_player_id}`)) {
       const carddiv = document.createElement('div');
-      const translatedCard = translateCard(card.id_card);
+      // const translatedCard = translateCard(card.id_card);
       gpid = `card-hand${card.game_player_id}`;
       const cardDivClassArr = [
         'card',
-        `rank-${translatedCard.value}`,
-        `${translatedCard.suit}`,
+        `rank-${card.value_display}`,
+        `${card.suit_display}`,
       ];
       const rankSpan = document.createElement('span');
-      rankSpan.appendChild(document.createTextNode(translatedCard.value));
+      rankSpan.appendChild(document.createTextNode(card.value_display));
       rankSpan.classList.add('rank');
       const suitSpan = document.createElement('span');
-      suitSpan.innerHTML = `&${translatedCard.suit};`;
+      suitSpan.innerHTML = `&${card.suit_display};`;
       suitSpan.classList.add('suit');
 
       carddiv.classList.add(...cardDivClassArr);
@@ -336,29 +263,24 @@ socket.on('init game', (results) => {
 });
 
 socket.on('update community cards', (results) => {
-  console.log('---- SOCKET GOT THE COMMUNITY CARDS, RESULTS:', results);
   communityCards.innerHTML = '';
   results.cards.forEach((card) => {
-    const translatedCard = translateCard(card.id_card);
     const carddiv = document.createElement('div');
     const cardDivClassArr = [
       'card',
-      `rank-${translatedCard.value}`,
-      `${translatedCard.suit}`,
+      `rank-${card.value_display}`,
+      `${card.suit_display}`,
     ];
     const rankSpan = document.createElement('span');
-    rankSpan.appendChild(document.createTextNode(translatedCard.value));
+    rankSpan.appendChild(document.createTextNode(card.value_display));
     rankSpan.classList.add('rank');
     const suitSpan = document.createElement('span');
-    suitSpan.innerHTML = `&${translatedCard.suit};`;
+    suitSpan.innerHTML = `&${card.suit_display};`;
     suitSpan.classList.add('suit');
 
     carddiv.classList.add(...cardDivClassArr);
     carddiv.appendChild(rankSpan);
     carddiv.appendChild(suitSpan);
-    console.log(rankSpan);
-    console.log(suitSpan);
-    console.log(carddiv);
     if (communityCards) {
       communityCards.appendChild(carddiv);
     }
@@ -431,6 +353,9 @@ socket.on('user update', (gamePlayer) => {
 });
 
 socket.on('game update', (game) => {
+  const actionAmountInput = document.getElementById('action-amount');
+  actionAmountInput.setAttribute('min', game.min_bet);
+  actionAmountInput.setAttribute('value', game.min_bet + 1);
   document
     .getElementById('min_bet')
     .getAttribute('data-it', game.min_bet.toString());
@@ -448,7 +373,6 @@ socket.on('game update', (game) => {
 });
 
 socket.on('round update', (game_round) => {
-  console.log('game round => ', game_round);
   document.getElementById('game_round').setAttribute('data-it', game_round);
   document.getElementById(
     'game_round',
@@ -485,6 +409,5 @@ socket.on('update-turn', (id) => {
 });
 
 socket.on('add player', (game_player) => {
-  console.log('adding player to player div');
   addPlayerToPlayerDiv(game_player);
 });

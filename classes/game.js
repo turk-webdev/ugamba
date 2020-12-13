@@ -21,7 +21,6 @@ class Game {
         return new Game(undefined, 1, deck.id, 0);
       })
       .catch((error) => {
-        console.log('error creating game: ', error);
         throw new Error('Game creation failure.');
       });
   }

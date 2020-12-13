@@ -19,11 +19,11 @@ const addCard = (gameId, gpid) => {
     })
     .then((result) => {
       // return res.sendStatus(200);
+      console.log('result in addCard => ', result);
       return result;
     })
-    .catch((error) => {
+    .catch(() => {
       // TODO: Do some real error handling/checking
-      console.log(`Error adding card to deck: ${error}`);
       // res.sendStatus(500);
     });
 };
