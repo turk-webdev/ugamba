@@ -19,7 +19,6 @@ const addCard = (gameId, gpid) => {
     })
     .then((result) => {
       // return res.sendStatus(200);
-      console.log('result in addCard => ', result);
       return result;
     })
     .catch(() => {

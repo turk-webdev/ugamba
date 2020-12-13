@@ -88,7 +88,7 @@ class Game {
 
   static getNumPlayers(game_id) {
     return db.one(
-      `SELECT COUNT(*) FROM game_player AS gp WHERE gp.id_game=$1;`,
+      `SELECT COUNT(*) FROM game_player AS gp WHERE gp.id_game=$1 AND gp.id_user > 0;`,
       [game_id],
     );
   }

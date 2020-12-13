@@ -7,7 +7,7 @@ const gameId = document.getElementById('game').getAttribute('data-it');
 const chatText = document.getElementById('chat-input');
 const chatSubmit = document.getElementById('chat-submit');
 const chatInput = document.getElementById('chat-input');
-const gameRound = document.getElementById('game_round').getAttribute('data-it');
+const playersDiv = document.getElementById('players');
 const communityCards = document.getElementById('community-cards');
 
 const PlayerActions = {
@@ -167,7 +167,7 @@ const addButtons = () => {
   secondPNode.classList.add(...pClassArr);
   secondButtonNode.classList.add(...bClassArr);
 
-  if (min_bet === 0) {
+  if (parseInt(min_bet) === 0) {
     const betText = document.createTextNode('Bet');
     const checkText = document.createTextNode('Check');
     firstButtonNode.appendChild(betText);
@@ -226,6 +226,21 @@ const removeNotification = () => {
     .classList.remove('is-success', 'is-danger', 'column', 'is-one-quarter');
   document.getElementById('error').innerHTML = '';
 };
+const clearPlayerCards = () => {
+  playersDiv.childNodes.forEach((player) => {
+    if (player.tagName === 'DIV') {
+      const playerId = player.getAttribute('id');
+      const cardHandLi = document.getElementById(`card-hand${playerId}`);
+      if (cardHandLi === null) {
+        return;
+      }
+
+      while (cardHandLi.firstChild) {
+        cardHandLi.removeChild(cardHandLi.lastChild);
+      }
+    }
+  });
+};
 
 /*
  * **************************************************************
@@ -234,6 +249,7 @@ const removeNotification = () => {
  */
 socket.on('init game', (results) => {
   let gpid;
+  clearPlayerCards();
   // document.getElementById(`card-hand${card.game_player_id}`).innerHTML = '';
   results.cards.forEach((card) => {
     if (document.getElementById(`card-hand${card.game_player_id}`)) {
@@ -285,6 +301,20 @@ socket.on('update community cards', (results) => {
       communityCards.appendChild(carddiv);
     }
   });
+});
+
+socket.on('user left', (game_player) => {
+  document.getElementById(game_player.id).remove();
+});
+socket.on('game end', () => {
+  document.getElementById(
+    'winner-modal-content',
+  ).innerHTML = `The game has ended. Sending you back home`;
+  document.getElementById('winner-modal').classList.add('is-active');
+  setTimeout(() => {
+    document.getElementById('winner-modal').classList.remove('is-active');
+    window.location.href = `/`;
+  }, 3000);
 });
 
 socket.on('leave game', () => {
@@ -345,6 +375,17 @@ socket.on('status-msg', (msg) => {
   setTimeout(removeNotification, 3000);
 });
 
+socket.on('broadcast winner', (winner) => {
+  document.getElementById(
+    'winner-modal-content',
+  ).innerHTML = `WINNER: ${winner.winner.username} with a pot of $${winner.pot}`;
+  document.getElementById('winner-modal').classList.add('is-active');
+  setTimeout(() => {
+    document.getElementById('winner-modal').classList.remove('is-active');
+    document.getElementById('winner-modal-content').innerHTML = '';
+  }, 3000);
+});
+
 socket.on('user update', (gamePlayer) => {
   document.getElementById(
     gamePlayer.id,
@@ -356,15 +397,11 @@ socket.on('game update', (game) => {
   const actionAmountInput = document.getElementById('action-amount');
   actionAmountInput.setAttribute('min', game.min_bet);
   actionAmountInput.setAttribute('value', game.min_bet + 1);
-  document
-    .getElementById('min_bet')
-    .getAttribute('data-it', game.min_bet.toString());
+  document.getElementById('min_bet').setAttribute('data-it', game.min_bet);
   document.getElementById(
     'min_bet',
   ).innerHTML = `Min Bet: ${game.min_bet.toString()}`;
-  document
-    .getElementById('game_pot')
-    .setAttribute('data-it', game.game_pot.toString());
+  document.getElementById('game_pot').setAttribute('data-it', game.game_pot);
   document.getElementById(
     'game_pot',
   ).innerHTML = `Game Pot: ${game.game_pot.toString()}`;

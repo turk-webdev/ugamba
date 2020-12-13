@@ -315,12 +315,15 @@ const actionHandler = async (req, res) => {
   const { user } = req;
   const action_amount = req.body.amount;
   const i_action_amount = parseInt(action_amount);
+  const game = await Game.findById(game_id);
 
   // eslint-disable-next-line
   const userSocket = req.session.passport.user.socket;
 
   const io = req.app.get('io');
 
+  let i_game_pot;
+  let updated_game_pot;
   /*
    *this is the main action handler
    * Each case should emit a socket action to the player making the action,
@@ -328,19 +331,22 @@ const actionHandler = async (req, res) => {
    */
 
   if (game_action === PlayerActions.LEAVE) {
-    await GamePlayer.removePlayer(user.id, game_id);
     io.to(userSocket).emit('status-msg', {
       type: 'success',
       msg: 'Leaving...',
     });
+    const gameplayer = await GamePlayer.getByUserIdAndGameId(user.id, game_id);
 
     io.to(userSocket).emit('leave game');
+    io.to(game_id).emit('user left', gameplayer);
+    await GamePlayer.removePlayer(user.id, game_id);
     const numPlayers = await Game.getNumPlayers(game_id);
-    if (numPlayers.count.toString() === 0) {
+    if (parseInt(numPlayers.count) <= 1) {
+      io.to(game_id).emit('game end');
       await Game.delete(game_id);
       await GamePlayer.deleteAllPlayersFromGame(game_id);
     }
-    return res.send();
+    return res.send('error');
   }
   const curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
   const game_player = await GamePlayer.getByUserIdAndGameId(user.id, game_id);
@@ -350,7 +356,7 @@ const actionHandler = async (req, res) => {
       type: 'error',
       msg: 'Its not your turn!',
     });
-    return res.send();
+    return res.send('error');
   }
   // eslint-disable-next-line
   switch (game_action) {
@@ -377,13 +383,14 @@ const actionHandler = async (req, res) => {
             type: 'error',
             msg: 'Thats not a bet, use check instead!',
           });
-          return res.send();
+          return res.send('error');
         }
         if (i_user_money >= i_action_amount && i_action_amount >= i_min_bid) {
           const new_value = i_user_money - i_action_amount;
           await User.updateMoneyById(user.id, new_value);
           const gamePot = await Game.getGamePot(game_id);
-          const i_game_pot = parseInt(Object.values(gamePot));
+          i_game_pot = parseInt(Object.values(gamePot));
+          updated_game_pot = i_game_pot + i_action_amount;
           await Game.updateGamePot(game_id, i_game_pot + i_action_amount);
           await Game.updateMinBet(game_id, i_action_amount);
           await GamePlayer.updatePlayerLastAction(
@@ -397,14 +404,14 @@ const actionHandler = async (req, res) => {
           });
           io.to(game_id).emit('game update', {
             min_bet: i_action_amount,
-            game_pot: i_game_pot + i_action_amount,
+            game_pot: updated_game_pot,
           });
         } else {
           io.to(userSocket).emit('status-msg', {
             type: 'error',
             msg: 'You dont have enough money!',
           });
-          return res.send();
+          return res.send('error');
         }
       }
       break;
@@ -421,7 +428,8 @@ const actionHandler = async (req, res) => {
           const new_value = i_user_money - i_min_bid;
           await User.updateMoneyById(user.id, new_value);
           const gamePot = await Game.getGamePot(game_id);
-          const i_game_pot = parseInt(Object.values(gamePot));
+          i_game_pot = parseInt(Object.values(gamePot));
+          updated_game_pot = i_game_pot + i_min_bid;
           await Game.updateGamePot(game_id, i_game_pot + i_min_bid);
           await GamePlayer.updatePlayerLastAction(
             game_id,
@@ -434,14 +442,13 @@ const actionHandler = async (req, res) => {
           });
           io.to(game_id).emit('game update', {
             min_bet: i_min_bid,
-            game_pot: i_game_pot + i_min_bid,
+            game_pot: updated_game_pot,
           });
         } else {
           io.to(userSocket).emit('status-msg', {
             type: 'error',
             msg: 'You dont have enough money!',
           });
-          return res.send();
         }
       }
       break;
@@ -461,11 +468,9 @@ const actionHandler = async (req, res) => {
           const new_value = i_user_money - i_action_amount - i_min_bid;
           await User.updateMoneyById(user.id, new_value);
           const gamePot = await Game.getGamePot(game_id);
-          const i_game_pot = parseInt(Object.values(gamePot));
-          await Game.updateGamePot(
-            game_id,
-            i_game_pot + i_action_amount + i_min_bid,
-          );
+          i_game_pot = parseInt(Object.values(gamePot));
+          updated_game_pot = i_game_pot + i_action_amount + i_min_bid;
+          await Game.updateGamePot(game_id, updated_game_pot);
           await Game.updateMinBet(game_id, i_action_amount + i_min_bid);
           await GamePlayer.updatePlayerLastAction(
             game_id,
@@ -478,20 +483,20 @@ const actionHandler = async (req, res) => {
           });
           io.to(game_id).emit('game update', {
             min_bet: i_action_amount + i_min_bid,
-            game_pot: i_game_pot + i_action_amount + i_min_bid,
+            game_pot: updated_game_pot,
           });
         } else if (i_action_amount === 0) {
           io.to(userSocket).emit('status-msg', {
             type: 'error',
             msg: 'Thats not a raise, use Call instead!',
           });
-          return res.send();
+          return res.send('error');
         } else {
           io.to(userSocket).emit('status-msg', {
             type: 'error',
             msg: 'You dont have enough money!',
           });
-          return res.send();
+          return res.send('error');
         }
       }
       break;
@@ -513,7 +518,7 @@ const actionHandler = async (req, res) => {
         const i_user_money = parseInt(Object.values(user_money));
         const i_min_bid = parseInt(Object.values(min_bid));
         const gamePot = await Game.getGamePot(game_id);
-        const i_game_pot = parseInt(Object.values(gamePot));
+        i_game_pot = parseInt(Object.values(gamePot));
         io.to(userSocket).emit('user update', {
           id: user.id,
           money: i_user_money,
@@ -604,7 +609,6 @@ const actionHandler = async (req, res) => {
       }
     }
     if (player_actions.length === 1) {
-      console.log('WINNER => ', user.id);
     }
     if (count === 1) {
       const curr_game_round = await Game.getGameRound(game_id);
@@ -633,18 +637,55 @@ const actionHandler = async (req, res) => {
             game_id,
           );
           const winningPlayer = getWinningPlayer(allPlayersPossibleHands);
-          console.log('winningPlayer.id => ', winningPlayer.id);
           const winner = await GamePlayer.getByGamePlayerId(winningPlayer.id);
-          /*TODO: 
-            set all players to unfolded, 
-            send socket that shows winner,
-            send game pot to winner, 
-            set game round to 1, 
-            set current players turn to first player,
+          io.to(game_id).emit('broadcast winner', {
+            winner,
+            pot: parseInt(updated_game_pot),
+          });
+          await User.updateMoneyById(
+            winner.id_user,
+            winner.money + parseInt(updated_game_pot),
+          );
+          io.to(game_id).emit('game update', {
+            min_bet: 0,
+            game_pot: 0,
+          });
+          io.to(game_id).emit('user update', {
+            id: winner.id,
+            money: winner.money + updated_game_pot,
+          });
+          await GamePlayer.updateAllUsersOfGameToUnfold(game_id);
+          await GamePlayer.resetLastActionOfAllUsersInGame(game_id);
+          io.emit('round update', 1);
+          await Game.updateGameRound(game_id, 1);
+          await Deck.unassignAllCardsInDeck(game.id_deck);
+          const allPlayers = await GamePlayer.getAllPlayersInGame(game_id);
+          await Game.setCurrGamePlayerId(game_id, allPlayers[0].id);
+          await Game.updateGamePot(game_id, 0);
+          await Game.updateMinBet(game_id, 0);
+          io.emit('update-turn', allPlayers[0].id);
+          io.to(game_id).emit(
+            'turn-notification-off',
+            curr_game_player_id.curr_game_player_id,
+          );
+          io.emit('turn-notification-on', allPlayers[0].id);
+          allPlayers.forEach(async (player) => {
+            Card.addCard(game_id, player.id);
+            Card.addCard(game_id, player.id);
+          });
+
+          io.emit('update community cards', { cards: [] });
+          Game.findDeckByGameId(game_id).then((deck) => {
+            // eslint-disable-next-line max-len
+            Deck.getAllOwnedCardsInDeck(deck.id_deck).then((playercards) => {
+              io.to(game_id).emit('init game', {
+                cards: playercards,
+              });
+            });
+          });
+          /* TODO: 
             move blinds,
-            send cards out to players
             */
-          console.log('WINNER => ', winner);
           return;
         default:
           // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5
@@ -667,6 +708,7 @@ const actionHandler = async (req, res) => {
 
     // return res.send('hello world');
   }
+  return res.send('finished');
 };
 
 module.exports = {
