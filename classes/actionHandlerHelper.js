@@ -2,6 +2,8 @@
 const Game = require('./game');
 const GamePlayer = require('./game_player');
 const User = require('./user');
+const Card = require('./card');
+const Deck = require('./deck');
 
 const updateGamePot = async (gameId, deltaBalance) => {
     const currPot = await Game.getGamePot(gameId);
@@ -27,7 +29,7 @@ const betHandler = async (req, res) => {
         type: 'error',
         msg: 'Thats not a bet, use check instead!',
         });
-        return res.send('error');
+        return 1;//res.send('error');
     }
 
     // If all is a-ok, then update pot & wallet and ping all sockets
@@ -54,8 +56,10 @@ const betHandler = async (req, res) => {
             type: 'error',
             msg: 'You dont have enough money!',
         });
-        return res.send('error');
+        return 1;//res.send('error');
     }
+
+    return 0;
 };
 
 const checkHandler = async (io) => {
@@ -104,6 +108,60 @@ const callHandler = async (req, res) => {
     }
 };
 
+const updateCommunityCards = async (req, io) => {
+    const { game_id } = req.params;
+    const deck = await Game.findDeckByGameId(game_id);
+    const communityCards = await Deck.getAllCommunityCardsInDeck(deck.id_deck, dealer.id);
+    io.to(game_id).emit('update community cards', {
+        cards: communityCards,
+    });
+};
+
+const dealCommunityCards = async (req, numCardsToDeal) => {
+    const { game_id } = req.params;
+    const dealer = await GamePlayer.getByUserIdAndGameId(0, game_id);
+    for (let i=0; i<numCardsToDeal; i++) {
+        Card.addCard(game_id, dealer.id);
+    }
+};
+
+const startOver = async (req, io) => {
+    const { game_id } = req.params;
+    const game = await Game.findById(game_id);
+
+    await GamePlayer.updateAllUsersOfGameToUnfold(game_id);
+    await GamePlayer.resetLastActionOfAllUsersInGame(game_id);
+    io.emit('round update', 1);
+    await Game.updateGameRound(game_id, 1);
+    await Deck.unassignAllCardsInDeck(game.id_deck);
+
+    // Set the first player to be the current player
+    const allPlayers = await GamePlayer.getAllPlayersInGame(game_id);
+    await Game.setCurrGamePlayerId(game_id, allPlayers[0].id);
+    await Game.updateGamePot(game_id, 0);
+    await Game.updateMinBet(game_id, 0);
+    io.emit('update-turn', allPlayers[0].id);
+    io.to(game_id).emit(
+        'turn-notification-off',
+        curr_game_player_id.curr_game_player_id,
+    );
+    io.emit('turn-notification-on', allPlayers[0].id);
+        allPlayers.forEach(async (player) => {
+        Card.addCard(game_id, player.id);
+        Card.addCard(game_id, player.id);
+    });
+    
+    // Reset community cards & unassign players' cards
+    io.emit('update community cards', { cards: [] });
+    const deck = await Game.findDeckByGameId(game_id);
+    const playerCards = await Deck.getAllCardsInDeck(deck.id_deck);
+    io.to(game_id).emit('init game', {
+        cards: playerCards,
+    });
+
+    // TODO: Move blinds
+};
+
 const resetHandler = async (req, res) => {
     const { game_id } = req.params;
     const { user } = req;
@@ -118,7 +176,7 @@ const resetHandler = async (req, res) => {
     const i_min_bid = parseInt(Object.values(min_bid));
     const gamePot = await Game.getGamePot(game_id);
     const i_game_pot = parseInt(Object.values(gamePot));
-    
+
     io.to(userSocket).emit('user update', {
       id: user.id,
       money: i_user_money,
@@ -167,13 +225,13 @@ const raiseHandler = async (req, res) => {
             type: 'error',
             msg: 'Thats not a raise, use Call instead!',
         });
-        return res.send('error');
+        return 1;// res.send('error');
     } else {
         io.to(userSocket).emit('status-msg', {
             type: 'error',
             msg: 'You dont have enough money!',
         });
-        return res.send('error');
+        return 1;//res.send('error');
     }
 };
 
@@ -211,4 +269,7 @@ module.exports = {
     callHandler,
     raiseHandler,
     resetHandler,
+    dealCommunityCards,
+    updateCommunityCards,
+    startOver,
 };

@@ -358,13 +358,17 @@ const actionHandler = async (req, res) => {
       Helper.checkHandler(io);
       break;
     case PlayerActions.BET:
-      Helper.betHandler(req, res);
+      if (Helper.betHandler(req, res) > 0) {
+        return res.send('error');
+      }
       break;
     case PlayerActions.CALL:
       Helper.callHandler(req, res);
       break;
     case PlayerActions.RAISE:
-      Helper.raiseHandler(req, res);
+      if (Helper.raiseHandler(req, res) > 0) {
+        return res.send('error');
+      }
       break;
     case PlayerActions.FOLD:
       io.to(userSocket).emit('status-msg', {
@@ -385,7 +389,7 @@ const actionHandler = async (req, res) => {
    *
    */
 
-  // GAME TURN CODE
+  // "Increment" the player whose turn it is
   const nonFoldedPlayers = await GamePlayer.findAllNonFoldedPlayers(game_id);
   const currPlayerIndex = nonFoldedPlayers.findIndex(
     (element) => element.id === curr_game_player_id.curr_game_player_id,
@@ -419,16 +423,20 @@ const actionHandler = async (req, res) => {
    * these should all be throguh sockets
    */
 
-  // Game Round Checks Here
-  // if 1 bet/raise and rest folds - that one person won the game?
-  // if 1 bet/raise and rest
+  // This gets us a list previous actions from all players
+  // who are currently not folded
+  // We want to use this to determine what to do next
   const player_actions = await GamePlayer.getNonFoldedPlayerLastActions(
     game_id,
   );
+
+  // We want to find the INDEX of the current player in player_actions
   const currPlayerActionIndex = player_actions.findIndex(
     (element) => element.id === curr_game_player_id.curr_game_player_id,
   );
 
+  // This is the next player in the queue
+  // If we are at the last player, then wrap back around
   let target_index = currPlayerActionIndex + 1;
   if (target_index === player_actions.length) {
     target_index = 0;
@@ -443,6 +451,8 @@ const actionHandler = async (req, res) => {
     (nextPlayerAction === PlayerActions.BET ||
       nextPlayerAction === PlayerActions.RAISE)
   ) {
+
+    // Count of players still going
     let count = 0;
     for (const action of player_actions) {
       if (
@@ -452,40 +462,35 @@ const actionHandler = async (req, res) => {
         count += 1;
       }
     }
+
+    // What is this supposed to be?
     if (player_actions.length === 1) {
     }
+
     if (count === 1) {
       const curr_game_round = await Game.getGameRound(game_id);
       const i_curr_game_round = curr_game_round.game_round;
-      // get the id_game_player via id_user of 0 and curr_game_id
-      const dealer = await GamePlayer.getByUserIdAndGameId(0, game_id);
+
       switch (i_curr_game_round) {
         case 1:
-          // i.e. we are going from 1 to 2, so its three cards on the table
-          // if this case, do default case three times?
-          for (let i = 0; i < 3; i++) {
-            Card.addCard(game_id, dealer.id);
-          }
-          Game.findDeckByGameId(game_id).then((deck) => {
-            Deck.getAllCommunityCardsInDeck(deck.id_deck, dealer.id).then(
-              (communityCards) => {
-                io.to(game_id).emit('update community cards', {
-                  cards: communityCards,
-                });
-              },
-            );
-          });
+          // We're going from round 1 to 2, which is the flop
+          Helper.dealCommunityCards(req, 3);
+          Helper.updateCommunityCards(req, io);
           break;
         case 4:
+          // We're going from round 4 to 5 which means we now check for winner
           const allPlayersPossibleHands = await getAllPlayersPossibleHands(
             game_id,
           );
           const winningPlayer = getWinningPlayer(allPlayersPossibleHands);
           const winner = await GamePlayer.getByGamePlayerId(winningPlayer.id);
+
           io.to(game_id).emit('broadcast winner', {
             winner,
             pot: parseInt(updated_game_pot),
           });
+
+          // Give the winner his winnings & update sockets
           await User.updateMoneyById(
             winner.id_user,
             winner.money + parseInt(updated_game_pot),
@@ -498,59 +503,22 @@ const actionHandler = async (req, res) => {
             id: winner.id,
             money: winner.money + updated_game_pot,
           });
-          await GamePlayer.updateAllUsersOfGameToUnfold(game_id);
-          await GamePlayer.resetLastActionOfAllUsersInGame(game_id);
-          io.emit('round update', 1);
-          await Game.updateGameRound(game_id, 1);
-          await Deck.unassignAllCardsInDeck(game.id_deck);
-          const allPlayers = await GamePlayer.getAllPlayersInGame(game_id);
-          await Game.setCurrGamePlayerId(game_id, allPlayers[0].id);
-          await Game.updateGamePot(game_id, 0);
-          await Game.updateMinBet(game_id, 0);
-          io.emit('update-turn', allPlayers[0].id);
-          io.to(game_id).emit(
-            'turn-notification-off',
-            curr_game_player_id.curr_game_player_id,
-          );
-          io.emit('turn-notification-on', allPlayers[0].id);
-          allPlayers.forEach(async (player) => {
-            Card.addCard(game_id, player.id);
-            Card.addCard(game_id, player.id);
-          });
 
-          io.emit('update community cards', { cards: [] });
-          Game.findDeckByGameId(game_id).then((deck) => {
-            // eslint-disable-next-line max-len
-            Deck.getAllOwnedCardsInDeck(deck.id_deck).then((playercards) => {
-              io.to(game_id).emit('init game', {
-                cards: playercards,
-              });
-            });
-          });
-          /* TODO: 
-            move blinds,
-            */
+          // Set the game back to round 1
+          Helper.startOver(req, io);
           return;
         default:
-          // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5
-          // give the dealer one card
-          Card.addCard(game_id, dealer.id);
-          Game.findDeckByGameId(game_id).then((deck) => {
-            Deck.getAllCommunityCardsInDeck(deck.id_deck, dealer.id).then(
-              (communityCards) => {
-                io.to(game_id).emit('update community cards', {
-                  cards: communityCards,
-                });
-              },
-            );
-          });
+          // We're going from 2 to 3, or 3 to 4
+          // which is turn & river respectively
+          Helper.dealCommunityCards(req, 1);
+          Helper.updateCommunityCards(req, io);
           break;
       }
+
+      // Increment game round
       io.emit('round update', i_curr_game_round + 1);
       await Game.updateGameRound(game_id, i_curr_game_round + 1);
     }
-
-    // return res.send('hello world');
   }
   return res.send('finished');
 };
