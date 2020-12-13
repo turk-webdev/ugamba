@@ -71,6 +71,12 @@ const joinGame = async (req, res) => {
         });
       });
       game = await Game.findById(game_id);
+    } else {
+      io.emit('add player', {
+        id: game_player.id,
+        money: user.money,
+        username: user.username,
+      });
     }
 
     game_player = await GamePlayer.getByUserIdAndGameId(req.user.id, game_id);

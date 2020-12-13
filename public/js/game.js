@@ -125,31 +125,33 @@ const addClick = () => {
 };
 
 const addPlayerToPlayerDiv = (game_player) => {
-  const cardDiv1 = document.createElement('div');
-  const cardDiv2 = document.createElement('div');
-  const cardHandLi = document.createElement('li');
-  cardHandLi.classList.add('card-hand');
-  const tableUl = document.createElement('ul');
-  tableUl.classList.add('card-hand');
-  const infoDiv = document.createElement('div');
-  const moneyP = document.createElement('p');
-  const usernameP = document.createElement('p');
-  const cardDivClassArr = ['card', 'back'];
-  infoDiv.setAttribute('id', `${game_player.id}info`);
-  moneyP.innerHTML = `Money: ${game_player.money}`;
-  usernameP.innerHTML = game_player.username;
-  infoDiv.appendChild(moneyP);
-  infoDiv.appendChild(usernameP);
-  cardDiv1.classList.add(...cardDivClassArr);
-  cardDiv2.classList.add(...cardDivClassArr);
-  cardHandLi.appendChild(cardDiv1);
-  cardHandLi.appendChild(cardDiv2);
-  tableUl.appendChild(cardHandLi);
-  const playerDiv = document.createElement('div');
-  playerDiv.setAttribute('id', game_player.id);
-  playerDiv.appendChild(infoDiv);
-  playerDiv.appendChild(tableUl);
-  document.getElementById('players').appendChild(playerDiv);
+  if (!document.getElementById(game_player.id)) {
+    const cardDiv1 = document.createElement('div');
+    const cardDiv2 = document.createElement('div');
+    const cardHandLi = document.createElement('li');
+    cardHandLi.classList.add('card-hand');
+    const tableUl = document.createElement('ul');
+    tableUl.classList.add('card-hand');
+    const infoDiv = document.createElement('div');
+    const moneyP = document.createElement('p');
+    const usernameP = document.createElement('p');
+    const cardDivClassArr = ['card', 'back'];
+    infoDiv.setAttribute('id', `${game_player.id}info`);
+    moneyP.innerHTML = `Money: ${game_player.money}`;
+    usernameP.innerHTML = game_player.username;
+    infoDiv.appendChild(moneyP);
+    infoDiv.appendChild(usernameP);
+    cardDiv1.classList.add(...cardDivClassArr);
+    cardDiv2.classList.add(...cardDivClassArr);
+    cardHandLi.appendChild(cardDiv1);
+    cardHandLi.appendChild(cardDiv2);
+    tableUl.appendChild(cardHandLi);
+    const playerDiv = document.createElement('div');
+    playerDiv.setAttribute('id', game_player.id);
+    playerDiv.appendChild(infoDiv);
+    playerDiv.appendChild(tableUl);
+    document.getElementById('players').appendChild(playerDiv);
+  }
 };
 
 const addButtons = () => {
