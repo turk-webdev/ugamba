@@ -7,7 +7,7 @@ const gameId = document.getElementById('game').getAttribute('data-it');
 const chatText = document.getElementById('chat-input');
 const chatSubmit = document.getElementById('chat-submit');
 const chatInput = document.getElementById('chat-input');
-const gameRound = document.getElementById('game').getAttribute('gameround');
+const playersDiv = document.getElementById('players');
 const communityCards = document.getElementById('community-cards');
 
 const PlayerActions = {
@@ -57,23 +57,6 @@ if (chatMenuItem) {
  *                      Check Game Round Conditions
  * **************************************************************
  */
-if (gameRound && parseInt(gameRound) === 0) {
-  console.log('~~~~ Game Round Is 0, Waiting On More Players');
-} else if (gameRound && parseInt(gameRound) === 1) {
-  console.log(`~~~~ game_round: ${gameRound}`);
-  const data = {
-    game_id: gameId,
-  };
-  socket.emit('init game', data);
-} else if (gameRound && parseInt(gameRound) === 2) {
-  console.log(`~~~~ game_round: ${gameRound}`);
-  const data = {
-    game_id: gameId,
-  };
-  socket.emit('send community cards', data);
-} else {
-  console.log('NO GAME STATUS');
-}
 /*
  * **************************************************************
  *                      Helper functions
@@ -90,7 +73,6 @@ const addMessageToChat = (res) => {
   li.appendChild(document.createTextNode(`${res.message}`));
   span.classList.add(...coloredNameClassArr);
   messages.appendChild(li);
-  console.log('scrollheight => ', messages.scrollHeight);
   messages.scrollTop = messages.scrollHeight;
 };
 if (chatInput) {
@@ -125,9 +107,8 @@ const makeGameActionRequest = async (gameAction = '', body = {}) => {
     body: JSON.stringify(body),
   });
 };
-
-const addClick = (buttonList) => {
-  Array.from(buttonList).forEach((button) => {
+const addClick = () => {
+  Array.from(actionButtons).forEach((button) => {
     const gameAction = button.getAttribute('name');
     button.addEventListener('click', () => {
       if (
@@ -143,9 +124,37 @@ const addClick = (buttonList) => {
   });
 };
 
-const addButtons = (buttonList) => {
+const addPlayerToPlayerDiv = (game_player) => {
+  const cardDiv1 = document.createElement('div');
+  const cardDiv2 = document.createElement('div');
+  const cardHandLi = document.createElement('li');
+  cardHandLi.classList.add('card-hand');
+  const tableUl = document.createElement('ul');
+  tableUl.classList.add('card-hand');
+  const infoDiv = document.createElement('div');
+  const moneyP = document.createElement('p');
+  const usernameP = document.createElement('p');
+  const cardDivClassArr = ['card', 'back'];
+  infoDiv.setAttribute('id', `${game_player.id}info`);
+  moneyP.innerHTML = `Money: ${game_player.money}`;
+  usernameP.innerHTML = game_player.username;
+  infoDiv.appendChild(moneyP);
+  infoDiv.appendChild(usernameP);
+  cardDiv1.classList.add(...cardDivClassArr);
+  cardDiv2.classList.add(...cardDivClassArr);
+  cardHandLi.appendChild(cardDiv1);
+  cardHandLi.appendChild(cardDiv2);
+  tableUl.appendChild(cardHandLi);
+  const playerDiv = document.createElement('div');
+  playerDiv.setAttribute('id', game_player.id);
+  playerDiv.appendChild(infoDiv);
+  playerDiv.appendChild(tableUl);
+  document.getElementById('players').appendChild(playerDiv);
+};
+
+const addButtons = () => {
   const min_bet = parseInt(
-    document.getElementById('min_bet').innerHTML.slice(8),
+    document.getElementById('min_bet').getAttribute('data-it'),
   );
   const pClassArr = ['control'];
   const bClassArr = ['action-button', 'button', 'm-0'];
@@ -158,7 +167,7 @@ const addButtons = (buttonList) => {
   secondPNode.classList.add(...pClassArr);
   secondButtonNode.classList.add(...bClassArr);
 
-  if (min_bet === 0) {
+  if (parseInt(min_bet) === 0) {
     const betText = document.createTextNode('Bet');
     const checkText = document.createTextNode('Check');
     firstButtonNode.appendChild(betText);
@@ -181,7 +190,7 @@ const addButtons = (buttonList) => {
     document.getElementById('user-action-buttons').appendChild(firstPNode);
     document.getElementById('user-action-buttons').appendChild(secondPNode);
   }
-  addClick(buttonList);
+  addClick();
 };
 window.onload = addButtons(actionButtons);
 
@@ -193,8 +202,15 @@ const turnOnHighlight = () => {
     'is-one-fifth',
     'is-light',
   ];
-  document.getElementById('curr_turn').innerHTML.slice(18);
-  document.getElementById('curr_turn').classList.add(...divClassArr);
+  const currPlayerTurn = document
+    .getElementById('curr_turn')
+    .getAttribute('data-it');
+
+  if (parseInt(currPlayerTurn) !== 0) {
+    document
+      .getElementById(`${currPlayerTurn}info`)
+      .classList.add(...divClassArr);
+  }
 };
 window.onload = turnOnHighlight();
 
@@ -204,74 +220,26 @@ const removeButtons = () => {
   buttons.removeChild(buttons.lastElementChild);
 };
 
-const translateCard = (id_card) => {
-  let suit;
-  let value;
-  if (parseInt(id_card) > 0 && parseInt(id_card) < 14) {
-    suit = 'club';
-    value = parseInt(id_card) + 1;
-  } else if (parseInt(id_card) > 13 && parseInt(id_card) < 27) {
-    suit = 'diamond';
-    value = parseInt(id_card) + 1 - 14;
-  } else if (parseInt(id_card) > 26 && parseInt(id_card) < 40) {
-    suit = 'heart';
-    value = parseInt(id_card) + 1 - 28;
-  } else if (parseInt(id_card) > 39 && parseInt(id_card) < 53) {
-    suit = 'spade';
-    value = parseInt(id_card) + 1 - 42;
-  }
-
-  switch (value) {
-    case 2:
-      value = 'two';
-      break;
-    case 3:
-      value = 'three';
-      break;
-    case 4:
-      value = 'four';
-      break;
-    case 5:
-      value = 'five';
-      break;
-    case 6:
-      value = 'six';
-      break;
-    case 7:
-      value = 'seven';
-      break;
-    case 8:
-      value = 'eight';
-      break;
-    case 9:
-      value = 'nine';
-      break;
-    case 10:
-      value = 'ten';
-      break;
-    case 11:
-      value = 'jack';
-      break;
-    case 12:
-      value = 'queen';
-      break;
-    case 13:
-      value = 'king';
-      break;
-    case 14:
-      value = 'ace';
-      break;
-    default:
-      break;
-  }
-  return { value, suit };
-};
-
 const removeNotification = () => {
   document
     .getElementById('error-field')
     .classList.remove('is-success', 'is-danger', 'column', 'is-one-quarter');
   document.getElementById('error').innerHTML = '';
+};
+const clearPlayerCards = () => {
+  playersDiv.childNodes.forEach((player) => {
+    if (player.tagName === 'DIV') {
+      const playerId = player.getAttribute('id');
+      const cardHandLi = document.getElementById(`card-hand${playerId}`);
+      if (cardHandLi === null) {
+        return;
+      }
+
+      while (cardHandLi.firstChild) {
+        cardHandLi.removeChild(cardHandLi.lastChild);
+      }
+    }
+  });
 };
 
 /*
@@ -280,57 +248,81 @@ const removeNotification = () => {
  * **************************************************************
  */
 socket.on('init game', (results) => {
-  console.log('---- SOCKET STARTING THE GAME, RESULTS:', results);
-  const twoCardDiv = document.createElement('div');
   let gpid;
+  clearPlayerCards();
+  // document.getElementById(`card-hand${card.game_player_id}`).innerHTML = '';
   results.cards.forEach((card) => {
-    if (document.getElementById(card.game_player_id)) {
-      const translatedCard = translateCard(card.id_card);
-      gpid = card.game_player_id;
-      const cardDivClassArr = [
-        'game-card',
-        translatedCard.value,
-        translatedCard.suit,
-      ];
+    if (document.getElementById(`card-hand${card.game_player_id}`)) {
       const carddiv = document.createElement('div');
+      // const translatedCard = translateCard(card.id_card);
+      gpid = `card-hand${card.game_player_id}`;
+      const cardDivClassArr = [
+        'card',
+        `rank-${card.value_display}`,
+        `${card.suit_display}`,
+      ];
+      const rankSpan = document.createElement('span');
+      rankSpan.appendChild(document.createTextNode(card.value_display));
+      rankSpan.classList.add('rank');
+      const suitSpan = document.createElement('span');
+      suitSpan.innerHTML = `&${card.suit_display};`;
+      suitSpan.classList.add('suit');
+
       carddiv.classList.add(...cardDivClassArr);
-      twoCardDiv.appendChild(carddiv);
+      carddiv.appendChild(rankSpan);
+      carddiv.appendChild(suitSpan);
+      if (document.getElementById(gpid)) {
+        document.getElementById(gpid).appendChild(carddiv);
+      }
     }
   });
-  if (document.getElementById(gpid)) {
-    document.getElementById(gpid).appendChild(twoCardDiv);
-  }
 });
 
-socket.on('send community cards', (results) => {
-  console.log('---- SOCKET GOT THE COMMUNITY CARDS, RESULTS:', results);
-  const threeCardDiv = document.createElement('div');
+socket.on('update community cards', (results) => {
+  communityCards.innerHTML = '';
   results.cards.forEach((card) => {
+    const carddiv = document.createElement('div');
+    const cardDivClassArr = [
+      'card',
+      `rank-${card.value_display}`,
+      `${card.suit_display}`,
+    ];
+    const rankSpan = document.createElement('span');
+    rankSpan.appendChild(document.createTextNode(card.value_display));
+    rankSpan.classList.add('rank');
+    const suitSpan = document.createElement('span');
+    suitSpan.innerHTML = `&${card.suit_display};`;
+    suitSpan.classList.add('suit');
+
+    carddiv.classList.add(...cardDivClassArr);
+    carddiv.appendChild(rankSpan);
+    carddiv.appendChild(suitSpan);
     if (communityCards) {
-      const translatedCard = translateCard(card.id_card);
-      const cardDivClassArr = [
-        'game-card',
-        translatedCard.value,
-        translatedCard.suit,
-      ];
-      const carddiv = document.createElement('div');
-      carddiv.classList.add(...cardDivClassArr);
-      threeCardDiv.appendChild(carddiv);
+      communityCards.appendChild(carddiv);
     }
   });
-  if (communityCards) {
-    communityCards.appendChild(threeCardDiv);
-  }
+});
+
+socket.on('user left', (game_player) => {
+  document.getElementById(game_player.id).remove();
+});
+socket.on('game end', () => {
+  document.getElementById(
+    'winner-modal-content',
+  ).innerHTML = `The game has ended. Sending you back home`;
+  document.getElementById('winner-modal').classList.add('is-active');
+  setTimeout(() => {
+    document.getElementById('winner-modal').classList.remove('is-active');
+    window.location.href = `/`;
+  }, 3000);
 });
 
 socket.on('leave game', () => {
   socket.emit('unsubscribe chat', gameId);
-  console.log('hello world');
   window.location.href = `/`;
 });
 
 const loadIntoGameRoom = () => {
-  console.log('gameId => ', gameId);
   socket.emit('game room', gameId);
 };
 window.onload = loadIntoGameRoom();
@@ -372,7 +364,6 @@ socket.on('subscribe chat', (user) => {
 
 socket.on('status-msg', (msg) => {
   let divClassArr = [];
-  console.log(msg.type);
   if (msg.type === 'success') {
     divClassArr = ['notification', 'is-success', 'column', 'is-one-quarter'];
   } else {
@@ -384,22 +375,45 @@ socket.on('status-msg', (msg) => {
   setTimeout(removeNotification, 3000);
 });
 
-socket.on('user update', (user) => {
+socket.on('broadcast winner', (winner) => {
   document.getElementById(
-    user.id,
-  ).childNodes[1].innerHTML = `Money: ${user.money.toString()}`;
+    'winner-modal-content',
+  ).innerHTML = `WINNER: ${winner.winner.username} with a pot of $${winner.pot}`;
+  document.getElementById('winner-modal').classList.add('is-active');
+  setTimeout(() => {
+    document.getElementById('winner-modal').classList.remove('is-active');
+    document.getElementById('winner-modal-content').innerHTML = '';
+  }, 3000);
+});
+
+socket.on('user update', (gamePlayer) => {
+  document.getElementById(
+    gamePlayer.id,
+  ).childNodes[1].innerHTML = `Money: ${gamePlayer.money.toString()}`;
   document.getElementById('error').innerHTML = '';
 });
 
 socket.on('game update', (game) => {
+  const actionAmountInput = document.getElementById('action-amount');
+  actionAmountInput.setAttribute('min', game.min_bet);
+  actionAmountInput.setAttribute('value', game.min_bet + 1);
+  document.getElementById('min_bet').setAttribute('data-it', game.min_bet);
   document.getElementById(
     'min_bet',
   ).innerHTML = `Min Bet: ${game.min_bet.toString()}`;
+  document.getElementById('game_pot').setAttribute('data-it', game.game_pot);
   document.getElementById(
     'game_pot',
   ).innerHTML = `Game Pot: ${game.game_pot.toString()}`;
   removeButtons();
   addButtons(dynamicButtons);
+});
+
+socket.on('round update', (game_round) => {
+  document.getElementById('game_round').setAttribute('data-it', game_round);
+  document.getElementById(
+    'game_round',
+  ).innerHTML = `Game Round: ${game_round.toString()}`;
 });
 
 socket.on('turn-notification-on', (id) => {
@@ -410,7 +424,7 @@ socket.on('turn-notification-on', (id) => {
     'is-one-fifth',
     'is-light',
   ];
-  document.getElementById(id).classList.add(...divClassArr);
+  document.getElementById(`${id}info`).classList.add(...divClassArr);
 });
 
 socket.on('turn-notification-off', (id) => {
@@ -421,11 +435,16 @@ socket.on('turn-notification-off', (id) => {
     'is-one-fifth',
     'is-light',
   ];
-  document.getElementById(id).classList.remove(...divClassArr);
+  document.getElementById(`${id}info`).classList.remove(...divClassArr);
 });
 
 socket.on('update-turn', (id) => {
+  document.getElementById('curr_turn').setAttribute('data-it', id.toString());
   document.getElementById(
     'curr_turn',
-  ).innerHTML = `Action on player ${id.toString()}`;
+  ).innerHTML = `Current player turn: ${id.toString()}`;
+});
+
+socket.on('add player', (game_player) => {
+  addPlayerToPlayerDiv(game_player);
 });

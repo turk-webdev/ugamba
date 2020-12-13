@@ -3,7 +3,6 @@ const Deck = require('../classes/deck');
 const MAX_CARD_ID = 52;
 
 const initDeckForGame = (req, res) => {
-  console.log('here');
   // First, create a new deck entry
   Deck.createNewDeck()
     .then((deckId) => {
@@ -22,9 +21,8 @@ const initDeckForGame = (req, res) => {
     .then(() => {
       return res.sendStatus(200);
     })
-    .catch((error) => {
+    .catch(() => {
       // TODO: Do some real error handling/checking
-      console.log(error);
       res.sendStatus(500);
     });
 };
@@ -55,7 +53,6 @@ const dealCardToPlayer = (req, res) => {
     })
     .catch((error) => {
       // TODO: Do some real error handling/checking
-      console.log(error);
       res.sendStatus(500);
     });
 };
@@ -68,7 +65,6 @@ const getTableCards = (req, res) => {
     })
     .catch((err) => {
       res.sendStatus(500);
-      console.log(err);
     });
 };
 

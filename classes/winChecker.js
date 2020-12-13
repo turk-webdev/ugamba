@@ -115,16 +115,15 @@ const getBestWins = (allWinningHands) => {
         highestRankKey = hands;
       }
 
-      highestRankValue =
-        entry.rankValue > highestRankValue ? entry.rankValue : highestRankValue;
       highestRankKey =
         entry.rankValue > highestRankValue ? hands : highestRankKey;
+      highestRankValue = Math.max(entry.rankValue, highestRankValue);
     }
 
     bestWinningHands[gamePlayerId] =
       allWinningHands[gamePlayerId][highestRankKey];
-    return bestWinningHands;
   }
+  return bestWinningHands;
 };
 
 const findWinner = (bestWinningHands) => {
@@ -137,15 +136,14 @@ const findWinner = (bestWinningHands) => {
       highestRankKey = gamePlayerId;
     }
 
-    highestRankValue =
-      bestWinningHands[gamePlayerId].rankValue > highestRankValue
-        ? bestWinningHands[gamePlayerId].rankValue
-        : highestRankValue;
-
     highestRankKey =
       bestWinningHands[gamePlayerId].rankValue > highestRankValue
         ? gamePlayerId
         : highestRankKey;
+    highestRankValue =
+      bestWinningHands[gamePlayerId].rankValue > highestRankValue
+        ? bestWinningHands[gamePlayerId].rankValue
+        : highestRankValue;
   }
 
   // Adding the id as a field to the response being sent back

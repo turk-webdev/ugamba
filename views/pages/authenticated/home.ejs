@@ -18,23 +18,27 @@ include('../../partials/navbar.ejs') -%>
             You currently have $<%= user.money %>
           </h2>
           <% if(games.length !== 0){%>
-            <h3 class="is-6"> You're already in these games. Click to join</h3>
-          <%games.forEach((game)=>{%>
+          <h3 class="is-6">You're already in these games. Click to join</h3>
+          <div class="game-holder">
+            <%games.forEach((game)=>{%>
 
-          <div class="columns is-align-content-space-between is-vcentered p-0">
-            <div class="column">
-              <p class="is-6">Game #<%=game.id%>:</p>
+            <div
+              class="columns is-align-content-space-between is-vcentered p-0"
+            >
+              <div class="column">
+                <p class="is-6">Game #<%=game.id%>:</p>
+              </div>
+              <div class="column level-right">
+                <button
+                  data-it="<%=game.id%>"
+                  class="join-existing-game m-0 level-item button is-primary"
+                >
+                  Join
+                </button>
+              </div>
             </div>
-            <div class="column level-right">
-              <button
-                data-it="<%=game.id%>"
-                class="join-existing-game m-0 level-item button is-primary"
-              >
-                Join
-              </button>
-            </div>
+            <%})%> <%}%>
           </div>
-          <%})%> <%}%>
         </div>
         <div class="column right has-text-centered registration-right">
           <div class="field">

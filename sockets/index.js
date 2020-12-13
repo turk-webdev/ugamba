@@ -12,7 +12,6 @@ const init = (server, session) => {
       session(socket.request, {}, next);
     })
     .on('connection', (socket) => {
-      console.log('a user connected');
       const user = socket.request.session.passport;
       // join global chat on connection always
       socket.join('chat-0');
@@ -24,13 +23,10 @@ const init = (server, session) => {
       }
 
       socket.on('init game', (data) => {
-        console.log('---- SOCKET_INIT_GAME DATA: ', data);
-        console.log('---- USER INFO: ', user.user.id);
         Game.findDeckByGameId(data.game_id).then((deck) => {
           // eslint-disable-next-line max-len
           DeckClass.getAllOwnedCardsInDeck(deck[0].id_deck).then(
             (playercards) => {
-              console.log('---- SOCKETS PLAYERCARDS: ', playercards);
               socket.to(data.game_id).emit('init game', {
                 cards: playercards,
               });
@@ -40,13 +36,10 @@ const init = (server, session) => {
       });
 
       socket.on('send community cards', (data) => {
-        console.log('---- SOCKET SEND COMMUNITY CARDS DATA: ', data);
-        console.log('---- USER INFO: ', user.user.id);
         Game.findDeckByGameId(data.game_id).then((deck) => {
           // eslint-disable-next-line max-len
           DeckClass.getAllCommunityCardsInDeck(deck[0].id_deck).then(
             (communitycards) => {
-              console.log('---- SOCKETS COMMUNITYCARDS: ', communitycards);
               socket.to(data.game_id).emit('send community cards', {
                 cards: communitycards,
               });
@@ -83,9 +76,7 @@ const init = (server, session) => {
         socket.join(game_id);
       });
 
-      socket.on('disconnect', () => {
-        console.log('user disconnected');
-      });
+      socket.on('disconnect', () => {});
     });
   return io;
 };

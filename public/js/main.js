@@ -115,7 +115,6 @@ const addMessageToChat = (res) => {
   li.appendChild(document.createTextNode(`${res.message}`));
   span.classList.add(...coloredNameClassArr);
   messages.appendChild(li);
-  console.log('scrollheight => ', messages.scrollHeight);
   messages.scrollTop = messages.scrollHeight;
 };
 

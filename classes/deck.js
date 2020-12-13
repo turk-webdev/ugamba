@@ -43,15 +43,15 @@ const getAllUnownedCardsInDeck = (deckId) => {
 
 const getAllOwnedCardsInDeck = (deckId) => {
   return db.many(
-    'SELECT * FROM deck_card WHERE id_deck = $1 AND game_player_id IS NOT NULL',
+    'SELECT dc.id, dc.id_card, dc.id_deck, dc.game_player_id, c.suit_display, c.value_display FROM deck_card AS dc INNER JOIN card AS c ON dc.id_card =c.id WHERE dc.id_deck = $1 AND dc.game_player_id IS NOT NULL',
     [deckId],
   );
 };
 
-const getAllCommunityCardsInDeck = (deckId) => {
-  return db.many(
-    'SELECT * FROM deck_card WHERE id_deck = $1 AND game_player_id = 0',
-    [deckId],
+const getAllCommunityCardsInDeck = (deckId, dealer_id) => {
+  return db.any(
+    'SELECT * FROM deck_card INNER JOIN card ON deck_card.id_card = card.id WHERE id_deck = $1 AND game_player_id = $2',
+    [deckId, dealer_id],
   );
 };
 // If the card is being dealt to the table,
@@ -66,8 +66,7 @@ const assignDeckCardToPlayerHand = (cardId, gamePlayerId) => {
 // Returns a gameplayers first 2 cards
 const getAllDeckCardsByDeckIdAndGamePlayerId = (deckId, gamePlayerId) => {
   return db.many(
-    'SELECT deck_card.id, deck_card.id_card, deck_card.game_player_id, deck_card.id_deck FROM deck_card' +
-      ' WHERE deck_card.id_deck = $1 AND deck_card.game_player_id = $2',
+    'SELECT dc.id, dc.id_card, dc.game_player_id, dc.id_deck , c.suit_display, c.value_display FROM deck_card AS dc INNER JOIN card AS c ON dc.id_card =c.id WHERE dc.id_deck = $1 AND dc.game_player_id = $2',
     [deckId, gamePlayerId],
   );
 };
@@ -91,6 +90,14 @@ const unassignAllCardsInDeck = (deckId) => {
   );
 };
 
+const getDisplayValueFromValue = (value) => {
+  return db.many('SELECT value_display FROM card WHERE value=$1', [value]);
+};
+
+const getDisplaySuitFromSuit = (suit) => {
+  return db.many('SELECT suit_display FROM card WHERE suit=$1', [suit]);
+};
+
 module.exports = {
   getCardById,
   getDeckCardById,
@@ -106,4 +113,6 @@ module.exports = {
   getAllOwnedCardsOfPlayer,
   getAllDeckCardsByDeckIdAndGamePlayerId,
   unassignAllCardsInDeck,
+  getDisplayValueFromValue,
+  getDisplaySuitFromSuit,
 };
