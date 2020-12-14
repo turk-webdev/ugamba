@@ -80,6 +80,13 @@ router.post('/win', async (req,res) => {
   console.log(winner);
 });
 
+router.post('/turk', async (req, res) => {
+  const { game_id } = req.body;
+  const GamePlayer = require('../classes/game_player');
+  const obj = await GamePlayer.getAllPlayersInGame(game_id);
+  console.log('testing:\n',obj);
+});
+
 router.post('/translate', async (req,res) => {
   const { card_id } = req.body;
   const obj = require('../classes/cardTranslate');
