@@ -9,10 +9,4 @@ router.post('/register', User.register);
 
 router.post('/login', User.login);
 
-// router.get('/:id', User.findOneById);
-
-// router.patch('/:id', User.update);
-//
-// router.delete('/:id', User.delete);
-
 module.exports = router;

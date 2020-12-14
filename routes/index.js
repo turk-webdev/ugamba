@@ -39,14 +39,4 @@ router.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-// router.get('/register', (_, res) => {
-// return res.render('register', { error: undefined });
-// });
-
-// router.get('/login', (req, res) => {
-// if (req.isUnauthenticated()) {
-// res.render('login', { error: undefined });
-// } else res.redirect('authenticated/home');
-// });
-
 module.exports = router;

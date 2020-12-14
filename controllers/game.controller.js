@@ -170,16 +170,6 @@ const joinGame = async (req, res) => {
   });
 };
 
-const findAll = async (_, res) => {
-  Game.findAll()
-    .then((game) => {
-      return res.send({ game });
-    })
-    .catch((err) => {
-      return res.send({ error: err.message });
-    });
-};
-
 const createOrJoin = async (req, res) => {
   const io = req.app.get('io');
   // const socket = io();
@@ -269,103 +259,6 @@ const createOrJoin = async (req, res) => {
       }
     }
   });
-};
-
-const findById = async (req, res) => {
-  const { id } = req.params;
-  Game.findById(id)
-    .then((results) => {
-      if (!results) {
-        return res.status(400).send({ error: 'No game found' });
-      }
-      return res.send(results);
-    })
-    .catch((err) => {
-      return res.status(400).send({ error: err.message });
-    });
-};
-
-const update = async (req, res) => {
-  const { id } = req.params;
-  const { id_deck } = req.body;
-  const { game_pot } = req.body;
-  const { min_bet } = req.body;
-  const { game_round } = req.body;
-  const { curr_game_player_id } = req.body;
-
-  Game.updateGame(
-    id,
-    id_deck,
-    game_pot,
-    min_bet,
-    game_round,
-    curr_game_player_id,
-  )
-    .then(() => {
-      return res.send({ message: 'Game has been updated successfully' });
-    })
-    .catch(() => {
-      return res.status(400).send({ error: 'No game found' });
-    });
-};
-
-const deleteGame = async (req, res) => {
-  const { id } = req.params;
-
-  Game.delete(id)
-    .then(() => {
-      return res.send({ message: 'Game has been deleted successfully' });
-    })
-    .catch(() => {
-      return res.status(400).send({ error: 'No game found' });
-    });
-};
-
-const playerFold = async (req, res) => {
-  const { id_user } = req.body;
-  const { game_id } = req.params;
-
-  GamePlayer.setPlayertoFold(id_user, game_id)
-    .then(() => {
-      return res.send({ message: 'Game_player has been updated successfully' });
-    })
-    .catch(() => {
-      return res.status(400).send({ error: 'No game_player found' });
-    });
-};
-
-const leaveGame = async (req, res) => {
-  const { game_id } = req.params;
-  const { id_user } = req.body;
-
-  GamePlayer.removePlayer(id_user, game_id)
-    .then(() => {
-      return res.send({ message: 'Game_player has been removed successfully' });
-    })
-    .catch(() => {
-      return res.status(400).send({ error: 'No game_player found' });
-    });
-};
-
-const changeRound = async (req, res) => {
-  const { game_id } = req.params;
-
-  Game.getGameRound(game_id)
-    .then((results) => {
-      if (results === 9) {
-        Game.updateGameRound(game_id, 1);
-      } else {
-        Game.updateGameRound(game_id, results + 1);
-      }
-    })
-    .then(() => {
-      return res.send({
-        message: 'Game game_round has been updated successfully',
-      });
-    })
-    .catch(() => {
-      return res.status(400).send({ error: 'No game found' });
-    });
 };
 
 const actionHandler = async (req, res) => {
@@ -674,12 +567,5 @@ const actionHandler = async (req, res) => {
 module.exports = {
   createOrJoin,
   joinGame,
-  findAll,
-  findById,
-  update,
-  deleteGame,
-  playerFold,
-  leaveGame,
-  changeRound,
   actionHandler,
 };
