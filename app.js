@@ -28,16 +28,6 @@ if (dropSessionOnStart) {
   });
 }
 
-// Initialize static card data
-// const initalizeCardsOnStart = process.env.NOD_ENV !== 'dev';
-// const initalizeCardsOnStart = false;
-// if (initalizeCardsOnStart) {
-// const fullPath = path.join(__dirname, './csv/scripts.sql'); // generating full path;
-// db.any(new QueryFile(fullPath, { minify: true })).then(() => {
-// console.log('Initialized cards');
-// });
-// }
-
 // Instantiate the app
 const app = express();
 

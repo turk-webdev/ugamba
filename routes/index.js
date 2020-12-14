@@ -19,7 +19,6 @@ router.get('/', (req, res) => {
     res.render('index', { error: undefined, type: undefined });
   } else {
     let games = [];
-    console.log('req.user => ', req.user);
     GamePlayer.findAllGamesByUserId(req.user.id)
       .then((result) => {
         games = games.concat(result);

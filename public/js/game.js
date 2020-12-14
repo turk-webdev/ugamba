@@ -135,21 +135,40 @@ const addPlayerToPlayerDiv = (game_player) => {
     const moneyP = document.createElement('p');
     const usernameP = document.createElement('p');
     const cardDivClassArr = ['card', 'back'];
-    infoDiv.setAttribute('id', `${game_player.id}info`);
-    moneyP.innerHTML = `Money: ${game_player.money}`;
+    moneyP.innerHTML = `Money: $${game_player.money}`;
     usernameP.innerHTML = game_player.username;
-    infoDiv.appendChild(moneyP);
-    infoDiv.appendChild(usernameP);
     cardDiv1.classList.add(...cardDivClassArr);
     cardDiv2.classList.add(...cardDivClassArr);
     cardHandLi.appendChild(cardDiv1);
     cardHandLi.appendChild(cardDiv2);
     tableUl.appendChild(cardHandLi);
     const playerDiv = document.createElement('div');
-    playerDiv.setAttribute('id', game_player.id);
+    const playerDivClassArr = ['is-flex', 'is-flex-direction-column'];
+    playerDiv.appendChild(moneyP);
+    playerDiv.appendChild(usernameP);
     playerDiv.appendChild(infoDiv);
     playerDiv.appendChild(tableUl);
-    document.getElementById('players').appendChild(playerDiv);
+    playerDiv.classList.add(...playerDivClassArr);
+    const playerWrapperDiv = document.createElement('div');
+    const playerWrapperDivClassArr = [
+      'column',
+      'player-section',
+      'has-background-success-dark',
+      'is-3',
+      'playingCards',
+      'fourColours',
+      'rotateHand',
+      'm-3',
+      'has-text-weight-bold',
+      'is-size-5',
+      'is-flex',
+      'is-flex-direction-column',
+      'is-align-items-center',
+    ];
+    playerWrapperDiv.appendChild(playerDiv);
+    playerWrapperDiv.setAttribute('id', game_player.id);
+    playerWrapperDiv.classList.add(...playerWrapperDivClassArr);
+    playersDiv.appendChild(playerWrapperDiv);
   }
 };
 
@@ -196,21 +215,13 @@ const addButtons = () => {
 window.onload = addButtons(actionButtons);
 
 const turnOnHighlight = () => {
-  const divClassArr = [
-    'notification',
-    'is-warning',
-    'column',
-    'is-one-fifth',
-    'is-light',
-  ];
+  const divClassArr = ['highlight'];
   const currPlayerTurn = document
     .getElementById('curr_turn')
     .getAttribute('data-it');
 
   if (parseInt(currPlayerTurn) !== 0) {
-    document
-      .getElementById(`${currPlayerTurn}info`)
-      .classList.add(...divClassArr);
+    document.getElementById(currPlayerTurn).classList.add(...divClassArr);
   }
 };
 window.onload = turnOnHighlight();
@@ -224,23 +235,39 @@ const removeButtons = () => {
 const removeNotification = () => {
   document
     .getElementById('error-field')
-    .classList.remove('is-success', 'is-danger', 'column', 'is-one-quarter');
+    .classList.remove('is-success', 'is-danger', 'column', 'notification');
   document.getElementById('error').innerHTML = '';
 };
 const clearPlayerCards = () => {
-  playersDiv.childNodes.forEach((player) => {
-    if (player.tagName === 'DIV') {
-      const playerId = player.getAttribute('id');
-      const cardHandLi = document.getElementById(`card-hand${playerId}`);
-      if (cardHandLi === null) {
-        return;
-      }
+  const playergpid = document
+    .getElementsByClassName('player-cards')[0]
+    .getAttribute('id');
+  const cardHandLi = document.getElementById(`card-hand${playergpid}`);
+  if (cardHandLi === null) {
+    return;
+  }
 
-      while (cardHandLi.firstChild) {
-        cardHandLi.removeChild(cardHandLi.lastChild);
-      }
+  while (cardHandLi.firstChild) {
+    cardHandLi.removeChild(cardHandLi.lastChild);
+  }
+};
+
+const giveHiddenCards = () => {
+  const { childNodes } = playersDiv;
+  for (let i = 0; i < childNodes.length; i++) {
+    if (childNodes[i].id) {
+      console.log(childNodes[i].id);
+      const gpid = playersDiv.childNodes[i].getAttribute('id');
+      document.getElementById(`hand-back${gpid}`).innerHTML = '';
+
+      const div1 = document.createElement('div');
+      div1.classList.add('card', 'back');
+      const div2 = document.createElement('div');
+      div2.classList.add('card', 'back');
+      document.getElementById(`hand-back${gpid}`).appendChild(div1);
+      document.getElementById(`hand-back${gpid}`).appendChild(div2);
     }
-  });
+  }
 };
 
 /*
@@ -251,6 +278,7 @@ const clearPlayerCards = () => {
 socket.on('init game', (results) => {
   let gpid;
   clearPlayerCards();
+  giveHiddenCards();
   // document.getElementById(`card-hand${card.game_player_id}`).innerHTML = '';
   results.cards.forEach((card) => {
     if (document.getElementById(`card-hand${card.game_player_id}`)) {
@@ -366,9 +394,9 @@ socket.on('subscribe chat', (user) => {
 socket.on('status-msg', (msg) => {
   let divClassArr = [];
   if (msg.type === 'success') {
-    divClassArr = ['notification', 'is-success', 'column', 'is-one-quarter'];
+    divClassArr = ['notification', 'is-success', 'column'];
   } else {
-    divClassArr = ['notification', 'is-danger', 'column', 'is-one-quarter'];
+    divClassArr = ['notification', 'is-danger', 'column'];
   }
   const target = document.getElementById('error-field');
   target.classList.add(...divClassArr);
@@ -389,8 +417,8 @@ socket.on('broadcast winner', (winner) => {
 
 socket.on('user update', (gamePlayer) => {
   document.getElementById(
-    gamePlayer.id,
-  ).childNodes[1].innerHTML = `Money: ${gamePlayer.money.toString()}`;
+    `${gamePlayer.id}money`,
+  ).innerHTML = `Money: ${gamePlayer.money.toString()}`;
   document.getElementById('error').innerHTML = '';
 });
 
@@ -418,32 +446,31 @@ socket.on('round update', (game_round) => {
 });
 
 socket.on('turn-notification-on', (id) => {
-  const divClassArr = [
-    'notification',
-    'is-warning',
-    'column',
-    'is-one-fifth',
-    'is-light',
-  ];
-  document.getElementById(`${id}info`).classList.add(...divClassArr);
+  const divClassArr = ['highlight'];
+  document.getElementById(id).classList.add(...divClassArr);
 });
 
 socket.on('turn-notification-off', (id) => {
-  const divClassArr = [
-    'notification',
-    'is-warning',
-    'column',
-    'is-one-fifth',
-    'is-light',
-  ];
-  document.getElementById(`${id}info`).classList.remove(...divClassArr);
+  const divClassArr = ['highlight'];
+  document.getElementById(id).classList.remove(...divClassArr);
 });
 
-socket.on('update-turn', (id) => {
-  document.getElementById('curr_turn').setAttribute('data-it', id.toString());
+socket.on('update-turn', (player) => {
+  document
+    .getElementById('curr_turn')
+    .setAttribute('data-it', player.id.toString());
   document.getElementById(
     'curr_turn',
-  ).innerHTML = `Current player turn: ${id.toString()}`;
+  ).innerHTML = `Current player turn: ${player.username.toString()}`;
+});
+
+socket.on('user fold', (id) => {
+  if (document.getElementById(`hand-back${id}`)) {
+    document.getElementById(`hand-back${id}`).innerHTML = '';
+  }
+  if (document.getElementById(`card-hand${id}`)) {
+    document.getElementById(`card-hand${id}`).innerHTML = '';
+  }
 });
 
 socket.on('add player', (game_player) => {

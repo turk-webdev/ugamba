@@ -33,9 +33,6 @@ const updateBlinds = async (req) => {
     (item) => item.blind_status === BIG_BLIND_CODE,
   );
 
-  console.log(`small blind @ ${smallBlindIndex}, big blind @ ${bigBlindIndex}`);
-  console.log(players);
-
   const newSmallBlindIndex =
     smallBlindIndex + 1 === players.length ? 0 : smallBlindIndex + 1;
   const newBigBlindIndex =
@@ -93,10 +90,13 @@ const joinGame = async (req, res) => {
       });
       await Game.setCurrGamePlayerId(game_id, players[0].gpid);
       await Game.updateGameRound(game_id, 1);
-      io.emit('round update', 1);
-      io.emit('update-turn', players[0].gpid);
-      io.emit('turn-notification-on', players[0].gpid);
-      io.emit('add player', {
+      io.to(game_id).emit('round update', 1);
+      io.to(game_id).emit('update-turn', {
+        id: players[0].gpid,
+        username: players[0].username,
+      });
+      io.to(game_id).emit('turn-notification-on', players[0].gpid);
+      io.to(game_id).emit('add player', {
         id: game_player.id,
         money: user.money,
         username: user.username,
@@ -111,7 +111,7 @@ const joinGame = async (req, res) => {
       });
       game = await Game.findById(game_id);
     } else {
-      io.emit('add player', {
+      io.to(game_id).emit('add player', {
         id: game_player.id,
         money: user.money,
         username: user.username,
@@ -148,12 +148,19 @@ const joinGame = async (req, res) => {
   }
 
   players = await GamePlayer.findAllPlayersByGameId(game_id);
+  let currPlayer = { username: '' };
+  if (game.curr_game_player_id !== 0) {
+    currPlayer = await GamePlayer.getByGamePlayerId(game.curr_game_player_id);
+  }
+  const userPlayer = players.find((p) => p.id === user.id);
   res.render('authenticated/game', {
     game,
     games,
     players,
     yourCards,
     community,
+    currPlayer,
+    userPlayer,
   });
 };
 
@@ -438,10 +445,13 @@ const actionHandler = async (req, res) => {
     );
   }
   const new_curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
-  io.to(game_id).emit(
-    'update-turn',
-    new_curr_game_player_id.curr_game_player_id,
+  const currGamePlayer = await GamePlayer.getByGamePlayerId(
+    curr_game_player_id.curr_game_player_id,
   );
+  io.to(game_id).emit('update-turn', {
+    id: new_curr_game_player_id.curr_game_player_id,
+    username: currGamePlayer.username,
+  });
   io.to(game_id).emit(
     'turn-notification-off',
     curr_game_player_id.curr_game_player_id,
@@ -489,25 +499,28 @@ const actionHandler = async (req, res) => {
     });
     await GamePlayer.updateAllUsersOfGameToUnfold(game_id);
     await GamePlayer.resetLastActionOfAllUsersInGame(game_id);
-    io.emit('round update', 1);
+    io.to(game_id).emit('round update', 1);
     await Game.updateGameRound(game_id, 1);
     await Deck.unassignAllCardsInDeck(game.id_deck);
     const allPlayers = await GamePlayer.getAllPlayersInGame(game_id);
     await Game.setCurrGamePlayerId(game_id, allPlayers[0].id);
     await Game.updateGamePot(game_id, 0);
     await Game.updateMinBet(game_id, 0);
-    io.emit('update-turn', allPlayers[0].id);
+    io.to(game_id).emit('update-turn', {
+      id: allPlayers[0].id,
+      username: allPlayers[0].username,
+    });
     io.to(game_id).emit(
       'turn-notification-off',
       curr_game_player_id.curr_game_player_id,
     );
-    io.emit('turn-notification-on', allPlayers[0].id);
+    io.to(game_id).emit('turn-notification-on', allPlayers[0].id);
     allPlayers.forEach(async (player) => {
       Card.addCard(game_id, player.id);
       Card.addCard(game_id, player.id);
     });
 
-    io.emit('update community cards', { cards: [] });
+    io.to(game_id).emit('update community cards', { cards: [] });
     Game.findDeckByGameId(game_id).then((deck) => {
       // eslint-disable-next-line max-len
       Deck.getAllOwnedCardsInDeck(deck.id_deck).then((playercards) => {
@@ -575,7 +588,6 @@ const actionHandler = async (req, res) => {
           );
           const winningPlayer = getWinningPlayer(allPlayersPossibleHands);
           const winner = await GamePlayer.getByGamePlayerId(winningPlayer.id);
-          console.log('updated_game_pot', updated_game_pot);
           io.to(game_id).emit('broadcast winner', {
             winner,
             pot: parseInt(updated_game_pot),
@@ -594,25 +606,28 @@ const actionHandler = async (req, res) => {
           });
           await GamePlayer.updateAllUsersOfGameToUnfold(game_id);
           await GamePlayer.resetLastActionOfAllUsersInGame(game_id);
-          io.emit('round update', 1);
+          io.to(game_id).emit('round update', 1);
           await Game.updateGameRound(game_id, 1);
           await Deck.unassignAllCardsInDeck(game.id_deck);
           const allPlayers = await GamePlayer.getAllPlayersInGame(game_id);
           await Game.setCurrGamePlayerId(game_id, allPlayers[0].id);
           await Game.updateGamePot(game_id, 0);
           await Game.updateMinBet(game_id, 0);
-          io.emit('update-turn', allPlayers[0].id);
+          io.to(game_id).emit('update-turn', {
+            id: allPlayers[0].id,
+            username: allPlayers[0].username,
+          });
           io.to(game_id).emit(
             'turn-notification-off',
             curr_game_player_id.curr_game_player_id,
           );
-          io.emit('turn-notification-on', allPlayers[0].id);
+          io.to(game_id).emit('turn-notification-on', allPlayers[0].id);
           allPlayers.forEach(async (player) => {
             Card.addCard(game_id, player.id);
             Card.addCard(game_id, player.id);
           });
 
-          io.emit('update community cards', { cards: [] });
+          io.to(game_id).emit('update community cards', { cards: [] });
           Game.findDeckByGameId(game_id).then((deck) => {
             // eslint-disable-next-line max-len
             Deck.getAllOwnedCardsInDeck(deck.id_deck).then((playercards) => {
@@ -641,7 +656,7 @@ const actionHandler = async (req, res) => {
           });
           break;
       }
-      io.emit('round update', i_curr_game_round + 1);
+      io.to(game_id).emit('round update', i_curr_game_round + 1);
       await Game.updateGameRound(game_id, i_curr_game_round + 1);
     }
 

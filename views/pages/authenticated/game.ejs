@@ -1,61 +1,28 @@
 <%- include('../../partials/htmlStructure/head.ejs') -%>
 <%-include('../../partials/navbar.ejs') -%>
 
-  <div id='winner-modal' class="modal">
+<div class="has-text-white mt-6">
+  <div id="winner-modal" class="modal">
     <div class="modal-background"></div>
     <article class="message is-large modal-content">
-  <div id='winner-modal-content' class="message-body">
-  </div>
-</article>
-  </div>
-<div class="columns playingCards fourColours rotateHand">
-  <div class="column is-one-fifth" id="users-list-container">
-    <div>GameID: <%= game.id%></div>
-    <div id="game_pot" data-it="<%=game.game_pot%>">
-      Game Pot: <%= game.game_pot%>
-    </div>
-    <div id="min_bet" data-it="<%=game.min_bet%>">
-      Min Bet: <%= game.min_bet%>
-    </div>
-    <div id="curr_turn" data-it="<%=game.curr_game_player_id%>">
-      Current player turn: <%= game.curr_game_player_id%>
-    </div>
-    <div id="game_round" data-it="<%=game.game_round%>">
-      Game Round: <%= game.game_round%>
-    </div>
-    <br />
-    <div>IDDeck: <%= game.id_deck%></div>
-    <div>Gameplayer info and card info.</div>
+      <div id="winner-modal-content" class="message-body"></div>
+    </article>
   </div>
   <div
     id="game"
     data-it="<%=game.id%>"
     gameround="<%=game.game_round%>"
-    class="column is-flex is-flex-direction-column is-two-thirds"
+    class="column"
   >
-    <div id="community-cards">
-      COMMUNITY CARDS <%if(community.length!==0){%> 
-      <% community.forEach((card)=> { %>
-
-      <div class="card rank-<%=card.value%> <%=card.suit%>">
-        <span class="rank"><%=card.value%></span>
-        <span class="suit">&<%=card.suit%>;</span>
-      </div>
-      <%})}%>
-    </div>
-    <br />
-    <br />
-    <div id="players">
-      <%players.forEach((player)=>{%>
-      <div id="<%= player.gpid%>" class="is-flex is-flex-direction-column">
-        <div id="<%=player.gpid%>info">
-          <p>Money: <%= player.money%></p>
-          <p><%= player.username%></p>
-        </div>
-        <% if(player.id === user.id){%>
+    <div class="columns is-flex is-justify-content-space-around">
+      <div
+        class="column player-section has-background-success-dark is-3 playingCards fourColours rotateHand m-3 has-text-weight-bold is-size-5 is-flex is-flex-direction-column is-align-items-center player-cards"
+        id="<%=userPlayer.gpid%>"
+      >
+        <p><%= user.username%> - My Cards</p>
         <ul class="table">
-          <li id="card-hand<%=player.gpid%>">
-            <% if(game.game_round >=1 && !player.player_folded){%>
+          <li id="card-hand<%=userPlayer.gpid%>">
+            <% if(game.game_round >=1 && !userPlayer.player_folded){%>
             <div
               class="card rank-<%= yourCards.translatedCard1.value%> <%= yourCards.translatedCard1.suit%>"
             >
@@ -71,23 +38,24 @@
             <%}%>
           </li>
         </ul>
-        <div class="columns m-0 p-0">
-          <div class="field column p-0 m-0 is-2">
-            <div class="control has-icons-left has-icons-right">
-              <input
-                id="action-amount"
-                class="input is-small"
-                type="number"
-                type="number"
-                min=<%=game.min_bet%>
-                step="any"
-                value="<%=game.min_bet + 1%>"
-              />
-              <span class="icon is-left">
-                <i class="fas fa-dollar-sign"></i>
-              </span>
-            </div>
-          </div>
+      </div>
+
+      <div
+        class="column player-section has-background-success-dark is-2 playingCards fourColours rotateHand m-3 has-text-weight-bold is-size-5 is-flex is-flex-direction-column is-align-items-center"
+      >
+        <p id="<%= userPlayer.gpid%>money">Money: $<%=user.money%></p>
+        <div class="control has-icons-left has-icons-right">
+          <input
+            id="action-amount"
+            class="input"
+            type="number"
+            min="<%=game.min_bet%>"
+            step="any"
+            value="<%=game.min_bet + 1%>"
+          />
+          <span class="icon is-left">
+            <i class="fas fa-dollar-sign"></i>
+          </span>
         </div>
         <div id="user-action-buttons" class="field has-addons">
           <p class="control">
@@ -105,20 +73,84 @@
           <p id="error"></p>
         </div>
       </div>
-      <%}else{%>
-      <ul class="table">
-        <li class="card-hand<%=player.gpidid%>">
-          <div class="card back">*</div>
-          <div class="card back">*</div>
-        </li>
-      </ul>
+
+      <div
+        class="column has-background-success-dark is-5 playingCards fourColours rotateHand m-3"
+        id="users-list-container"
+      >
+        <span
+          id="game_pot"
+          class="has-text-weight-bold is-size-5"
+          data-it="<%=game.game_pot%>"
+        >
+          Game Pot: $<%= game.game_pot%>
+        </span>
+        <span class="has-text-weight-bold is-size-4">|</span>
+        <span
+          id="min_bet"
+          class="has-text-weight-bold is-size-5"
+          data-it="<%=game.min_bet%>"
+        >
+          Min Bet: $<%= game.min_bet%>
+        </span>
+        <span class="has-text-weight-bold is-size-4">|</span>
+        <span
+          id="curr_turn"
+          class="has-text-weight-bold is-size-5"
+          data-it="<%=game.curr_game_player_id%>"
+        >
+          Current player turn: <%= currPlayer.username%>
+        </span>
+        <span class="has-text-weight-bold is-size-4">|</span>
+        <span
+          id="game_round"
+          class="has-text-weight-bold is-size-5"
+          data-it="<%=game.game_round%>"
+        >
+          Game Round: <%= game.game_round%>
+        </span>
+        <div id="community-cards" class="pt-4">
+          <%if(community.length!==0){%> <% community.forEach((card)=> { %>
+
+          <div class="card rank-<%=card.value%> <%=card.suit%>">
+            <span class="rank"><%=card.value%></span>
+            <span class="suit">&<%=card.suit%>;</span>
+          </div>
+          <%})}%>
+        </div>
+      </div>
     </div>
-    <%}})%>
+
+    <div
+      id="players"
+      class="columns is-flex is-justify-content-start playingCards fourColours rotateHand"
+    >
+    <%players.forEach((player)=>{%> 
+      <% if(player.id !== user.id){%>
+      <div
+        class="column player-section has-background-success-dark is-3 playingCards fourColours rotateHand m-3 has-text-weight-bold is-size-5 is-flex is-flex-direction-column is-align-items-center"
+        id="<%= player.gpid%>"
+      >
+        <div class="is-flex is-flex-direction-column">
+          <p id="<%=player.gpid%>money">Money: $<%= player.money%></p>
+          <p><%= player.username%></p>
+          
+          <ul class="table">
+            <li id="hand-back<%=player.gpid%>" class="card-hand">
+      <% if(!player.player_folded){%>
+              <div class="card back"></div>
+              <div class="card back"></div>
+
+            <%}%>
+            </li>
+          </ul>
+        </div>
+        </div>
+        <%}})%>
+      </div>
+    </div>
+
+    <%- include('../../partials/chat.ejs') -%> <%-
+    include('../../partials/htmlStructure/gameFoot.ejs') -%>
   </div>
 </div>
-<div>
-  <div class="column"></div>
-</div>
-
-<%- include('../../partials/chat.ejs') -%> <%-
-include('../../partials/htmlStructure/gameFoot.ejs') -%>
