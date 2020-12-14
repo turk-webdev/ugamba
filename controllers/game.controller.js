@@ -514,31 +514,6 @@ const actionHandler = async (req, res) => {
       await GamePlayer.setPlayertoFold(user.id, game_id);
       await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
       break;
-    case PlayerActions.RESET:
-      {
-        await Game.updateGamePot(game_id, 0);
-        await Game.updateMinBet(game_id, 0);
-        await User.updateMoneyById(user.id, 1000);
-        const user_money = await User.getMoneyById(user.id);
-        const min_bid = await Game.getMinBet(game_id);
-        const i_user_money = parseInt(Object.values(user_money));
-        const i_min_bid = parseInt(Object.values(min_bid));
-        const gamePot = await Game.getGamePot(game_id);
-        i_game_pot = parseInt(Object.values(gamePot));
-        io.to(userSocket).emit('user update', {
-          id: user.id,
-          money: i_user_money,
-        });
-        io.to(game_id).emit('game update', {
-          min_bet: i_min_bid,
-          game_pot: i_game_pot,
-        });
-        io.to(userSocket).emit('status-msg', {
-          type: 'success',
-          msg: 'Reset!',
-        });
-      }
-      break;
   }
   // list of game actions
   /*

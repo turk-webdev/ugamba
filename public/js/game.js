@@ -17,7 +17,6 @@ const PlayerActions = {
   RAISE: 'raise',
   FOLD: 'fold',
   LEAVE: 'leave',
-  RESET: 'reset',
 };
 const messageTypes = [
   'has-text-primary',
