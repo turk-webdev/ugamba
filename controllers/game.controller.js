@@ -409,97 +409,15 @@ const actionHandler = async (req, res) => {
       }
       break;
     case PlayerActions.CALL:
-      {
-        // we need to get the users money, validate bet
-        // if validated then we can remove the money from the user
-        // finally we can then add that amount to the game pot
-        const user_money = await User.getMoneyById(user.id);
-        const min_bid = await Game.getMinBet(game_id);
-        const i_user_money = parseInt(Object.values(user_money));
-        const i_min_bid = parseInt(Object.values(min_bid));
-        if (i_user_money >= i_min_bid) {
-          const new_value = i_user_money - i_min_bid;
-          await User.updateMoneyById(user.id, new_value);
-          const gamePot = await Game.getGamePot(game_id);
-          i_game_pot = parseInt(Object.values(gamePot));
-          updated_game_pot = i_game_pot + i_min_bid;
-          await Game.updateGamePot(game_id, i_game_pot + i_min_bid);
-          await GamePlayer.updatePlayerLastAction(
-            game_id,
-            user.id,
-            game_action,
-          );
-          io.to(userSocket).emit('user update', {
-            id: game_player.id,
-            money: new_value,
-          });
-          io.to(game_id).emit('game update', {
-            min_bet: i_min_bid,
-            game_pot: updated_game_pot,
-          });
-        } else {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'You dont have enough money!',
-          });
-        }
-      }
+      Helper.callHandler(req);
       break;
     case PlayerActions.RAISE:
-      {
-        // we need to get the users money, validate bet
-        // if validated then we can remove the money from the user
-        // finally we can then add that amount to the game pot
-        const user_money = await User.getMoneyById(user.id);
-        const min_bid = await Game.getMinBet(game_id);
-        const i_user_money = parseInt(Object.values(user_money));
-        const i_min_bid = parseInt(Object.values(min_bid));
-        if (
-          i_user_money >= i_action_amount + i_min_bid &&
-          i_action_amount !== 0
-        ) {
-          const new_value = i_user_money - i_action_amount - i_min_bid;
-          await User.updateMoneyById(user.id, new_value);
-          const gamePot = await Game.getGamePot(game_id);
-          i_game_pot = parseInt(Object.values(gamePot));
-          updated_game_pot = i_game_pot + i_action_amount + i_min_bid;
-          await Game.updateGamePot(game_id, updated_game_pot);
-          await Game.updateMinBet(game_id, i_action_amount + i_min_bid);
-          await GamePlayer.updatePlayerLastAction(
-            game_id,
-            user.id,
-            game_action,
-          );
-          io.to(userSocket).emit('user update', {
-            id: game_player.id,
-            money: new_value,
-          });
-          io.to(game_id).emit('game update', {
-            min_bet: i_action_amount + i_min_bid,
-            game_pot: updated_game_pot,
-          });
-        } else if (i_action_amount === 0) {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'Thats not a raise, use Call instead!',
-          });
-          return res.send('error');
-        } else {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'You dont have enough money!',
-          });
-          return res.send('error');
-        }
+      if (Helper.raiseHandler(req) > 0) {
+        return res.send('error');
       }
       break;
     case PlayerActions.FOLD:
-      io.to(userSocket).emit('status-msg', {
-        type: 'success',
-        msg: 'Folded!',
-      });
-      await GamePlayer.setPlayertoFold(user.id, game_id);
-      await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
+      Helper.foldHandler(req);
       break;
   }
   // list of game actions
