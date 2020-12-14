@@ -52,6 +52,9 @@ const joinGame = async (req, res) => {
 
   const { game_id } = req.params;
   let game = await Game.findById(game_id);
+  if (!game) {
+    return res.redirect('/404');
+  }
   const { game_round } = game;
   const games = await GamePlayer.findAllGamesByUserId(req.user.id);
   let community = [];
@@ -64,6 +67,9 @@ const joinGame = async (req, res) => {
     );
   });
   let players = await GamePlayer.findAllPlayersByGameId(game_id);
+  if (!players.some((p) => p.id === req.user.id)) {
+    return res.redirect('/404');
+  }
   let game_player = await GamePlayer.getByUserIdAndGameId(req.user.id, game_id);
   const user = await User.findOneById(game_player.id_user);
 
