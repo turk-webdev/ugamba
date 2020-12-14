@@ -587,6 +587,60 @@ const actionHandler = async (req, res) => {
   const player_actions = await GamePlayer.getNonFoldedPlayerLastActions(
     game_id,
   );
+  if (player_actions.length <= 1) {
+    const winner = await GamePlayer.getByGamePlayerId(player_actions[0].id);
+    updated_game_pot = await Game.getGamePot(game_id);
+    updated_game_pot = updated_game_pot.game_pot;
+    io.to(game_id).emit('broadcast winner', {
+      winner,
+      pot: updated_game_pot,
+    });
+    await User.updateMoneyById(
+      winner.id_user,
+      winner.money + parseInt(updated_game_pot),
+    );
+    io.to(game_id).emit('game update', {
+      min_bet: 0,
+      game_pot: 0,
+    });
+    io.to(game_id).emit('user update', {
+      id: winner.id,
+      money: winner.money + updated_game_pot,
+    });
+    await GamePlayer.updateAllUsersOfGameToUnfold(game_id);
+    await GamePlayer.resetLastActionOfAllUsersInGame(game_id);
+    io.emit('round update', 1);
+    await Game.updateGameRound(game_id, 1);
+    await Deck.unassignAllCardsInDeck(game.id_deck);
+    const allPlayers = await GamePlayer.getAllPlayersInGame(game_id);
+    await Game.setCurrGamePlayerId(game_id, allPlayers[0].id);
+    await Game.updateGamePot(game_id, 0);
+    await Game.updateMinBet(game_id, 0);
+    io.emit('update-turn', allPlayers[0].id);
+    io.to(game_id).emit(
+      'turn-notification-off',
+      curr_game_player_id.curr_game_player_id,
+    );
+    io.emit('turn-notification-on', allPlayers[0].id);
+    allPlayers.forEach(async (player) => {
+      Card.addCard(game_id, player.id);
+      Card.addCard(game_id, player.id);
+    });
+
+    io.emit('update community cards', { cards: [] });
+    Game.findDeckByGameId(game_id).then((deck) => {
+      // eslint-disable-next-line max-len
+      Deck.getAllOwnedCardsInDeck(deck.id_deck).then((playercards) => {
+        io.to(game_id).emit('init game', {
+          cards: playercards,
+        });
+      });
+    });
+    /* TODO: 
+      move blinds,
+      */
+    return res.send('finished solo player');
+  }
   const currPlayerActionIndex = player_actions.findIndex(
     (element) => element.id === curr_game_player_id.curr_game_player_id,
   );
@@ -693,7 +747,6 @@ const actionHandler = async (req, res) => {
           /* TODO: 
             move blinds,
             */
-           
           return;
         default:
           // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5
@@ -713,10 +766,11 @@ const actionHandler = async (req, res) => {
       io.emit('round update', i_curr_game_round + 1);
       await Game.updateGameRound(game_id, i_curr_game_round + 1);
     }
-
+  
     // return res.send('hello world');
+    
   }
-  return res.send('finished');
+    return res.send('finished');
 };
 
 module.exports = {
