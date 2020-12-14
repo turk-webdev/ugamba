@@ -84,7 +84,6 @@ const joinGame = async (req, res) => {
 
   if (players.length >= MIN_NUM_BEFORE_GAME_START) {
     if (parseInt(game_round) === 0) {
-      console.log('initBlinds?');
       initBlinds(players);
       players.forEach(async (player) => {
         Card.addCard(game_id, player.gpid);
@@ -465,9 +464,13 @@ const actionHandler = async (req, res) => {
   const player_actions = await GamePlayer.getNonFoldedPlayerLastActions(
     game_id,
   );
+
+  updated_game_pot = await Game.getGamePot(game_id);
+  updated_game_pot = updated_game_pot.game_pot;
+
   if (player_actions.length <= 1) {
     const winner = await GamePlayer.getByGamePlayerId(player_actions[0].id);
-    updated_game_pot = updated_game_pot.game_pot;
+
     io.to(game_id).emit('broadcast winner', {
       winner,
       pot: updated_game_pot,
@@ -572,6 +575,7 @@ const actionHandler = async (req, res) => {
           );
           const winningPlayer = getWinningPlayer(allPlayersPossibleHands);
           const winner = await GamePlayer.getByGamePlayerId(winningPlayer.id);
+          console.log('updated_game_pot', updated_game_pot);
           io.to(game_id).emit('broadcast winner', {
             winner,
             pot: parseInt(updated_game_pot),

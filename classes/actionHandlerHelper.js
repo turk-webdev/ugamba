@@ -1,7 +1,5 @@
 const Game = require('./game');
-const Deck = require('./deck');
 const GamePlayer = require('./game_player');
-const Card = require('./card');
 const User = require('./user');
 
 const leaveHandler = async (req) => {
@@ -175,7 +173,6 @@ const raiseHandler = async (req) => {
 };
 
 const foldHandler = async (req) => {
-    console.log('foldHandler() start');
   const { game_id, game_action } = req.params;
   const { user } = req;
   const io = req.app.get('io');
