@@ -136,6 +136,7 @@ const addPlayerToPlayerDiv = (game_player) => {
     const usernameP = document.createElement('p');
     const cardDivClassArr = ['card', 'back'];
     moneyP.innerHTML = `Money: $${game_player.money}`;
+    moneyP.setAttribute('id', `${game_player.id}money`);
     usernameP.innerHTML = game_player.username;
     cardDiv1.classList.add(...cardDivClassArr);
     cardDiv2.classList.add(...cardDivClassArr);
