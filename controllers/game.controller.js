@@ -6,11 +6,49 @@ const { PlayerActions } = require('../utils/index');
 const User = require('../classes/user');
 const { getAllPlayersPossibleHands } = require('../classes/winBuilder');
 const { getWinningPlayer } = require('../classes/winChecker');
+const Helper = require('../classes/actionHandlerHelper');
 // const { getGameRound } = require('../classes/game');
 
 const MAX_NUM_PLAYER_IN_GAME = 7;
 const MIN_NUM_BEFORE_GAME_START = 2;
 const MAX_CARD_ID = 52;
+const SMALL_BLIND_CODE = 1;
+const BIG_BLIND_CODE = 2;
+
+// 1=small blind, 2=big blind
+const initBlinds = async (players) => {
+  const player1Id = players[0].gpid;
+  const player2Id = players[1].gpid;
+  await GamePlayer.setBlindStatusOfGamePlayer(player1Id, 1);
+  await GamePlayer.setBlindStatusOfGamePlayer(player2Id, 2);
+};
+
+const updateBlinds = async (req) => {
+  const { game_id } = req.params;
+  const players = await GamePlayer.getAllPlayersInGame(game_id);
+  const smallBlindIndex = players.findIndex(
+    (item) => item.blind_status === SMALL_BLIND_CODE,
+  );
+  const bigBlindIndex = players.findIndex(
+    (item) => item.blind_status === BIG_BLIND_CODE,
+  );
+
+  console.log(`small blind @ ${smallBlindIndex}, big blind @ ${bigBlindIndex}`);
+  console.log(players);
+
+  const newSmallBlindIndex =
+    smallBlindIndex + 1 === players.length ? 0 : smallBlindIndex + 1;
+  const newBigBlindIndex =
+    bigBlindIndex + 1 === players.length ? 0 : bigBlindIndex + 1;
+
+  await GamePlayer.setBlindStatusOfGamePlayer(players[smallBlindIndex].id, 0);
+  await GamePlayer.setBlindStatusOfGamePlayer(players[bigBlindIndex].id, 0);
+  await GamePlayer.setBlindStatusOfGamePlayer(
+    players[newSmallBlindIndex].id,
+    1,
+  );
+  await GamePlayer.setBlindStatusOfGamePlayer(players[newBigBlindIndex].id, 2);
+};
 
 const joinGame = async (req, res) => {
   const io = req.app.get('io');
@@ -46,6 +84,7 @@ const joinGame = async (req, res) => {
 
   if (players.length >= MIN_NUM_BEFORE_GAME_START) {
     if (parseInt(game_round) === 0) {
+      initBlinds(players);
       players.forEach(async (player) => {
         Card.addCard(game_id, player.gpid);
         Card.addCard(game_id, player.gpid);
@@ -319,8 +358,6 @@ const changeRound = async (req, res) => {
 const actionHandler = async (req, res) => {
   const { game_id, game_action } = req.params;
   const { user } = req;
-  const action_amount = req.body.amount;
-  const i_action_amount = parseInt(action_amount);
   const game = await Game.findById(game_id);
 
   // eslint-disable-next-line
@@ -328,8 +365,8 @@ const actionHandler = async (req, res) => {
 
   const io = req.app.get('io');
 
-  let i_game_pot;
   let updated_game_pot;
+
   /*
    *this is the main action handler
    * Each case should emit a socket action to the player making the action,
@@ -337,23 +374,11 @@ const actionHandler = async (req, res) => {
    */
 
   if (game_action === PlayerActions.LEAVE) {
-    io.to(userSocket).emit('status-msg', {
-      type: 'success',
-      msg: 'Leaving...',
-    });
-    const gameplayer = await GamePlayer.getByUserIdAndGameId(user.id, game_id);
-
-    io.to(userSocket).emit('leave game');
-    io.to(game_id).emit('user left', gameplayer);
-    await GamePlayer.removePlayer(user.id, game_id);
-    const numPlayers = await Game.getNumPlayers(game_id);
-    if (parseInt(numPlayers.count) <= 1) {
-      io.to(game_id).emit('game end');
-      await Game.delete(game_id);
-      await GamePlayer.deleteAllPlayersFromGame(game_id);
+    if (Helper.leaveHandler(req) > 0) {
+      res.send('error');
     }
-    return res.send('error');
   }
+
   const curr_game_player_id = await Game.getCurrGamePlayerId(game_id);
   const game_player = await GamePlayer.getByUserIdAndGameId(user.id, game_id);
   if (curr_game_player_id.curr_game_player_id !== game_player.id) {
@@ -364,11 +389,11 @@ const actionHandler = async (req, res) => {
     });
     return res.send('error');
   }
+
   // eslint-disable-next-line
   switch (game_action) {
     case PlayerActions.CHECK:
-      // literally nothing happens, signify in user game window by greying
-      // out actions for that 'turn'?
+      // Check occurs when the last person didn't raise or bet
       await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
       io.to(userSocket).emit('status-msg', {
         type: 'success',
@@ -376,143 +401,20 @@ const actionHandler = async (req, res) => {
       });
       break;
     case PlayerActions.BET:
-      {
-        // we need to get the users money, validate bet
-        // if validated then we can remove the money from the user
-        // finally we can then add that amount to the game pot
-        const user_money = await User.getMoneyById(user.id);
-        const min_bid = await Game.getMinBet(game_id);
-        const i_user_money = parseInt(Object.values(user_money));
-        const i_min_bid = parseInt(Object.values(min_bid));
-        if (i_action_amount === 0) {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'Thats not a bet, use check instead!',
-          });
-          return res.send('error');
-        }
-        if (i_user_money >= i_action_amount && i_action_amount >= i_min_bid) {
-          const new_value = i_user_money - i_action_amount;
-          await User.updateMoneyById(user.id, new_value);
-          const gamePot = await Game.getGamePot(game_id);
-          i_game_pot = parseInt(Object.values(gamePot));
-          updated_game_pot = i_game_pot + i_action_amount;
-          await Game.updateGamePot(game_id, i_game_pot + i_action_amount);
-          await Game.updateMinBet(game_id, i_action_amount);
-          await GamePlayer.updatePlayerLastAction(
-            game_id,
-            user.id,
-            game_action,
-          );
-          io.to(userSocket).emit('user update', {
-            id: game_player.id,
-            money: new_value,
-          });
-          io.to(game_id).emit('game update', {
-            min_bet: i_action_amount,
-            game_pot: updated_game_pot,
-          });
-        } else {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'You dont have enough money!',
-          });
-          return res.send('error');
-        }
+      if (Helper.betHandler(req) > 0) {
+        return res.send('error');
       }
       break;
     case PlayerActions.CALL:
-      {
-        // we need to get the users money, validate bet
-        // if validated then we can remove the money from the user
-        // finally we can then add that amount to the game pot
-        const user_money = await User.getMoneyById(user.id);
-        const min_bid = await Game.getMinBet(game_id);
-        const i_user_money = parseInt(Object.values(user_money));
-        const i_min_bid = parseInt(Object.values(min_bid));
-        if (i_user_money >= i_min_bid) {
-          const new_value = i_user_money - i_min_bid;
-          await User.updateMoneyById(user.id, new_value);
-          const gamePot = await Game.getGamePot(game_id);
-          i_game_pot = parseInt(Object.values(gamePot));
-          updated_game_pot = i_game_pot + i_min_bid;
-          await Game.updateGamePot(game_id, i_game_pot + i_min_bid);
-          await GamePlayer.updatePlayerLastAction(
-            game_id,
-            user.id,
-            game_action,
-          );
-          io.to(userSocket).emit('user update', {
-            id: game_player.id,
-            money: new_value,
-          });
-          io.to(game_id).emit('game update', {
-            min_bet: i_min_bid,
-            game_pot: updated_game_pot,
-          });
-        } else {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'You dont have enough money!',
-          });
-        }
-      }
+      Helper.callHandler(req);
       break;
     case PlayerActions.RAISE:
-      {
-        // we need to get the users money, validate bet
-        // if validated then we can remove the money from the user
-        // finally we can then add that amount to the game pot
-        const user_money = await User.getMoneyById(user.id);
-        const min_bid = await Game.getMinBet(game_id);
-        const i_user_money = parseInt(Object.values(user_money));
-        const i_min_bid = parseInt(Object.values(min_bid));
-        if (
-          i_user_money >= i_action_amount + i_min_bid &&
-          i_action_amount !== 0
-        ) {
-          const new_value = i_user_money - i_action_amount - i_min_bid;
-          await User.updateMoneyById(user.id, new_value);
-          const gamePot = await Game.getGamePot(game_id);
-          i_game_pot = parseInt(Object.values(gamePot));
-          updated_game_pot = i_game_pot + i_action_amount + i_min_bid;
-          await Game.updateGamePot(game_id, updated_game_pot);
-          await Game.updateMinBet(game_id, i_action_amount + i_min_bid);
-          await GamePlayer.updatePlayerLastAction(
-            game_id,
-            user.id,
-            game_action,
-          );
-          io.to(userSocket).emit('user update', {
-            id: game_player.id,
-            money: new_value,
-          });
-          io.to(game_id).emit('game update', {
-            min_bet: i_action_amount + i_min_bid,
-            game_pot: updated_game_pot,
-          });
-        } else if (i_action_amount === 0) {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'Thats not a raise, use Call instead!',
-          });
-          return res.send('error');
-        } else {
-          io.to(userSocket).emit('status-msg', {
-            type: 'error',
-            msg: 'You dont have enough money!',
-          });
-          return res.send('error');
-        }
+      if (Helper.raiseHandler(req) > 0) {
+        return res.send('error');
       }
       break;
     case PlayerActions.FOLD:
-      io.to(userSocket).emit('status-msg', {
-        type: 'success',
-        msg: 'Folded!',
-      });
-      await GamePlayer.setPlayertoFold(user.id, game_id);
-      await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
+      Helper.foldHandler(req);
       break;
   }
   // list of game actions
@@ -562,10 +464,13 @@ const actionHandler = async (req, res) => {
   const player_actions = await GamePlayer.getNonFoldedPlayerLastActions(
     game_id,
   );
+
+  updated_game_pot = await Game.getGamePot(game_id);
+  updated_game_pot = updated_game_pot.game_pot;
+
   if (player_actions.length <= 1) {
     const winner = await GamePlayer.getByGamePlayerId(player_actions[0].id);
-    updated_game_pot = await Game.getGamePot(game_id);
-    updated_game_pot = updated_game_pot.game_pot;
+
     io.to(game_id).emit('broadcast winner', {
       winner,
       pot: updated_game_pot,
@@ -611,9 +516,7 @@ const actionHandler = async (req, res) => {
         });
       });
     });
-    /* TODO: 
-      move blinds,
-      */
+    updateBlinds(req);
     return res.send('finished solo player');
   }
   const currPlayerActionIndex = player_actions.findIndex(
@@ -643,8 +546,6 @@ const actionHandler = async (req, res) => {
         count += 1;
       }
     }
-    // What is this?
-    // if (player_actions.length === 1) {}
 
     if (count === 1) {
       const curr_game_round = await Game.getGameRound(game_id);
@@ -674,6 +575,7 @@ const actionHandler = async (req, res) => {
           );
           const winningPlayer = getWinningPlayer(allPlayersPossibleHands);
           const winner = await GamePlayer.getByGamePlayerId(winningPlayer.id);
+          console.log('updated_game_pot', updated_game_pot);
           io.to(game_id).emit('broadcast winner', {
             winner,
             pot: parseInt(updated_game_pot),
@@ -722,6 +624,7 @@ const actionHandler = async (req, res) => {
           /* TODO: 
             move blinds,
             */
+          updateBlinds(req);
           return;
         default:
           // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5
@@ -741,11 +644,10 @@ const actionHandler = async (req, res) => {
       io.emit('round update', i_curr_game_round + 1);
       await Game.updateGameRound(game_id, i_curr_game_round + 1);
     }
-  
+
     // return res.send('hello world');
-    
   }
-    return res.send('finished');
+  return res.send('finished');
 };
 
 module.exports = {

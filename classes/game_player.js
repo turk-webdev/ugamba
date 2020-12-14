@@ -35,6 +35,13 @@ class Game_player {
     );
   }
 
+  static setBlindStatusOfGamePlayer(game_player_id, blind_status) {
+    return db.none(`UPDATE game_player SET blind_status=$1 WHERE id=$2`, [
+      blind_status,
+      game_player_id,
+    ]);
+  }
+
   static getByUserIdAndGameId(user_id, game_id) {
     return db.one(
       `SELECT * FROM game_player AS gp WHERE gp.id_user=$1 AND gp.id_game=$2;`,
