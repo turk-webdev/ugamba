@@ -640,7 +640,7 @@ const actionHandler = async (req, res) => {
     /* TODO: 
       move blinds,
       */
-    return res.send('finished');
+    return res.send('finished solo player');
   }
   const currPlayerActionIndex = player_actions.findIndex(
     (element) => element.id === curr_game_player_id.curr_game_player_id,
