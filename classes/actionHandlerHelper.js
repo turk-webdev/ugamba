@@ -3,7 +3,6 @@ const GamePlayer = require('./game_player');
 const User = require('./user');
 
 const leaveHandler = async (req) => {
-  console.log('leaveHandler()');
   const { game_id } = req.params;
   const { user } = req;
   const io = req.app.get('io');
@@ -61,7 +60,7 @@ const betHandler = async (req) => {
     await Game.updateGamePot(game_id, i_game_pot + i_action_amount);
     await Game.updateMinBet(game_id, i_action_amount);
     await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
-    io.to(userSocket).emit('user update', {
+    io.to(game_id).emit('user update', {
       id: game_player.id,
       money: new_value,
     });
@@ -104,7 +103,7 @@ const callHandler = async (req) => {
     const updated_game_pot = i_game_pot + i_min_bid;
     await Game.updateGamePot(game_id, i_game_pot + i_min_bid);
     await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
-    io.to(userSocket).emit('user update', {
+    io.to(game_id).emit('user update', {
       id: game_player.id,
       money: new_value,
     });
@@ -147,7 +146,7 @@ const raiseHandler = async (req) => {
     await Game.updateGamePot(game_id, updated_game_pot);
     await Game.updateMinBet(game_id, i_action_amount + i_min_bid);
     await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
-    io.to(userSocket).emit('user update', {
+    io.to(game_id).emit('user update', {
       id: game_player.id,
       money: new_value,
     });
@@ -177,16 +176,16 @@ const foldHandler = async (req) => {
   const { user } = req;
   const io = req.app.get('io');
   const userSocket = req.session.passport.user.socket;
+  const game_player = await GamePlayer.getByUserIdAndGameId(user.id, game_id);
 
   io.to(userSocket).emit('status-msg', {
     type: 'success',
     msg: 'Folded!',
   });
+  io.to(game_id).emit('user fold', game_player.id);
 
   await GamePlayer.setPlayertoFold(user.id, game_id);
   await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
-
-  console.log('foldHandler() end');
 };
 
 module.exports = {

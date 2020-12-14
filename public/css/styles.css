@@ -1,27 +1,44 @@
-#chat {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  height: 40vh;
-  padding: 0;
+#chat-wrapper {
+  z-index:10000 !important;
+  display:flex;
+  position:absolute;
+  bottom:0;
+  right:0;
+  width:400px;
+  height:400px;
+  flex-direction:row;
+}
+
+.player-section{
+  min-height:200px
+}
+
+.highlight{
+  border:6px solid yellow;
+}
+
+#users-list-container{
+  min-height:200px
 }
 
 .chat-menu{
   background-color:white;
-  position: fixed;
-  right:380px;
-  bottom: 0;
-  height: 40vh;
+  width:70%;
   padding:1rem;
   overflow:scroll;
 }
+#chat{
+  display:flex;
+  flex-direction:column;
+  padding:0;
+}
 
 #chat-container {
-  /* position:relative; */
-  /* height:100%; */
-  padding-top: 60px;
   display: flex;
-  padding-left: 0.75rem;
+  flex-direction:column;
+  height:400px;
+  overflow:scroll;
+  padding:0;
 }
 
 .chat-header {
@@ -29,21 +46,17 @@
   top: 0;
   width: 100%;
   z-index: 1000;
-  /* margin:.75rem 0 .75rem 0; */
 }
 
-.chat-input-group {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
+#chat-input-group {
   margin: 0.75rem 0 0.75rem 0;
+  margin-top:auto;
+  width: 100%;
 }
 
 #messages {
   margin: 5px;
   padding: 5px;
-  width: 90%;
-  height: 450px;
   overflow: auto;
   text-align: justify;
 }
@@ -52,10 +65,11 @@
   /* --brandColor: hsl(166, 67%, 51%); */
   --brandColor:	hsl(16, 88%, 54%);
   --brandSecondary:	hsl(60, 100%, 50%);
-  --background: rgb(247, 247, 247);
+  --background: rgb(230,230,230);
   --textDark: hsla(0, 0%, 0%, 0.66);
   --textLight: hsla(0, 0%, 0%, 0.33);
 }
+
 .table{
   background-color:transparent !important;
 }

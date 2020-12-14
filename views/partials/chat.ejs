@@ -1,4 +1,4 @@
-<div id="chat" class="card column level-right is-one-fifth">
+<div id="chat-wrapper" class="card">
 <aside class="chat-menu">
 <p class="menu-label">
     Chat Rooms
@@ -10,14 +10,15 @@
     <%})%>
   </ul>
 </aside>
-  <div id="chat-container" class="columns">
+<div id="chat">
+  <div id="chat-container" >
     <ul id="messages">
       <div class="column is-full has-text-centered">
-        <li class='has-text-centered has-text-grey-light'>Start Chatting!</h3>
+        <li class='has-text-centered has-text-grey-light'>Start Chatting!</li>
         <div>
     </ul>
   </div>
-  <div class="field has-addons chat-input-group">
+  <div id="chat-input-group" class="field has-addons ">
     <div class="control is-expanded">
       <input
         id="chat-input"
@@ -30,4 +31,5 @@
       <a id="chat-submit" class="button is-info"> Search </a>
     </div>
   </div>
+</div>
 </div>

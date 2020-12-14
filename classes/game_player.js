@@ -129,7 +129,7 @@ class Game_player {
   // Returns all non-dealers in game
   static getAllPlayersInGame(game_id) {
     return db.any(
-      `SELECT * FROM game_player WHERE id_game=$1 AND id_user>0 AND player_folded=0 ORDER BY game_player.id;`,
+      `SELECT gp.id, gp.id_game, gp.id_user, gp.blind_status, gp.player_folded, gp.player_last_action,u.username,u.money FROM game_player AS gp INNER JOIN users AS u ON u.id =gp.id_user WHERE gp.id_game=$1 AND gp.id_user>0 AND gp.player_folded=0 ORDER BY gp.id;`,
       [game_id],
     );
   }
@@ -149,7 +149,7 @@ class Game_player {
 
   static getNonFoldedPlayerLastActions(id_game) {
     return db.any(
-      `SELECT * FROM game_player WHERE id_game=$1 AND player_folded=0 ORDER BY game_player.id;`,
+      `SELECT * FROM game_player WHERE id_game=$1 AND player_folded=0 AND id_user > 0 ORDER BY game_player.id;`,
       [id_game],
     );
   }
