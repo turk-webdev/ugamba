@@ -14,6 +14,8 @@
     "db:migrate": "npx sequelize db:migrate",
     "db:rollback": "npx sequelize db:migrate:undo",
     "db:seed:all": "npx sequelize-cli db:seed:all",
+    "db:seed:rollback": "npx sequelize-cli db:seed:undo",
+    "db:seed:rollback:all": "npx sequelize-cli db:seed:undo:all",
     "postinstall": "npx sequelize db:migrate && npx sequelize-cli db:seed:all"
   },
   "dependencies": {
