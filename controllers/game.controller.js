@@ -11,6 +11,43 @@ const { getWinningPlayer } = require('../classes/winChecker');
 const MAX_NUM_PLAYER_IN_GAME = 7;
 const MIN_NUM_BEFORE_GAME_START = 2;
 const MAX_CARD_ID = 52;
+const SMALL_BLIND_CODE = 1;
+const BIG_BLIND_CODE = 2;
+
+// 1=small blind, 2=big blind
+const initBlinds = async (players) => {
+  const player1Id = players[0].gpid;
+  const player2Id = players[1].gpid;
+  await GamePlayer.setBlindStatusOfGamePlayer(player1Id, 1);
+  await GamePlayer.setBlindStatusOfGamePlayer(player2Id, 2);
+};
+
+const updateBlinds = async (req) => {
+  const { game_id } = req.params;
+  const players = await GamePlayer.getAllPlayersInGame(game_id);
+  const smallBlindIndex = players.findIndex(
+    (item) => item.blind_status === SMALL_BLIND_CODE,
+  );
+  const bigBlindIndex = players.findIndex(
+    (item) => item.blind_status === BIG_BLIND_CODE,
+  );
+
+  console.log(`small blind @ ${smallBlindIndex}, big blind @ ${bigBlindIndex}`);
+  console.log(players);
+
+  const newSmallBlindIndex =
+    smallBlindIndex + 1 === players.length ? 0 : smallBlindIndex + 1;
+  const newBigBlindIndex =
+    bigBlindIndex + 1 === players.length ? 0 : bigBlindIndex + 1;
+
+  await GamePlayer.setBlindStatusOfGamePlayer(players[smallBlindIndex].id, 0);
+  await GamePlayer.setBlindStatusOfGamePlayer(players[bigBlindIndex].id, 0);
+  await GamePlayer.setBlindStatusOfGamePlayer(
+    players[newSmallBlindIndex].id,
+    1,
+  );
+  await GamePlayer.setBlindStatusOfGamePlayer(players[newBigBlindIndex].id, 2);
+};
 
 const joinGame = async (req, res) => {
   const io = req.app.get('io');
@@ -46,6 +83,8 @@ const joinGame = async (req, res) => {
 
   if (players.length >= MIN_NUM_BEFORE_GAME_START) {
     if (parseInt(game_round) === 0) {
+      console.log('initBlinds?');
+      initBlinds(players);
       players.forEach(async (player) => {
         Card.addCard(game_id, player.gpid);
         Card.addCard(game_id, player.gpid);
@@ -337,6 +376,7 @@ const actionHandler = async (req, res) => {
    */
 
   if (game_action === PlayerActions.LEAVE) {
+    console.log('PLAYER LEAVE');
     io.to(userSocket).emit('status-msg', {
       type: 'success',
       msg: 'Leaving...',
@@ -369,7 +409,9 @@ const actionHandler = async (req, res) => {
     case PlayerActions.CHECK:
       // literally nothing happens, signify in user game window by greying
       // out actions for that 'turn'?
+      console.log('player check');
       await GamePlayer.updatePlayerLastAction(game_id, user.id, game_action);
+      console.log('player check ok');
       io.to(userSocket).emit('status-msg', {
         type: 'success',
         msg: 'Checked!',
@@ -693,7 +735,7 @@ const actionHandler = async (req, res) => {
           /* TODO: 
             move blinds,
             */
-           
+          updateBlinds(req);
           return;
         default:
           // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5
