@@ -587,134 +587,188 @@ const actionHandler = async (req, res) => {
   const player_actions = await GamePlayer.getNonFoldedPlayerLastActions(
     game_id,
   );
-  const currPlayerActionIndex = player_actions.findIndex(
-    (element) => element.id === curr_game_player_id.curr_game_player_id,
-  );
+  console.log(player_actions);
+  if (player_actions.length === 1 && player_actions[0].player_last_action != null) {
+    const winner = await GamePlayer.getByGamePlayerId(player_actions[0].id);
+    updated_game_pot = await Game.getGamePot(game_id);
+    updated_game_pot = updated_game_pot.game_pot;
+    io.to(game_id).emit('broadcast winner', {
+      winner,
+      pot: updated_game_pot,
+    });
+    await User.updateMoneyById(
+      winner.id_user,
+      winner.money + parseInt(updated_game_pot),
+    );
+    io.to(game_id).emit('game update', {
+      min_bet: 0,
+      game_pot: 0,
+    });
+    io.to(game_id).emit('user update', {
+      id: winner.id,
+      money: winner.money + updated_game_pot,
+    });
+    await GamePlayer.updateAllUsersOfGameToUnfold(game_id);
+    await GamePlayer.resetLastActionOfAllUsersInGame(game_id);
+    io.emit('round update', 1);
+    await Game.updateGameRound(game_id, 1);
+    await Deck.unassignAllCardsInDeck(game.id_deck);
+    const allPlayers = await GamePlayer.getAllPlayersInGame(game_id);
+    await Game.setCurrGamePlayerId(game_id, allPlayers[0].id);
+    await Game.updateGamePot(game_id, 0);
+    await Game.updateMinBet(game_id, 0);
+    io.emit('update-turn', allPlayers[0].id);
+    io.to(game_id).emit(
+      'turn-notification-off',
+      curr_game_player_id.curr_game_player_id,
+    );
+    io.emit('turn-notification-on', allPlayers[0].id);
+    allPlayers.forEach(async (player) => {
+      Card.addCard(game_id, player.id);
+      Card.addCard(game_id, player.id);
+    });
 
-  let target_index = currPlayerActionIndex + 1;
-  if (target_index === player_actions.length) {
-    target_index = 0;
-  }
-  const lastPlayerAction =
-    player_actions[currPlayerActionIndex].player_last_action;
-  const nextPlayerAction =
-    player_actions[target_index].player_last_action || null;
-  if (
-    (lastPlayerAction === PlayerActions.CHECK ||
-      lastPlayerAction === PlayerActions.CALL) &&
-    (nextPlayerAction === PlayerActions.BET ||
-      nextPlayerAction === PlayerActions.RAISE)
-  ) {
-    let count = 0;
-    for (const action of player_actions) {
-      if (
-        action.player_last_action === PlayerActions.BET ||
-        action.player_last_action === PlayerActions.RAISE
-      ) {
-        count += 1;
+    io.emit('update community cards', { cards: [] });
+    Game.findDeckByGameId(game_id).then((deck) => {
+      // eslint-disable-next-line max-len
+      Deck.getAllOwnedCardsInDeck(deck.id_deck).then((playercards) => {
+        io.to(game_id).emit('init game', {
+          cards: playercards,
+        });
+      });
+    });
+    /* TODO: 
+      move blinds,
+      */
+    return;
+  } else {
+    const currPlayerActionIndex = player_actions.findIndex(
+      (element) => element.id === curr_game_player_id.curr_game_player_id,
+    );
+
+    let target_index = currPlayerActionIndex + 1;
+    if (target_index === player_actions.length) {
+      target_index = 0;
+    }
+    const lastPlayerAction =
+      player_actions[currPlayerActionIndex].player_last_action;
+    const nextPlayerAction =
+      player_actions[target_index].player_last_action || null;
+    if (
+      (lastPlayerAction === PlayerActions.CHECK ||
+        lastPlayerAction === PlayerActions.CALL) &&
+      (nextPlayerAction === PlayerActions.BET ||
+        nextPlayerAction === PlayerActions.RAISE)
+    ) {
+      let count = 0;
+      for (const action of player_actions) {
+        if (
+          action.player_last_action === PlayerActions.BET ||
+          action.player_last_action === PlayerActions.RAISE
+        ) {
+          count += 1;
+        }
       }
-    }
-    if (player_actions.length === 1) {
-    }
-    if (count === 1) {
-      const curr_game_round = await Game.getGameRound(game_id);
-      const i_curr_game_round = curr_game_round.game_round;
-      // get the id_game_player via id_user of 0 and curr_game_id
-      const dealer = await GamePlayer.getByUserIdAndGameId(0, game_id);
-      switch (i_curr_game_round) {
-        case 1:
-          // i.e. we are going from 1 to 2, so its three cards on the table
-          // if this case, do default case three times?
-          for (let i = 0; i < 3; i++) {
-            Card.addCard(game_id, dealer.id);
-          }
-          Game.findDeckByGameId(game_id).then((deck) => {
-            Deck.getAllCommunityCardsInDeck(deck.id_deck, dealer.id).then(
-              (communityCards) => {
-                io.to(game_id).emit('update community cards', {
-                  cards: communityCards,
-                });
-              },
+      if (count === 1) {
+        const curr_game_round = await Game.getGameRound(game_id);
+        const i_curr_game_round = curr_game_round.game_round;
+        // get the id_game_player via id_user of 0 and curr_game_id
+        const dealer = await GamePlayer.getByUserIdAndGameId(0, game_id);
+        switch (i_curr_game_round) {
+          case 1:
+            // i.e. we are going from 1 to 2, so its three cards on the table
+            // if this case, do default case three times?
+            for (let i = 0; i < 3; i++) {
+              Card.addCard(game_id, dealer.id);
+            }
+            Game.findDeckByGameId(game_id).then((deck) => {
+              Deck.getAllCommunityCardsInDeck(deck.id_deck, dealer.id).then(
+                (communityCards) => {
+                  io.to(game_id).emit('update community cards', {
+                    cards: communityCards,
+                  });
+                },
+              );
+            });
+            break;
+          case 4:
+            const allPlayersPossibleHands = await getAllPlayersPossibleHands(
+              game_id,
             );
-          });
-          break;
-        case 4:
-          const allPlayersPossibleHands = await getAllPlayersPossibleHands(
-            game_id,
-          );
-          const winningPlayer = getWinningPlayer(allPlayersPossibleHands);
-          const winner = await GamePlayer.getByGamePlayerId(winningPlayer.id);
-          io.to(game_id).emit('broadcast winner', {
-            winner,
-            pot: parseInt(updated_game_pot),
-          });
-          await User.updateMoneyById(
-            winner.id_user,
-            winner.money + parseInt(updated_game_pot),
-          );
-          io.to(game_id).emit('game update', {
-            min_bet: 0,
-            game_pot: 0,
-          });
-          io.to(game_id).emit('user update', {
-            id: winner.id,
-            money: winner.money + updated_game_pot,
-          });
-          await GamePlayer.updateAllUsersOfGameToUnfold(game_id);
-          await GamePlayer.resetLastActionOfAllUsersInGame(game_id);
-          io.emit('round update', 1);
-          await Game.updateGameRound(game_id, 1);
-          await Deck.unassignAllCardsInDeck(game.id_deck);
-          const allPlayers = await GamePlayer.getAllPlayersInGame(game_id);
-          await Game.setCurrGamePlayerId(game_id, allPlayers[0].id);
-          await Game.updateGamePot(game_id, 0);
-          await Game.updateMinBet(game_id, 0);
-          io.emit('update-turn', allPlayers[0].id);
-          io.to(game_id).emit(
-            'turn-notification-off',
-            curr_game_player_id.curr_game_player_id,
-          );
-          io.emit('turn-notification-on', allPlayers[0].id);
-          allPlayers.forEach(async (player) => {
-            Card.addCard(game_id, player.id);
-            Card.addCard(game_id, player.id);
-          });
+            const winningPlayer = getWinningPlayer(allPlayersPossibleHands);
+            const winner = await GamePlayer.getByGamePlayerId(winningPlayer.id);
+            io.to(game_id).emit('broadcast winner', {
+              winner,
+              pot: parseInt(updated_game_pot),
+            });
+            await User.updateMoneyById(
+              winner.id_user,
+              winner.money + parseInt(updated_game_pot),
+            );
+            io.to(game_id).emit('game update', {
+              min_bet: 0,
+              game_pot: 0,
+            });
+            io.to(game_id).emit('user update', {
+              id: winner.id,
+              money: winner.money + updated_game_pot,
+            });
+            await GamePlayer.updateAllUsersOfGameToUnfold(game_id);
+            await GamePlayer.resetLastActionOfAllUsersInGame(game_id);
+            io.emit('round update', 1);
+            await Game.updateGameRound(game_id, 1);
+            await Deck.unassignAllCardsInDeck(game.id_deck);
+            const allPlayers = await GamePlayer.getAllPlayersInGame(game_id);
+            await Game.setCurrGamePlayerId(game_id, allPlayers[0].id);
+            await Game.updateGamePot(game_id, 0);
+            await Game.updateMinBet(game_id, 0);
+            io.emit('update-turn', allPlayers[0].id);
+            io.to(game_id).emit(
+              'turn-notification-off',
+              curr_game_player_id.curr_game_player_id,
+            );
+            io.emit('turn-notification-on', allPlayers[0].id);
+            allPlayers.forEach(async (player) => {
+              Card.addCard(game_id, player.id);
+              Card.addCard(game_id, player.id);
+            });
 
-          io.emit('update community cards', { cards: [] });
-          Game.findDeckByGameId(game_id).then((deck) => {
-            // eslint-disable-next-line max-len
-            Deck.getAllOwnedCardsInDeck(deck.id_deck).then((playercards) => {
-              io.to(game_id).emit('init game', {
-                cards: playercards,
+            io.emit('update community cards', { cards: [] });
+            Game.findDeckByGameId(game_id).then((deck) => {
+              // eslint-disable-next-line max-len
+              Deck.getAllOwnedCardsInDeck(deck.id_deck).then((playercards) => {
+                io.to(game_id).emit('init game', {
+                  cards: playercards,
+                });
               });
             });
-          });
-          /* TODO: 
-            move blinds,
-            */
-          return;
-        default:
-          // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5
-          // give the dealer one card
-          Card.addCard(game_id, dealer.id);
-          Game.findDeckByGameId(game_id).then((deck) => {
-            Deck.getAllCommunityCardsInDeck(deck.id_deck, dealer.id).then(
-              (communityCards) => {
-                io.to(game_id).emit('update community cards', {
-                  cards: communityCards,
-                });
-              },
-            );
-          });
-          break;
+            /* TODO: 
+              move blinds,
+              */
+            return;
+          default:
+            // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5
+            // give the dealer one card
+            Card.addCard(game_id, dealer.id);
+            Game.findDeckByGameId(game_id).then((deck) => {
+              Deck.getAllCommunityCardsInDeck(deck.id_deck, dealer.id).then(
+                (communityCards) => {
+                  io.to(game_id).emit('update community cards', {
+                    cards: communityCards,
+                  });
+                },
+              );
+            });
+            break;
+        }
+        io.emit('round update', i_curr_game_round + 1);
+        await Game.updateGameRound(game_id, i_curr_game_round + 1);
       }
-      io.emit('round update', i_curr_game_round + 1);
-      await Game.updateGameRound(game_id, i_curr_game_round + 1);
+    
+      // return res.send('hello world');
     }
-
-    // return res.send('hello world');
   }
-  return res.send('finished');
+    return res.send('finished');
 };
 
 module.exports = {
