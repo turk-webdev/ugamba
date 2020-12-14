@@ -359,8 +359,6 @@ const changeRound = async (req, res) => {
 const actionHandler = async (req, res) => {
   const { game_id, game_action } = req.params;
   const { user } = req;
-  const action_amount = req.body.amount;
-  const i_action_amount = parseInt(action_amount);
   const game = await Game.findById(game_id);
 
   // eslint-disable-next-line
@@ -368,8 +366,8 @@ const actionHandler = async (req, res) => {
 
   const io = req.app.get('io');
 
-  let i_game_pot;
   let updated_game_pot;
+
   /*
    *this is the main action handler
    * Each case should emit a socket action to the player making the action,
@@ -469,7 +467,6 @@ const actionHandler = async (req, res) => {
   );
   if (player_actions.length <= 1) {
     const winner = await GamePlayer.getByGamePlayerId(player_actions[0].id);
-    updated_game_pot = await Game.getGamePot(game_id);
     updated_game_pot = updated_game_pot.game_pot;
     io.to(game_id).emit('broadcast winner', {
       winner,
@@ -516,9 +513,7 @@ const actionHandler = async (req, res) => {
         });
       });
     });
-    /* TODO: 
-      move blinds,
-      */
+    updateBlinds(req);
     return res.send('finished solo player');
   }
   const currPlayerActionIndex = player_actions.findIndex(
@@ -548,8 +543,6 @@ const actionHandler = async (req, res) => {
         count += 1;
       }
     }
-    // What is this?
-    // if (player_actions.length === 1) {}
 
     if (count === 1) {
       const curr_game_round = await Game.getGameRound(game_id);
