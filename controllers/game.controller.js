@@ -587,8 +587,7 @@ const actionHandler = async (req, res) => {
   const player_actions = await GamePlayer.getNonFoldedPlayerLastActions(
     game_id,
   );
-  console.log(player_actions);
-  if (player_actions.length === 1 && player_actions[0].player_last_action != null) {
+  if (player_actions.length <= 1) {
     const winner = await GamePlayer.getByGamePlayerId(player_actions[0].id);
     updated_game_pot = await Game.getGamePot(game_id);
     updated_game_pot = updated_game_pot.game_pot;
