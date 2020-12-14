@@ -165,7 +165,7 @@ const addPlayerToPlayerDiv = (game_player) => {
       'is-flex-direction-column',
       'is-align-items-center',
     ];
-    cardHandLi.setAttribute('id', `hand-back${gama_player.id}`);
+    cardHandLi.setAttribute('id', `hand-back${game_player.id}`);
     playerWrapperDiv.appendChild(playerDiv);
     playerWrapperDiv.setAttribute('id', game_player.id);
     playerWrapperDiv.classList.add(...playerWrapperDivClassArr);
