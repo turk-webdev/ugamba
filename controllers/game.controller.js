@@ -614,8 +614,9 @@ const actionHandler = async (req, res) => {
         count += 1;
       }
     }
-    if (player_actions.length === 1) {
-    }
+    // What is this?
+    // if (player_actions.length === 1) {}
+
     if (count === 1) {
       const curr_game_round = await Game.getGameRound(game_id);
       const i_curr_game_round = curr_game_round.game_round;
@@ -692,6 +693,7 @@ const actionHandler = async (req, res) => {
           /* TODO: 
             move blinds,
             */
+           
           return;
         default:
           // this should be for everything else i.e 2 to 3, 3 to 4, 4 to 5
