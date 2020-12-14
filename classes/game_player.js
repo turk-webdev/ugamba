@@ -35,6 +35,13 @@ class Game_player {
     );
   }
 
+  static setBlindStatusOfGamePlayer(game_player_id, blind_status) {
+    return db.none(`UPDATE game_player SET blind_status=$1 WHERE id=$2`, [
+      blind_status,
+      game_player_id,
+    ]);
+  }
+
   static getByUserIdAndGameId(user_id, game_id) {
     return db.one(
       `SELECT * FROM game_player AS gp WHERE gp.id_user=$1 AND gp.id_game=$2;`,
@@ -122,7 +129,7 @@ class Game_player {
   // Returns all non-dealers in game
   static getAllPlayersInGame(game_id) {
     return db.any(
-      `SELECT * FROM game_player WHERE id_game=$1 AND id_user>0 AND player_folded=0 ORDER BY game_player.id;`,
+      `SELECT * FROM game_player WHERE id_game=$1 AND id_user>0 ORDER BY game_player.id;`,
       [game_id],
     );
   }
